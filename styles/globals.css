@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DEFINIÇÃO DA BASE DO SITE
+  Aqui aplicamos as cores e fontes definidas no tailwind.config.js
+*/
+body {
+  @apply bg-brand-black text-brand-gray-light font-sans antialiased;
+}
+
+/* COMPONENTES CUSTOMIZADOS
+  Estilos reutilizáveis que usam nossas novas cores.
+*/
+
+/* Efeito de borda com gradiente para os cards */
+.card-border-gradient {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  /* CORRIGIMOS OS NOMES DAS CORES ABAIXO */
+  border-image: linear-gradient(to bottom right, theme('colors.brand.blue'), theme('colors.brand.gray-dark')) 1;
+}
+
+/* Estilos para o Modal */
+.thumbnail-active {
+  @apply border-2 border-brand-blue;
+}
+
+/* Estilos para os Botões de Filtro */
+.filter-btn {
+  @apply bg-transparent border border-brand-gray-border text-brand-gray-light py-2 px-6 rounded-full font-medium transition-all duration-200 ease-in-out;
+}
+
+.filter-btn:hover {
+  @apply bg-brand-gray-dark border-brand-blue;
+}
+
+.filter-btn.active {
+  @apply bg-brand-blue text-brand-black border-brand-blue font-bold;
+}
+
+/* Estilos para o Campo de Busca */
+#search-input {
+  @apply bg-brand-gray-dark border border-brand-gray-border text-brand-gray-light py-3 px-6 rounded-full transition-all duration-200 ease-in-out w-full max-w-lg;
+}
+
+#search-input::placeholder {
+  @apply text-brand-gray;
+}
+
+#search-input:focus {
+  @apply outline-none border-brand-blue ring-2 ring-brand-blue/50;
+}
+
+/* Classe para acessibilidade (manter) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

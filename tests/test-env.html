@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Variáveis de Ambiente</title>
+</head>
+<body>
+    <h1>Teste das Variáveis de Ambiente</h1>
+    
+    <button onclick="testEnv()">Testar Variáveis de Ambiente</button>
+    <button onclick="testLogin()">Testar Login</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function testEnv() {
+            try {
+                const response = await fetch('/api/test-env');
+                const data = await response.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Variáveis de Ambiente:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                console.log('Variáveis de ambiente:', data);
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+                console.error('Erro:', error);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        email: 'contato@example.com', 
+                        password: '123456' 
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Teste de Login:</h3>
+                    <p>Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                console.log('Resposta do login:', data);
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+                console.error('Erro:', error);
+            }
+        }
+    </script>
+</body>
+</html>

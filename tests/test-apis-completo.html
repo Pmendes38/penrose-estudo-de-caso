@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste Completo das APIs - Penrose</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f23;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+        }
+        .test-section {
+            background: #1a1a2e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .test-section h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #5a6fd8;
+        }
+        .test-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #16213e;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #4ade80; }
+        .error { border-left: 4px solid #f87171; }
+        .warning { border-left: 4px solid #fbbf24; }
+        .info { border-left: 4px solid #60a5fa; }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.success { background: #4ade80; color: #000; }
+        .status.error { background: #f87171; color: #000; }
+        .status.warning { background: #fbbf24; color: #000; }
+        .status.info { background: #60a5fa; color: #000; }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Teste Completo das APIs - Penrose</h1>
+            <p>Testando todas as funcionalidades do sistema</p>
+        </div>
+
+        <!-- Teste de Conectividade -->
+        <div class="test-section">
+            <h3>🔌 Teste de Conectividade</h3>
+            <button class="test-button" onclick="testBackendConnection()">Testar Backend</button>
+            <button class="test-button" onclick="testSupabaseConnection()">Testar Supabase</button>
+            <div id="connection-result"></div>
+        </div>
+
+        <!-- Teste de Autenticação -->
+        <div class="test-section">
+            <h3>🔐 Teste de Autenticação</h3>
+            <button class="test-button" onclick="testRegister()">Testar Cadastro</button>
+            <button class="test-button" onclick="testLogin()">Testar Login</button>
+            <button class="test-button" onclick="testAdminLogin()">Testar Login Admin</button>
+            <button class="test-button" onclick="testTokenValidation()">Validar Token</button>
+            <div id="auth-result"></div>
+        </div>
+
+        <!-- Teste de Produtos -->
+        <div class="test-section">
+            <h3>📦 Teste de Produtos</h3>
+            <button class="test-button" onclick="testListProducts()">Listar Produtos</button>
+            <button class="test-button" onclick="testCreateProduct()">Criar Produto</button>
+            <button class="test-button" onclick="testUpdateProduct()">Atualizar Produto</button>
+            <div id="products-result"></div>
+        </div>
+
+        <!-- Teste de Carrinho e Pagamento -->
+        <div class="test-section">
+            <h3>🛒 Teste de Carrinho e Pagamento</h3>
+            <button class="test-button" onclick="testCalculateShipping()">Calcular Frete</button>
+            <button class="test-button" onclick="testCreatePayment()">Criar Pagamento PIX</button>
+            <button class="test-button" onclick="testCreatePaymentBoleto()">Criar Pagamento Boleto</button>
+            <button class="test-button" onclick="testCreatePaymentCard()">Criar Pagamento Cartão</button>
+            <div id="payment-result"></div>
+        </div>
+
+        <!-- Teste Administrativo -->
+        <div class="test-section">
+            <h3>👨‍💼 Teste Administrativo</h3>
+            <button class="test-button" onclick="testListOrders()">Listar Pedidos</button>
+            <button class="test-button" onclick="testUpdateOrderStatus()">Atualizar Status</button>
+            <button class="test-button" onclick="testListClients()">Listar Clientes</button>
+            <div id="admin-result"></div>
+        </div>
+
+        <!-- Teste de Performance -->
+        <div class="test-section">
+            <h3>⚡ Teste de Performance</h3>
+            <button class="test-button" onclick="runPerformanceTest()">Executar Teste Completo</button>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div id="performance-result"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let adminToken = null;
+        const results = {};
+
+        // Função para mostrar resultados
+        function showResult(elementId, data, type = 'info') {
+            const element = document.getElementById(elementId);
+            const status = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            const statusClass = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            
+            element.innerHTML = `
+                <div class="result ${statusClass}">
+                    <span class="status ${statusClass}">${status}</span>
+                    <strong>${new Date().toLocaleTimeString()}</strong>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        // Teste de conectividade com o backend
+        async function testBackendConnection() {
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('connection-result', { 
+                        status: 'success', 
+                        message: 'Backend conectado com sucesso!',
+                        data: data,
+                        timestamp: new Date().toISOString()
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('connection-result', { 
+                    status: 'error', 
+                    message: 'Falha na conexão com o backend',
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                }, 'error');
+            }
+        }
+
+        // Teste de cadastro
+        async function testRegister() {
+            try {
+                const testUser = {
+                    nome: `Teste_${Date.now()}`,
+                    email: `teste_${Date.now()}@penrose.com`,
+                    senha: '123456'
+                };
+
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testUser)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('auth-result', { 
+                        status: 'success', 
+                        message: 'Usuário cadastrado com sucesso!',
+                        user: testUser,
+                        response: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('auth-result', { 
+                    status: 'error', 
+                    message: 'Falha no cadastro',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de login
+        async function testLogin() {
+            try {
+                const testUser = {
+                    email: 'contato@example.com',
+                    password: '123456'
+                };
+
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testUser)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    showResult('auth-result', { 
+                        status: 'success', 
+                        message: 'Login realizado com sucesso!',
+                        token: data.token ? 'Token recebido' : 'Sem token',
+                        role: data.role
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('auth-result', { 
+                    status: 'error', 
+                    message: 'Falha no login',
+                    error: error.message
+                }, 'error');
+            }
+            }
+
+        // Teste de login admin
+        async function testAdminLogin() {
+            try {
+                const adminUser = {
+                    email: 'contato@example.com',
+                    password: '123456'
+                };
+
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(adminUser)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    adminToken = data.token;
+                    showResult('auth-result', { 
+                        status: 'success', 
+                        message: 'Login admin realizado com sucesso!',
+                        token: data.token ? 'Token recebido' : 'Sem token',
+                        role: data.role
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('auth-result', { 
+                    status: 'error', 
+                    message: 'Falha no login admin',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de validação de token
+        async function testTokenValidation() {
+            if (!authToken) {
+                showResult('auth-result', { 
+                    status: 'warning', 
+                    message: 'Faça login primeiro para testar o token'
+                }, 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('auth-result', { 
+                        status: 'success', 
+                        message: 'Token validado com sucesso!',
+                        user: data.user
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('auth-result', { 
+                    status: 'error', 
+                    message: 'Falha na validação do token',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de listar produtos
+        async function testListProducts() {
+            try {
+                const response = await fetch('/api/products/admin');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('products-result', { 
+                        status: 'success', 
+                        message: 'Produtos listados com sucesso!',
+                        count: data.length,
+                        products: data.slice(0, 3) // Mostra apenas os primeiros 3
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('products-result', { 
+                    status: 'error', 
+                    message: 'Falha ao listar produtos',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de criar produto
+        async function testCreateProduct() {
+            try {
+                const testProduct = {
+                    name: `Produto Teste ${Date.now()}`,
+                    description: 'Produto criado automaticamente para teste',
+                    price: 99.99,
+                    category: 'Teste',
+                    mainImage: 'https://via.placeholder.com/400x400',
+                    moreImages: ['https://via.placeholder.com/400x400'],
+                    sizes: [{ name: 'M', price: 99.99, inStock: true }]
+                };
+
+                const response = await fetch('/api/products/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testProduct)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('products-result', { 
+                        status: 'success', 
+                        message: 'Produto criado com sucesso!',
+                        product: testProduct,
+                        response: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('products-result', { 
+                    status: 'error', 
+                    message: 'Falha ao criar produto',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de atualizar produto
+        async function testUpdateProduct() {
+            try {
+                const updateData = {
+                    description: 'Produto atualizado automaticamente para teste',
+                    price: 149.99
+                };
+
+                const response = await fetch('/api/products/admin/1', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('products-result', { 
+                        status: 'success', 
+                        message: 'Produto atualizado com sucesso!',
+                        updates: updateData,
+                        response: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('products-result', { 
+                    status: 'error', 
+                    message: 'Falha ao atualizar produto',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de cálculo de frete
+        async function testCalculateShipping() {
+            try {
+                const shippingData = {
+                    cep: '01310-100',
+                    product: {
+                        id: 'test-product',
+                        price: 99.99,
+                        weight: 0.5,
+                        width: 20,
+                        height: 20,
+                        length: 20
+                    }
+                };
+
+                const response = await fetch('/api/shipping/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(shippingData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('payment-result', { 
+                        status: 'success', 
+                        message: 'Frete calculado com sucesso!',
+                        cep: shippingData.cep,
+                        options: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('payment-result', { 
+                    status: 'error', 
+                    message: 'Falha ao calcular frete',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de criação de pagamento PIX
+        async function testCreatePayment() {
+            try {
+                const paymentData = {
+                    cartItems: [{ id: 1, name: 'Produto Teste', price: 99.99, quantity: 1 }],
+                    totalAmount: 99.99,
+                    billingType: 'PIX',
+                    customerData: { nome: 'Cliente Teste', email: 'contato@example.com' },
+                    selectedShipping: { price: 15.90 }
+                };
+
+                const response = await fetch('/api/payments/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('payment-result', { 
+                        status: 'success', 
+                        message: 'Pagamento PIX criado com sucesso!',
+                        payment: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('payment-result', { 
+                    status: 'error', 
+                    message: 'Falha ao criar pagamento PIX',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de criação de pagamento Boleto
+        async function testCreatePaymentBoleto() {
+            try {
+                const paymentData = {
+                    cartItems: [{ id: 1, name: 'Produto Teste', price: 99.99, quantity: 1 }],
+                    totalAmount: 99.99,
+                    billingType: 'BOLETO',
+                    customerData: { nome: 'Cliente Teste', email: 'contato@example.com' },
+                    selectedShipping: { price: 15.90 }
+                };
+
+                const response = await fetch('/api/payments/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('payment-result', { 
+                        status: 'success', 
+                        message: 'Pagamento Boleto criado com sucesso!',
+                        payment: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('payment-result', { 
+                    status: 'error', 
+                    message: 'Falha ao criar pagamento Boleto',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de criação de pagamento Cartão
+        async function testCreatePaymentCard() {
+            try {
+                const paymentData = {
+                    cartItems: [{ id: 1, name: 'Produto Teste', price: 99.99, quantity: 1 }],
+                    totalAmount: 99.99,
+                    billingType: 'CREDIT_CARD',
+                    customerData: { nome: 'Cliente Teste', email: 'contato@example.com' },
+                    selectedShipping: { price: 15.90 }
+                };
+
+                const response = await fetch('/api/payments/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('payment-result', { 
+                        status: 'success', 
+                        message: 'Pagamento Cartão criado com sucesso!',
+                        payment: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('payment-result', { 
+                    status: 'error', 
+                    message: 'Falha ao criar pagamento Cartão',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de listar pedidos
+        async function testListOrders() {
+            try {
+                const response = await fetch('/api/orders/admin');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('admin-result', { 
+                        status: 'success', 
+                        message: 'Pedidos listados com sucesso!',
+                        count: data.length,
+                        orders: data.slice(0, 3) // Mostra apenas os primeiros 3
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('admin-result', { 
+                    status: 'error', 
+                    message: 'Falha ao listar pedidos',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de atualizar status do pedido
+        async function testUpdateOrderStatus() {
+            try {
+                const statusData = { status: 'Em Processamento' };
+
+                const response = await fetch('/api/orders/admin/1/status', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(statusData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('admin-result', { 
+                        status: 'success', 
+                        message: 'Status do pedido atualizado com sucesso!',
+                        status: statusData.status,
+                        response: data
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('admin-result', { 
+                    status: 'error', 
+                    message: 'Falha ao atualizar status do pedido',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de listar clientes
+        async function testListClients() {
+            try {
+                const response = await fetch('/api/admin/clientes');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('admin-result', { 
+                        status: 'success', 
+                        message: 'Clientes listados com sucesso!',
+                        count: data.length,
+                        clients: data.slice(0, 3) // Mostra apenas os primeiros 3
+                    }, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.message}`);
+                }
+            } catch (error) {
+                showResult('admin-result', { 
+                    status: 'error', 
+                    message: 'Falha ao listar clientes',
+                    error: error.message
+                }, 'error');
+            }
+        }
+
+        // Teste de performance completo
+        async function runPerformanceTest() {
+            const tests = [
+                { name: 'Backend Connection', func: testBackendConnection },
+                { name: 'Register', func: testRegister },
+                { name: 'Login', func: testLogin },
+                { name: 'Admin Login', func: testAdminLogin },
+                { name: 'Token Validation', func: testTokenValidation },
+                { name: 'List Products', func: testListProducts },
+                { name: 'Create Product', func: testCreateProduct },
+                { name: 'Calculate Shipping', func: testCalculateShipping },
+                { name: 'Create Payment PIX', func: testCreatePayment },
+                { name: 'List Orders', func: testListOrders },
+                { name: 'List Clients', func: testListClients }
+            ];
+
+            const progressFill = document.getElementById('progress-fill');
+            const performanceResult = document.getElementById('performance-result');
+            
+            let completed = 0;
+            const results = [];
+
+            showResult('performance-result', { 
+                status: 'info', 
+                message: 'Iniciando teste de performance...',
+                totalTests: tests.length
+            }, 'info');
+
+            for (let i = 0; i < tests.length; i++) {
+                const test = tests[i];
+                const startTime = performance.now();
+                
+                try {
+                    await test.func();
+                    const endTime = performance.now();
+                    const duration = (endTime - startTime).toFixed(2);
+                    
+                    results.push({
+                        test: test.name,
+                        status: 'success',
+                        duration: `${duration}ms`
+                    });
+                } catch (error) {
+                    results.push({
+                        test: test.name,
+                        status: 'error',
+                        error: error.message
+                    });
+                }
+
+                completed++;
+                const progress = (completed / tests.length) * 100;
+                progressFill.style.width = `${progress}%`;
+
+                // Aguarda um pouco entre os testes
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            const successCount = results.filter(r => r.status === 'success').length;
+            const errorCount = results.filter(r => r.status === 'error').length;
+            const avgDuration = results
+                .filter(r => r.duration)
+                .reduce((sum, r) => sum + parseFloat(r.duration), 0) / successCount;
+
+            showResult('performance-result', { 
+                status: 'success', 
+                message: 'Teste de performance concluído!',
+                summary: {
+                    total: tests.length,
+                    success: successCount,
+                    errors: errorCount,
+                    successRate: `${((successCount / tests.length) * 100).toFixed(1)}%`,
+                    averageDuration: `${avgDuration.toFixed(2)}ms`
+                },
+                results: results
+            }, 'success');
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Teste de APIs carregado!');
+            console.log('💡 Dica: Execute os testes na ordem sugerida');
+        });
+    </script>
+</body>
+</html>

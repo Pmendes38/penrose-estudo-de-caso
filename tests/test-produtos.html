@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste dos Produtos - Penrose</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f0f0f;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .product-card {
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        .product-images {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .product-images img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 2px solid #333;
+        }
+        .main-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background-color: #10b981; }
+        .error { background-color: #ef4444; }
+        .info { background-color: #3b82f6; }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        .loading {
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste dos Produtos - Penrose</h1>
+        <p>Esta página testa se os produtos estão carregando corretamente do Supabase com as novas URLs das imagens.</p>
+        
+        <div class="status info">
+            <strong>Status:</strong> <span id="status">Aguardando...</span>
+        </div>
+
+        <div>
+            <button onclick="testProduct(1)">Testar Produto ID 1 (Venom)</button>
+            <button onclick="testProduct(2)">Testar Produto ID 2 (Soldado Invernal)</button>
+            <button onclick="testProduct(3)">Testar Produto ID 3 (Escanor)</button>
+            <button onclick="testAllProducts()">Testar Todos os Produtos</button>
+            <button onclick="testImageUrls()">🧪 Testar URLs das Imagens</button>
+            <button onclick="debugVenom()">🔍 Debug Venom (ID 1)</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://example.supabase.co';
+        const SUPABASE_ANON_KEY = 'CONFIGURE_TOKEN_LOCALMENTE';
+
+        async function testProduct(productId) {
+            updateStatus(`Testando produto ID ${productId}...`, 'info');
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/produtos?id=eq.${productId}`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const products = await response.json();
+                
+                if (products && products.length > 0) {
+                    const product = products[0];
+                    displayProduct(product);
+                    updateStatus(`✅ Produto ID ${productId} carregado com sucesso!`, 'success');
+                } else {
+                    updateStatus(`❌ Produto ID ${productId} não encontrado`, 'error');
+                }
+
+            } catch (error) {
+                updateStatus(`❌ Erro ao testar produto ID ${productId}: ${error.message}`, 'error');
+                console.error('Erro:', error);
+            }
+        }
+
+        async function testAllProducts() {
+            updateStatus('Testando todos os produtos...', 'info');
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const products = await response.json();
+                
+                if (products && products.length > 0) {
+                    updateStatus(`✅ ${products.length} produtos carregados com sucesso!`, 'success');
+                    products.forEach(product => displayProduct(product));
+                } else {
+                    updateStatus('❌ Nenhum produto encontrado', 'error');
+                }
+
+            } catch (error) {
+                updateStatus(`❌ Erro ao carregar produtos: ${error.message}`, 'error');
+                console.error('Erro:', error);
+            }
+        }
+
+        async function testImageUrls() {
+            updateStatus('🧪 Testando URLs das imagens...', 'info');
+            
+            const testUrls = [
+                'https://example.supabase.co/storage/v1/object/public/produtos/Produtos/venom/venom-1.jpg',
+                'https://example.supabase.co/storage/v1/object/public/produtos/Produtos/venom/venom-2.jpg',
+                'https://example.supabase.co/storage/v1/object/public/produtos/Produtos/soldadoinvernal/bucky-1.jpg',
+                'https://example.supabase.co/storage/v1/object/public/produtos/Produtos/escanor/escanor-1.jpg'
+            ];
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h2>🧪 Teste de URLs das Imagens</h2>';
+
+            for (const url of testUrls) {
+                const urlDiv = document.createElement('div');
+                urlDiv.className = 'product-card';
+                urlDiv.innerHTML = `
+                    <h3>Testando: ${url.split('/').pop()}</h3>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <div class="product-images">
+                        <img src="${url}" alt="Teste de imagem" class="main-image" 
+                             onload="this.nextElementSibling.textContent='✅ Imagem carregada com sucesso!'; this.nextElementSibling.style.color='#10b981';"
+                             onerror="this.nextElementSibling.textContent='❌ Erro ao carregar imagem'; this.nextElementSibling.style.color='#ef4444';">
+                        <p style="color: #fbbf24;">🔄 Carregando...</p>
+                    </div>
+                `;
+                resultsDiv.appendChild(urlDiv);
+            }
+
+            updateStatus('🧪 Teste de URLs concluído! Verifique as imagens abaixo.', 'info');
+        }
+
+        async function debugVenom() {
+            updateStatus('🔍 Debugando produto Venom (ID 1)...', 'info');
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/produtos?id=eq.1`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const products = await response.json();
+                
+                if (products && products.length > 0) {
+                    const product = products[0];
+                    
+                    // Debug detalhado do Venom
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '<h2>🔍 DEBUG DETALHADO - VENOM (ID 1)</h2>';
+                    
+                    const debugDiv = document.createElement('div');
+                    debugDiv.className = 'product-card';
+                    
+                    // Parse do moreImages
+                    let moreImages = [];
+                    let moreImagesType = typeof product.moreImages;
+                    let moreImagesLength = 0;
+                    
+                    if (typeof product.moreImages === 'string') {
+                        try {
+                            moreImages = JSON.parse(product.moreImages);
+                            moreImagesType = 'array (após parse)';
+                            moreImagesLength = moreImages.length;
+                        } catch (parseError) {
+                            moreImages = [];
+                            moreImagesType = 'string (parse falhou)';
+                        }
+                    } else if (Array.isArray(product.moreImages)) {
+                        moreImages = product.moreImages;
+                        moreImagesType = 'array (nativo)';
+                        moreImagesLength = moreImages.length;
+                    }
+                    
+                    debugDiv.innerHTML = `
+                        <h3>📦 ${product.name}</h3>
+                        <p><strong>ID:</strong> ${product.id}</p>
+                        <p><strong>Main Image:</strong> ${product.mainImage}</p>
+                        
+                        <h4>🔍 ANÁLISE DO CAMPO moreImages:</h4>
+                        <p><strong>Tipo original:</strong> ${typeof product.moreImages}</p>
+                        <p><strong>Tipo após processamento:</strong> ${moreImagesType}</p>
+                        <p><strong>Quantidade de imagens:</strong> ${moreImagesLength}</p>
+                        <p><strong>Conteúdo bruto:</strong> <code>${product.moreImages}</code></p>
+                        
+                        <h4>🖼️ IMAGENS PROCESSADAS:</h4>
+                        <div class="product-images">
+                            ${moreImages.map((img, index) => `
+                                <div style="text-align: center;">
+                                    <img src="${img}" alt="Venom ${index + 1}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 2px solid #333;">
+                                    <p style="font-size: 10px; margin: 2px 0;">${img.split('/').pop()}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <h4>🧪 TESTE DE PARSE JSON:</h4>
+                        <button onclick="testParse('${product.moreImages}')" style="background: #10b981; margin: 5px;">Testar Parse JSON</button>
+                        <div id="parseResult"></div>
+                    `;
+                    
+                    resultsDiv.appendChild(debugDiv);
+                    updateStatus('✅ Debug do Venom concluído! Verifique os detalhes abaixo.', 'success');
+                } else {
+                    updateStatus('❌ Produto Venom não encontrado', 'error');
+                }
+
+            } catch (error) {
+                updateStatus(`❌ Erro ao debugar Venom: ${error.message}`, 'error');
+                console.error('Erro:', error);
+            }
+        }
+
+        function testParse(jsonString) {
+            const parseResultDiv = document.getElementById('parseResult');
+            try {
+                const parsed = JSON.parse(jsonString);
+                parseResultDiv.innerHTML = `
+                    <div style="background: #10b981; color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>✅ Parse JSON bem-sucedido!</strong><br>
+                        Tipo: ${typeof parsed}<br>
+                        Quantidade: ${parsed.length}<br>
+                        Conteúdo: ${JSON.stringify(parsed, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                parseResultDiv.innerHTML = `
+                    <div style="background: #ef4444; color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>❌ Parse JSON falhou!</strong><br>
+                        Erro: ${error.message}<br>
+                        String original: ${jsonString}
+                    </div>
+                `;
+            }
+        }
+
+        function displayProduct(product) {
+            const resultsDiv = document.getElementById('results');
+            
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product-card';
+            
+            const mainImage = product.mainImage || 'Imagem não disponível';
+            const moreImages = product.moreImages || [];
+            
+            productDiv.innerHTML = `
+                <h2>${product.name || 'Nome não disponível'}</h2>
+                <p><strong>ID:</strong> ${product.id}</p>
+                <p><strong>Categoria:</strong> ${product.category || 'Não especificada'}</p>
+                <p><strong>Descrição:</strong> ${product.description || 'Descrição não disponível'}</p>
+                
+                <h3>🔍 DEBUG - Dados das Imagens:</h3>
+                <p><strong>Main Image:</strong> ${mainImage}</p>
+                <p><strong>More Images (tipo):</strong> ${typeof moreImages}</p>
+                <p><strong>More Images (length):</strong> ${moreImages.length}</p>
+                <p><strong>More Images (conteúdo):</strong> ${JSON.stringify(moreImages, null, 2)}</p>
+                
+                <h3>Imagem Principal:</h3>
+                <img src="${mainImage}" alt="${product.name}" class="main-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <p style="display:none; color: #ef4444;">❌ Erro ao carregar imagem: ${mainImage}</p>
+                
+                <h3>Imagens Adicionais (${moreImages.length}):</h3>
+                <div class="product-images">
+                    ${moreImages.map(img => `
+                        <img src="${img}" alt="Imagem adicional" onerror="this.style.borderColor='#ef4444'; this.title='Erro: ${img}'">
+                    `).join('')}
+                </div>
+                
+                <p><strong>Tamanhos:</strong> ${product.sizes ? product.sizes.length : 0} disponíveis</p>
+                <p><strong>Peso:</strong> ${product.weight || 'Não especificado'} kg</p>
+                <p><strong>Dimensões:</strong> ${product.length || '?'} x ${product.width || '?'} x ${product.height || '?'} cm</p>
+            `;
+            
+            resultsDiv.appendChild(productDiv);
+        }
+
+        function updateStatus(message, type) {
+            const statusSpan = document.getElementById('status');
+            statusSpan.textContent = message;
+            statusSpan.className = type;
+        }
+
+        // Teste automático ao carregar a página
+        window.onload = function() {
+            updateStatus('Página carregada - Clique em um botão para testar', 'info');
+        };
+    </script>
+</body>
+</html>
