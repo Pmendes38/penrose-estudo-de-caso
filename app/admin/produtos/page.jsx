@@ -6,51 +6,95 @@ import Link from 'next/link';
 export default function AdminProdutos() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const mapProduct = (p) => ({
+    id: p.id,
+    name: p.name || p.title || 'Produto',
+    category: p.category?.name || p.category || '-',
+    price: typeof p.price === 'number' ? p.price : (Array.isArray(p.sizes) ? (p.sizes[0]?.price || 0) : 0),
+    status: p.status || (p.active === true ? 'active' : p.active === false ? 'inactive' : 'active'),
+    stock: typeof p.stock === 'number' ? p.stock : (p.inventory || 0),
+    image: (Array.isArray(p.images) && p.images[0]) || p.mainImage || '/assets/products/venom/venom-1.jpg',
+  });
+
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const token = typeof window !== 'undefined'
+        ? localStorage.getItem('adminToken') || localStorage.getItem('authToken')
+        : null;
+
+      const res = await fetch('/api/products/admin', {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        setError('Não autorizado. Faça login novamente.');
+        setProducts([]);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Erro ao buscar produtos');
+      }
+
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : []);
+      setProducts(list.map(mapProduct));
+    } catch (err) {
+      console.error('Erro ao carregar produtos:', err);
+      setError(err.message || 'Erro ao carregar produtos');
+      setProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Simular carregamento de produtos
-        setTimeout(() => {
-          setProducts([
-            {
-              id: '1',
-              name: 'Venom: Simbionte Dominador',
-              category: 'Marvel',
-              price: 529.90,
-              status: 'active',
-              stock: 5,
-              image: '/assets/products/venom/venom-1.jpg'
-            },
-            {
-              id: '2',
-              name: 'Soldado Invernal - Bucky Barnes',
-              category: 'Marvel',
-              price: 250.00,
-              status: 'active',
-              stock: 3,
-              image: '/assets/products/soldadoinvernal/bucky-1.jpg'
-            },
-            {
-              id: '3',
-              name: 'Escanor O Leão do Orgulho',
-              category: 'Anime',
-              price: 229.90,
-              status: 'active',
-              stock: 2,
-              image: '/assets/products/escanor/escanor-1.jpg'
-            }
-          ]);
-          setIsLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        setIsLoading(false);
-      }
-    };
-
     fetchProducts();
   }, []);
+
+  const toggleStatus = async (product) => {
+    const newStatus = product.status === 'active' ? 'inactive' : 'active';
+    const prev = products;
+    // Otimista
+    setProducts((curr) => curr.map((p) => (p.id === product.id ? { ...p, status: newStatus } : p)));
+    try {
+      const token = typeof window !== 'undefined'
+        ? localStorage.getItem('adminToken') || localStorage.getItem('authToken')
+        : null;
+      const res = await fetch(`/api/products/admin/${product.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        setError('Não autorizado. Faça login novamente.');
+        setProducts(prev);
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Erro ao atualizar produto');
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar produto:', err);
+      setError(err.message || 'Erro ao atualizar produto');
+      setProducts(prev);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -89,13 +133,27 @@ export default function AdminProdutos() {
             Gerencie seu catálogo de produtos
           </p>
         </div>
-        <Link
-          href="/admin/produtos/novo"
-          className="bg-brand-blue hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center"
-        >
-          ➕ Novo Produto
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={fetchProducts}
+            className="bg-brand-gray-dark hover:bg-brand-gray/60 text-brand-gray-light font-semibold py-2 px-4 rounded-lg transition-colors"
+          >
+            ↻ Atualizar
+          </button>
+          <Link
+            href="/admin/produtos/novo"
+            className="bg-brand-blue hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center"
+          >
+            ➕ Novo Produto
+          </Link>
+        </div>
       </div>
+
+      {error && (
+        <div className="bg-red-900/40 border border-red-600 text-red-200 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -174,6 +232,13 @@ export default function AdminProdutos() {
                   >
                     👁️ Ver
                   </Link>
+                  <button
+                    className="text-yellow-300 hover:text-yellow-200 px-3 py-1 rounded transition-colors"
+                    onClick={() => toggleStatus(product)}
+                    title={product.status === 'active' ? 'Desativar' : 'Ativar'}
+                  >
+                    {product.status === 'active' ? '⏸️ Desativar' : '▶️ Ativar'}
+                  </button>
                   <button
                     className="text-red-400 hover:text-red-300 px-3 py-1 rounded transition-colors"
                     onClick={() => console.log('Excluir produto:', product.id)}
