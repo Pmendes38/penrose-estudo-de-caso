@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { formatBRL, formatDate } from '@/src/shared/lib/format';
+import { formatBRL, formatDate } from '@/shared/lib/format';
 
 type OrderItem = { name: string; size?: string; price: number; image?: string };
 type Order = { id: string; date: string; status: string; total: number; items: OrderItem[] };

@@ -1,27 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/src/shared/context/CartContext.jsx';
+import { useCart } from '@/shared/context/CartContext';
 
-export default function AddToCartClient({ product }: { product: any }) {
+type Size = { name?: string; label?: string; price: number; inStock?: boolean };
+type Product = {
+  id: string;
+  name: string;
+  images?: string[];
+  mainImage?: string;
+  sizes?: Size[];
+};
+
+export default function AddToCartClient({ product }: { product: Product }) {
   const router = useRouter();
-  const { addToCart } = useCart();
-  const [selected, setSelected] = useState<any>(product.sizes?.find((s: any) => s.inStock) ?? product.sizes?.[0]);
+  const { addItem, getLineId } = useCart();
+
+  const initial = useMemo(
+    () => product.sizes?.find((s) => s.inStock) ?? product.sizes?.[0],
+    [product.sizes]
+  );
+  const [selected, setSelected] = useState<Size | undefined>(initial);
+
+  const variantKey = selected?.name ?? selected?.label ?? null;
 
   const add = () => {
     if (!selected) return;
-    addToCart({
-      ...product,
-      selectedSize: selected.name,
+
+    const lineId = getLineId(product.id, variantKey);
+    addItem({
+      productId: product.id,
+      name: product.name,
       price: selected.price,
       quantity: 1,
+      image: product.images?.[0] ?? product.mainImage ?? null,
+      images: product.images,
+      variantKey, // ex.: "M", "G"…
+      meta: { selectedSize: variantKey },
     });
   };
 
   const buyNow = () => {
     add();
-    router.push('/carrinho'); // ajuste para /cart se renomear pasta
+    router.push('/carrinho');
   };
 
   return (
@@ -33,6 +55,7 @@ export default function AddToCartClient({ product }: { product: any }) {
       >
         {selected ? '🛒 Adicionar ao Carrinho' : 'Selecione um tamanho'}
       </button>
+
       <button
         onClick={buyNow}
         disabled={!selected}

@@ -3,7 +3,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { formatBRL } from '@/src/shared/lib/format';
+import { formatBRL } from '@/shared/lib/format';
 
 type Size = { price: number; label?: string; name?: string };
 type P = {

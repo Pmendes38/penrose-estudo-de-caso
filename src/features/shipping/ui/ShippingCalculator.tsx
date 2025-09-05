@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { LoadingSpinner } from '@/src/shared/ui/loading/Loading';
-import { api } from '@/src/shared/lib/http';
-import { formatBRL } from '@/src/shared/lib/format';
+import { LoadingSpinner } from '@/shared/ui/loading/Loading';
+import { api } from '@/shared/lib/http';
+import { formatBRL } from '@/shared/lib/format';
 
 type Props = {
   product: { id: string; name: string; weight?: number; length?: number; width?: number; height?: number };

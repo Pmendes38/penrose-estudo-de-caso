@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import ProductForm from '@/src/features/products/ui/ProductForm';
+import ProductForm from '@/features/products/ui/ProductForm';
 import { updateProductAction } from '../../_actions';
-import { api } from '@/src/shared/lib/http';
+import { api } from '@/shared/lib/http';
 
 type ProductDTO = {
   id: string;

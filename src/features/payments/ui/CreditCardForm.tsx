@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { formatBRL } from '@/src/shared/lib/format';
+import { formatBRL } from '@/shared/lib/format';
 
 type Props = {
   amount: number;

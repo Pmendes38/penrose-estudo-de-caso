@@ -1,15 +1,14 @@
-// app/page.tsx
 import { Suspense } from 'react';
-import { fetchPublicProducts } from '@/lib/http';
-import LandingHero from '@/src/features/landing/ui/LandingHero';
-import LandingReady from '@/src/features/landing/ui/LandingReady';
-import LandingCatalog from '@/src/features/landing/ui/LandingCatalog';
-import LandingContact from '@/src/features/landing/ui/LandingContact';
+import { fetchPublicProducts } from '@/features/products/api';
+import LandingHero from '@/features/landing/ui/LandingHero';
+import LandingReady from '@/features/landing/ui/LandingReady';
+import LandingCatalog from '@/features/landing/ui/LandingCatalog';
+import LandingContact from '@/features/landing/ui/LandingContact';
 
-export const revalidate = 60; // cache do catálogo por 60s (ajuste conforme necessidade)
+export const revalidate = 60; 
 
 export default async function HomePage() {
-  const products = await fetchPublicProducts(); // SSR: menos JS no cliente e melhor SEO
+  const products = await fetchPublicProducts(); 
 
   return (
     <main>

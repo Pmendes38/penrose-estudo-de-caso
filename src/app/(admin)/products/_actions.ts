@@ -1,8 +1,8 @@
 'use server';
 
 import { revalidatePath, redirect } from 'next/navigation';
-import { productCreateSchema } from '@/src/features/products/schemas';
-import { createProduct, updateProduct } from '@/src/features/products/api';
+import { productCreateSchema } from '@/features/products/schemas';
+import { createProduct, updateProduct } from '@/features/products/api';
 
 function parseForm(formData: FormData) {
   const images = String(formData.get('images') || '')

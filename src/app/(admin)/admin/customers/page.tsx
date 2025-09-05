@@ -1,4 +1,4 @@
-import { fetchAdminCustomers } from '@/lib/admin-customers';
+import { fetchAdminCustomers } from '@/shared/lib/admin-customers';
 import CustomersTable from './table';
 import { Suspense } from 'react';
 

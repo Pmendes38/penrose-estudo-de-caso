@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { env } from '@/lib/env';
+import { envServer } from '@/shared/lib/env.server';
 
 const LoginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -35,7 +35,7 @@ export async function adminLoginAction(_prev: State, formData: FormData): Promis
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
   try {
-    const res = await fetch(`${env.AUTH_API_URL}/api/auth/admin-login`, {
+    const res = await fetch(`${envServer.AUTH_API_URL}/api/auth/admin-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(parsed.data),
@@ -60,10 +60,10 @@ export async function adminLoginAction(_prev: State, formData: FormData): Promis
 
     const cookieBase = {
       httpOnly: true,
-      secure: env.NODE_ENV === 'production',
+      secure: envServer.NODE_ENV === 'production',
       sameSite: 'lax' as const,
       path: '/',
-      ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
+      ...(envServer.COOKIE_DOMAIN ? { domain: envServer.COOKIE_DOMAIN } : {}),
       ...(exp ? { expires: exp } : { maxAge: 60 * 60 * 2 }), // 2h fallback
     };
 

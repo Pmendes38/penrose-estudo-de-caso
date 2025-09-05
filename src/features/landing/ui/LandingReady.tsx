@@ -1,11 +1,18 @@
-import ProductCard from '@/components/Product/ProductCard';
-import type { Product } from '@/lib/types';
+// src/features/landing/ui/LandingReady.tsx
+import { useMemo } from 'react';
+import ProductCard from '@/features/products/ui/ProductCard';
+import type { Product, ProductView } from '@/features/products/schemas';
+import { normalizeProducts } from '@/features/products/normalizers';
 
-export default function LandingReady({ products }: { products: Product[] }) {
-  const ready = products.filter(
-    (p) => p.prontaEntrega || p.sizes?.some((s) => s.prontaEntrega)
+export default function LandingReady({ products }: { products: Product[] | any[] }) {
+  const ready = useMemo(
+    () => products.filter((p: any) => p.prontaEntrega || p.sizes?.some((s: any) => s.prontaEntrega)),
+    [products]
   );
+
   if (ready.length === 0) return null;
+
+  const normalized: ProductView[] = useMemo(() => normalizeProducts(ready), [ready]);
 
   return (
     <section id="pronta-entrega" className="py-20 md:py-32">
@@ -15,7 +22,7 @@ export default function LandingReady({ products }: { products: Product[] }) {
           <p className="mt-2 text-gray-400">Obras exclusivas disponíveis para envio imediato. Estoque limitado.</p>
         </div>
         <div className="flex flex-wrap justify-center gap-8">
-          {ready.map((product) => (
+          {normalized.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

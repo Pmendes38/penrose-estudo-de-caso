@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { adminLoginAction } from './actions';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useFormState, useFormStatus } from 'react-dom';
+import { adminLoginAction, type State } from './actions';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -18,10 +18,13 @@ function SubmitButton() {
   );
 }
 
-type State = { ok: boolean; error?: string };
-
 export default function AdminLoginPage() {
-  const [state, formAction] = useActionState<State, FormData>(adminLoginAction, { ok: false });
+  const router = useRouter();
+  const [state, formAction] = useFormState<State, FormData>(adminLoginAction, { ok: false });
+
+  useEffect(() => {
+    if (state.ok) router.replace('/admin');
+  }, [state.ok, router]);
 
   return (
     <div className="min-h-screen grid place-items-center bg-brand-black px-4">

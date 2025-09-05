@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { formatBRL } from '@/src/shared/lib/format';
+import { formatBRL } from '@/shared/lib/format';
 
 type Size = { name: string; price: number; originalPrice?: number; inStock?: boolean };
 

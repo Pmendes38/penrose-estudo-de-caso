@@ -1,14 +1,12 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Script from 'next/script';
-import { getProduct } from '@/src/features/products/api';
+import { getProduct } from '@/features/products/api';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://exemplo.invalid';
 
 type PageParams = { params: { id: string } };
 
-// (Opcional) Controle de revalidação
-// export const revalidate = 300; // 5 min
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const product = await getProduct(params.id).catch(() => null);
@@ -29,7 +27,6 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     description,
     alternates: { canonical },
     openGraph: {
-      type: 'product',
       url: canonical,
       title,
       description,

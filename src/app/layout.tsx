@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import '../styles/globals.css';
-import { CartProvider } from '@/src/shared/context/CartContext';
+import '@/app/globals.css';
+import { CartProvider } from '@/shared/context/CartContext';
 import Script from 'next/script';
 
 export const metadata: Metadata = {

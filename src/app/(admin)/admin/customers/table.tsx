@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { formatBRL, formatDate } from '@/lib/format';
-import type { Customer } from '@/lib/types';
+import { formatBRL, formatDate } from '@/shared/lib/format';
+import type { Customer } from '@/shared/lib/types';
 
 type Paginated<T> = {
   items: T[];

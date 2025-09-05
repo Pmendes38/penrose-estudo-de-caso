@@ -1,32 +1,23 @@
+// src/features/products/ui/ProductCard.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import OptimizedImage from '@/src/shared/ui/optimized-image';
-import Button from '@/src/shared/ui/button';
-import { formatBRL } from '@/src/shared/lib/format';
-import { useCart } from '@/src/shared/context/CartContext.jsx';
+import OptimizedImage from '@/shared/ui/optimized-image/index';
+import Button from '@/shared/ui/button';
+import { formatBRL } from '@/shared/lib/format';
+import { useCart } from '@/shared/context/CartContext';
+import type { ProductView } from '@/features/products/schemas';
 
 type Size = { name?: string; label?: string; price: number };
-type Product = {
-  id: string;
-  name: string;
-  images?: string[];
-  mainImage?: string;
-  sizes?: Size[];
-  tags?: string[];
-  isNew?: boolean;
-  prontaEntrega?: boolean;
-  discount?: number;
-};
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product }: { product: ProductView }) {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [showSizeSelector, setShowSizeSelector] = useState(false);
   const { addItem } = useCart();
 
-  const lowest = product.sizes?.length ? Math.min(...product.sizes.map((s) => s.price)) : 0;
-  const highest = product.sizes?.length ? Math.max(...product.sizes.map((s) => s.price)) : 0;
+  const lowest = product.sizes?.length ? Math.min(...product.sizes.map((s: Size) => s.price)) : (product.price ?? 0);
+  const highest = product.sizes?.length ? Math.max(...product.sizes.map((s: Size) => s.price)) : lowest;
   const multi = product.sizes && product.sizes.length > 1 && lowest !== highest;
 
   const handleAddToCart = () => {
@@ -34,16 +25,20 @@ export default function ProductCard({ product }: { product: Product }) {
       setShowSizeSelector(true);
       return;
     }
-    const sizeData = product.sizes?.find((s) => (s.label || s.name) === selectedSize);
+    const sizeData = product.sizes?.find((s: Size) => (s.label || s.name) === selectedSize);
     const price = sizeData?.price ?? lowest;
+
     addItem({
-      id: `${product.id}${selectedSize ? `-${selectedSize}` : ''}`,
+      productId: product.id,
       name: product.name,
       price,
-      image: product.images?.[0] || product.mainImage,
-      size: selectedSize || undefined,
       quantity: 1,
+      images: product.images,
+      image: product.images?.[0],
+      variantKey: selectedSize || null,
+      meta: { selectedSize },
     });
+
     setSelectedSize('');
     setShowSizeSelector(false);
   };
@@ -71,10 +66,10 @@ export default function ProductCard({ product }: { product: Product }) {
           </h3>
         </Link>
 
-        {Array.isArray(product.tags) && product.tags.length > 0 && (
+        {!!product.tags?.length && (
           <div className="flex flex-wrap gap-2 mb-4">
             {product.tags.slice(0, 3).map((tag, i) => (
-              <span key={i} className="px-3 py-1 bg-brand-gray-border/30 text-brand-gray text-xs rounded-full border border-brand-gray-border">
+              <span key={tag + i} className="px-3 py-1 bg-brand-gray-border/30 text-brand-gray text-xs rounded-full border border-brand-gray-border">
                 {tag}
               </span>
             ))}
@@ -100,14 +95,12 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {product.sizes?.length ? (
+        {!!product.sizes?.length && (
           <div className="mb-6">
             <fieldset>
               <legend className="text-sm font-medium text-brand-gray-light mb-3">
-                Tamanhos disponíveis:{' '}
-                {selectedSize && <span className="text-brand-blue font-semibold ml-2">{selectedSize}</span>}
+                Tamanhos disponíveis: {selectedSize && <span className="text-brand-blue font-semibold ml-2">{selectedSize}</span>}
               </legend>
-
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((s) => {
                   const label = s.label || s.name || '';
@@ -134,7 +127,7 @@ export default function ProductCard({ product }: { product: Product }) {
               )}
             </fieldset>
           </div>
-        ) : null}
+        )}
 
         <div className="space-y-3">
           <Button
@@ -169,7 +162,7 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
 
       <div className="absolute top-3 right-3">
-        {product.discount && (
+        {typeof product.discount === 'number' && (
           <span className="px-3 py-1.5 bg-gradient-to-r from-brand-error to-red-600 text-white text-xs font-semibold rounded-full shadow-medium">
             -{product.discount}% OFF
           </span>

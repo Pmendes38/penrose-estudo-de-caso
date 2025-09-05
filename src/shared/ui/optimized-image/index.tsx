@@ -2,7 +2,7 @@
 
 import Image, { ImageProps } from 'next/image';
 import { useState, memo, useMemo } from 'react';
-import { LoadingSpinner } from '@/src/shared/ui/loading/Loading';
+import { LoadingSpinner } from '@/shared/ui/loading/Loading';
 
 type Props = Omit<ImageProps, 'src' | 'alt'> & {
   src: string;

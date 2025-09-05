@@ -1,8 +1,7 @@
-// app/(admin)/layout.tsx
 import React from 'react';
 import Link from 'next/link';
-import { requireAdminOrRedirect } from '@/lib/auth';
-import './admin.css';
+import { requireAdminOrRedirect } from '@/shared/lib/auth.server';
+import '@/app/globals.css';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   requireAdminOrRedirect();
