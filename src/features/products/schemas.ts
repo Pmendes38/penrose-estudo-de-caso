@@ -1,51 +1,75 @@
 import { z } from 'zod';
 
-export const productCreateSchema = z.object({
-  name: z.string().min(2, 'Nome obrigatório'),
-  category: z.string().min(2, 'Categoria obrigatória'),
-  price: z.coerce.number().nonnegative('Preço inválido'),
-  stock: z.coerce.number().int().nonnegative('Estoque inválido').default(0),
-  status: z.enum(['active', 'inactive']).default('active'),
-  description: z.string().optional().default(''),
-  images: z.array(z.string().url('URL inválida')).optional().default([]),
-  tags: z.array(z.string()).optional().default([]),
-});
-export type ProductCreateInput = z.infer<typeof productCreateSchema>;
-
-export const ProductSizeSchema = z.object({
-  label: z.string().optional(),
-  name: z.string().optional(),
-  price: z.number().nonnegative(),
-  prontaEntrega: z.boolean().optional(),
-});
-export type ProductSize = z.infer<typeof ProductSizeSchema>;
+export const ProductStatusSchema = z.enum(['active', 'inactive']);
+export type ProductStatus = z.infer<typeof ProductStatusSchema>;
 
 export const ProductSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string().optional().nullable(),
-  price: z.number().optional().nullable(),
-  mainImage: z.string().optional().nullable(),
-  images: z.array(z.string()).optional().default([]),
-  moreImages: z.array(z.string()).optional().default([]),
-  category: z.string().optional().nullable(),
-  tags: z.union([z.array(z.string()), z.string()]).optional().nullable(),
-  sizes: z.array(ProductSizeSchema).optional(),
-  prontaEntrega: z.boolean().optional(),
-  isNew: z.boolean().optional(),
-  discount: z.number().optional().nullable(),
-  weight: z.number().optional(),
-  length: z.number().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
+  slug: z.string(),
+  category: z.string().nullable().optional(),
+  priceCents: z.number().nonnegative(),
+  stock: z.number().int().nonnegative(),
+  status: ProductStatusSchema,
+  description: z.string().nullable().optional(),
+  images: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([]),
+  sku: z.string().nullable().optional(),
+  createdAt: z.string().datetime().optional().nullable(),
+  updatedAt: z.string().datetime().optional().nullable(),
 });
 export type Product = z.infer<typeof ProductSchema>;
 
-export function parseProduct(input: unknown): Product {
-  return ProductSchema.parse(input);
-}
+export const ProductPageSchema = z.object({
+  items: z.array(ProductSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  pageSize: z.number().int(),
+  pages: z.number().int(),
+});
+export type ProductPage = z.infer<typeof ProductPageSchema>;
 
-export type ProductView = Omit<Product, 'tags' | 'images'> & {
-  tags: string[];
-  images: string[];
-};
+export const PublicProductEnvelopeSchema = z.object({
+  success: z.literal(true),
+  source: z.string(),
+  product: ProductSchema,
+});
+
+export const AdminCreateResponseSchema = z.object({
+  message: z.string(),
+  product: ProductSchema,
+});
+export const AdminUpdateResponseSchema = AdminCreateResponseSchema;
+export const AdminDeleteResponseSchema = z.object({ message: z.string() });
+
+export const ProductQuerySchema = z.object({
+  search: z.string().optional(),
+  category: z.string().optional(),
+  status: ProductStatusSchema.optional(),
+  minPrice: z.coerce.number().min(0).optional(),
+  maxPrice: z.coerce.number().min(0).optional(),
+  page: z.coerce.number().min(1).default(1),
+  pageSize: z.coerce.number().min(1).default(20),
+  sortBy: z.enum(['priceCents', 'createdAt', 'name']).default('createdAt'),
+  sortDir: z.enum(['asc', 'desc']).default('desc'),
+});
+export type ProductQuery = z.infer<typeof ProductQuerySchema>;
+
+export const AdminProductPageSchema = ProductPageSchema;
+export type AdminProductPage = z.infer<typeof AdminProductPageSchema>;
+
+export const CreateProductDtoSchema = z.object({
+  name: z.string().min(1),
+  category: z.string().optional(),
+  priceCents: z.number().nonnegative(),
+  stock: z.number().int().nonnegative().optional(),
+  status: ProductStatusSchema.optional(),
+  description: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  sku: z.string().regex(/^[A-Z0-9-_.]+$/i).optional(),
+});
+export type CreateProductDto = z.infer<typeof CreateProductDtoSchema>;
+
+export const UpdateProductDtoSchema = CreateProductDtoSchema.partial();
+export type UpdateProductDto = z.infer<typeof UpdateProductDtoSchema>;

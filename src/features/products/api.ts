@@ -1,63 +1,137 @@
 import 'server-only';
-import { api } from '@/shared/lib/http';
-import type { Product, ProductCreateInput } from './schemas';
+import { envServer } from '@/shared/lib/env.server';
+import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
+import {
+  ProductQuery, ProductQuerySchema, ProductPageSchema,
+  PublicProductEnvelopeSchema, ProductSchema,
+  CreateProductDto, CreateProductDtoSchema,
+  UpdateProductDto, UpdateProductDtoSchema,
+  AdminProductPageSchema, AdminCreateResponseSchema,
+  AdminUpdateResponseSchema, AdminDeleteResponseSchema,
+} from './schemas';
 
-const BASE = '/api/products';
+const BASE = `${envServer.AUTH_API_URL}/api/products`;
 
-export async function fetchPublicProducts(): Promise<Product[]> {
-  return api<Product[]>(`${BASE}/public`, {
-    cache: 'no-store',
+function toQuery(q: Record<string, any> = {}) {
+  const u = new URLSearchParams();
+  Object.entries(q).forEach(([k, v]) => {
+    if (v === undefined || v === null || v === '') return;
+    u.set(k, String(v));
   });
+  const s = u.toString();
+  return s ? `?${s}` : '';
 }
 
-export async function getProduct(
-  id: string,
-  opts?: { cache?: RequestCache }
-): Promise<Product> {
-  return api<Product>(`${BASE}/${id}`, {
-    cache: opts?.cache ?? 'no-store',
-  });
+/* ========= Public ========= */
+
+export async function fetchPublicProducts(query: Partial<ProductQuery> = {}) {
+  const params = ProductQuerySchema.partial().parse(query);
+  const res = await fetch(`${BASE}${toQuery(params)}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductPageSchema.parse(await res.json());
 }
 
-export async function getProductCached(
-  id: string,
-  revalidateSeconds = 300
-): Promise<Product> {
-  return api<Product>(`${BASE}/${id}`, {
-    cache: 'force-cache',
-    next: { revalidate: revalidateSeconds, tags: [`product:${id}`] },
-  });
+export async function fetchPublicProduct(idOrSlug: string) {
+  const res = await fetch(`${BASE}/${encodeURIComponent(idOrSlug)}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(await res.text());
+  const env = PublicProductEnvelopeSchema.parse(await res.json());
+  return env.product;
 }
 
-export async function listProducts(query?: {
-  q?: string;
-  page?: number;
-  pageSize?: number;
-}): Promise<Product[]> {
-  const params = new URLSearchParams();
-  if (query?.q) params.set('q', query.q);
-  if (query?.page) params.set('page', String(query.page));
-  if (query?.pageSize) params.set('pageSize', String(query.pageSize));
+/* ========= Admin (Auth: Bearer) ========= */
 
-  const qs = params.toString();
-  return api<Product[]>(`${BASE}${qs ? `?${qs}` : ''}`, {
-    cache: 'no-store',
-  });
+export async function listProductsAdmin(page = 1, pageSize = 50) {
+  const url = `${BASE}/admin/page${toQuery({ page, pageSize })}`;
+  const res = await fetchWithAuth(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(await res.text());
+  return AdminProductPageSchema.parse(await res.json());
 }
 
-export async function createProduct(input: ProductCreateInput): Promise<Product> {
-  return api<Product>(`${BASE}/admin`, {
+export async function createProductAdmin(input: CreateProductDto) {
+  const body = JSON.stringify(CreateProductDtoSchema.parse(input));
+  const res = await fetchWithAuth(`${BASE}/admin`, {
     method: 'POST',
-    body: JSON.stringify(input),
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    body,
   });
+  if (!res.ok) throw new Error(await res.text());
+  return AdminCreateResponseSchema.parse(await res.json());
 }
 
-export async function updateProduct(
-  id: string,
-  input: ProductCreateInput
-): Promise<Product> {
-  return api<Product>(`${BASE}/admin/${id}`, {
+export async function updateProductAdmin(id: string, input: UpdateProductDto) {
+  const body = JSON.stringify(UpdateProductDtoSchema.parse(input));
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}`, {
     method: 'PUT',
-    body: JSON.stringify(input),
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    body,
   });
+  if (!res.ok) throw new Error(await res.text());
+  return AdminUpdateResponseSchema.parse(await res.json());
+}
+
+export async function deleteProductAdmin(id: string) {
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return AdminDeleteResponseSchema.parse(await res.json());
+}
+
+/* ===== stock/images/tags (admin) ===== */
+
+export async function increaseStockAdmin(id: string, amount: number) {
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}/stock/increase${toQuery({ amount })}`, {
+    method: 'PUT',
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductSchema.parse(await res.json());
+}
+
+export async function decreaseStockAdmin(id: string, amount: number) {
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}/stock/decrease${toQuery({ amount })}`, {
+    method: 'PUT',
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductSchema.parse(await res.json());
+}
+
+export async function addImageAdmin(id: string, url: string) {
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}/images/add${toQuery({ url })}`, {
+    method: 'PUT',
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductSchema.parse(await res.json());
+}
+
+export async function removeImageAdmin(id: string, url: string) {
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}/images/remove${toQuery({ url })}`, {
+    method: 'PUT',
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductSchema.parse(await res.json());
+}
+
+export async function addTagAdmin(id: string, tag: string) {
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}/tags/add${toQuery({ tag })}`, {
+    method: 'PUT',
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductSchema.parse(await res.json());
+}
+
+export async function removeTagAdmin(id: string, tag: string) {
+  const res = await fetchWithAuth(`${BASE}/admin/${encodeURIComponent(id)}/tags/remove${toQuery({ tag })}`, {
+    method: 'PUT',
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductSchema.parse(await res.json());
 }
