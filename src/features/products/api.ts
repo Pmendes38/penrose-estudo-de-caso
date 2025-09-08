@@ -10,7 +10,7 @@ import {
   AdminUpdateResponseSchema, AdminDeleteResponseSchema,
 } from './schemas';
 
-const BASE = `${envServer.AUTH_API_URL}/api/products`;
+const BASE = `${envServer.AUTH_API_URL}/api/v1/products`;
 
 function toQuery(q: Record<string, any> = {}) {
   const u = new URLSearchParams();

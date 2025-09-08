@@ -1,7 +1,7 @@
 'use client';
 
 export async function validatePostalCode(postalCode: string) {
-  const res = await fetch('/api/shipping/validate-postal-code', {
+  const res = await fetch('/api/v1/shipping/validate-postal-code', {
     method: 'POST',
     headers: { 'Content-Type':'application/json' },
     body: JSON.stringify({ postalCode }),
@@ -18,7 +18,7 @@ export async function calculateShipping(input: {
   cartTotal?: number;
   preferCheapest?: boolean;
 }) {
-  const res = await fetch('/api/shipping/calculate', {
+  const res = await fetch('/api/v1/shipping/calculate', {
     method: 'POST',
     headers: { 'Content-Type':'application/json' },
     body: JSON.stringify(input),

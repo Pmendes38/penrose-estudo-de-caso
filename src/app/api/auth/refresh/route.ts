@@ -10,7 +10,7 @@ export async function POST() {
     return NextResponse.json({ ok: false, message: 'Missing refresh token' }, { status: 401 });
   }
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/auth/refresh`, {
+  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Refresh-Token': refreshToken },
     cache: 'no-store',

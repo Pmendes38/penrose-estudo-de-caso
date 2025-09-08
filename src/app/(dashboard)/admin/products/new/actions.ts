@@ -22,7 +22,7 @@ export async function createProductAction(formData: FormData) {
   }
 
   const token = cookies().get('accessToken')?.value;
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/products/admin`, {
+  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/products/admin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

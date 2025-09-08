@@ -7,7 +7,7 @@ import {
   type Payment,
 } from '../schemas';
 
-const BASE = `${envServer.AUTH_API_URL}/api/payments`;
+const BASE = `${envServer.AUTH_API_URL}/api/v1/payments`;
 
 function qs(params: Record<string, string | number | undefined>) {
   const sp = new URLSearchParams();

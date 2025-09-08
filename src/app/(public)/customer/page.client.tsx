@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { formatBRL, formatDate } from '@/shared/lib/format';
+import { Logo } from '@/shared/ui/Logo';
 
 type OrderItem = { name: string; size?: string; price: number; image?: string };
 type Order = { id: string; date: string; status: string; total: number; items: OrderItem[] };
@@ -14,7 +15,7 @@ export default function ClienteClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // troque por /api/me + /api/orders/me
+    // troque por /api/me + /api/v1/orders/me
     setUser({ name: 'João Silva', email: 'contato@example.com', phone: '(11) 99999-999'})
     setOrders([
       {
@@ -62,7 +63,7 @@ export default function ClienteClient() {
       <header className="bg-brand-gray-dark border-b border-brand-gray-border">
         <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Link href="/"><img src="/assets/WIDE LOGO.svg" alt="PENROSE" className="h-8 w-auto" /></Link>
+            <Link href="/"><Logo className="h-8 w-auto" /></Link>
             <h1 className="text-xl font-bold text-brand-gray-light">Minha Conta</h1>
           </div>
           <div className="flex items-center gap-4">

@@ -103,7 +103,7 @@ export default function CreditCardForm({ amount, onTokenize }: Props) {
     try {
       // ❗️Melhor prática: tokenizar via SDK do gateway no browser.
       // Se não houver SDK, poste para *sua rota* que chama o gateway.
-      const res = await fetch('/api/payments/tokenize', {
+      const res = await fetch('/api/v1/payments/tokenize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // NUNCA logue nem persista esse payload. A rota só repassa ao gateway e descarta.

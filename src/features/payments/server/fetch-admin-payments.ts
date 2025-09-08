@@ -20,6 +20,6 @@ export async function fetchAdminPayments(opts: { page?: number; pageSize?: numbe
     ...(filters.providerPaymentId ? { providerPaymentId: filters.providerPaymentId } : {}),
   });
 
-  const data = await api(`/api/payments/admin?${search.toString()}`);
+  const data = await api(`/api/v1/payments/admin?${search.toString()}`);
   return PaginatedPaymentsSchema.parse(data);
 }

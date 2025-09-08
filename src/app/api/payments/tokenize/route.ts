@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const gw = await fetch(`${envServer.AUTH_API_URL}/api/payments/tokenize`, {
+    const gw = await fetch(`${envServer.AUTH_API_URL}/api/v1/payments/tokenize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

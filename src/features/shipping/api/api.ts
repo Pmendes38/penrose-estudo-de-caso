@@ -11,7 +11,7 @@ import {
   type ShippingService,
 } from '../schemas';
 
-const BASE = `${envServer.AUTH_API_URL}/api/shipping`;
+const BASE = `${envServer.AUTH_API_URL}/api/v1/shipping`;
 
 export async function validatePostalCode(postalCode: string) {
   const res = await fetch(`${BASE}/validate-postal-code`, {

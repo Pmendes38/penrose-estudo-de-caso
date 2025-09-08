@@ -21,7 +21,7 @@ export async function adminLoginAction(_: ActionState, form: FormData): Promise<
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos' };
 
   try {
-    const res = await fetch(`${envServer.AUTH_API_URL}/api/auth/admin-login`, {
+    const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/admin-login`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify(parsed.data),
@@ -48,7 +48,7 @@ export async function loginAction(_: ActionState, form: FormData): Promise<Actio
   if (!parsed.success) return { ok:false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos' };
 
   try {
-    const res = await fetch(`${envServer.AUTH_API_URL}/api/auth/login`, {
+    const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify(parsed.data),
@@ -76,7 +76,7 @@ export async function registerAction(_: ActionState, form: FormData): Promise<Ac
     acceptTerms: true,
   };
   try {
-    const res = await fetch(`${envServer.AUTH_API_URL}/api/auth/register`, {
+    const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify(payload),

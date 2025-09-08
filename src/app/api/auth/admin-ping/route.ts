@@ -6,7 +6,7 @@ export async function GET() {
   const token = getAccessToken();
   if (!token) return NextResponse.json({ ok:false }, { status: 200 });
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/auth/admin/ping`, {
+  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/admin/ping`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });

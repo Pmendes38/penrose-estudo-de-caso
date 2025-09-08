@@ -8,7 +8,7 @@ export async function cancelPaymentAction(_: any, formData: FormData) {
   const id = String(formData.get('id') || '');
   if (!id) return { ok: false, error: 'ID inválido' };
   try {
-    await api(`/api/payments/admin/${id}/cancel`, { method: 'PUT', expectJson: false });
+    await api(`/api/v1/payments/admin/${id}/cancel`, { method: 'PUT', expectJson: false });
     revalidatePath('/admin/payments');
     return { ok: true };
   } catch (e: any) {
@@ -20,7 +20,7 @@ export async function refundPaymentAction(_: any, formData: FormData) {
   const id = String(formData.get('id') || '');
   if (!id) return { ok: false, error: 'ID inválido' };
   try {
-    await api(`/api/payments/admin/${id}/refund`, { method: 'PUT', expectJson: false });
+    await api(`/api/v1/payments/admin/${id}/refund`, { method: 'PUT', expectJson: false });
     revalidatePath('/admin/payments');
     return { ok: true };
   } catch (e: any) {

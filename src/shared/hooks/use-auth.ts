@@ -13,7 +13,7 @@ export function useAuth() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/me', { cache: 'no-store', credentials: 'include' });
+      const res = await fetch('/api/v1/auth/me', { cache: 'no-store', credentials: 'include' });
       const json = (await res.json()) as Me;
       setUser(json.authenticated ? json.user : null);
     } catch {
@@ -27,8 +27,8 @@ export function useAuth() {
 
   const isAuthenticated = !!user;
   const logout = async () => {
-    // bata numa rota /api/auth/logout que zera cookies no server
-    await fetch('/api/auth/logout', { method: 'POST' });
+    // bata numa rota /api/v1/auth/logout que zera cookies no server
+    await fetch('/api/v1/auth/logout', { method: 'POST' });
     setUser(null);
     router.push('/login');
   };

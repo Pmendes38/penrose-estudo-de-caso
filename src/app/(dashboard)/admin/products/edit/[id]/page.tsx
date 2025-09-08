@@ -22,7 +22,7 @@ type ProductDTO = {
 
 async function getProduct(id: string): Promise<ProductDTO | null> {
   try {
-    return await api<ProductDTO>(`${process.env.NEXT_PUBLIC_API_URL}/api/products/admin/${id}`);
+    return await api<ProductDTO>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/admin/${id}`);
   } catch {
     return null;
   }

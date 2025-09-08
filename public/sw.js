@@ -5,7 +5,7 @@ const DYNAMIC_CACHE_NAME = 'penrose-dynamic-v1.0.0';
 // Assets que devem ser cached imediatamente
 const STATIC_ASSETS = [
   '/',
-  '/assets/WIDE LOGO.svg',
+  '/assets/wide-logo.svg',
   '/favicon.ico',
   '/favicon.svg',
   '/apple-touch-icon.png',

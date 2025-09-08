@@ -5,7 +5,7 @@ export async function validateCoupon(input: {
   cartTotal?: number;
   items?: Array<{ productId: string; quantity: number; unitPrice: number; size?: string }>;
 }) {
-  const res = await fetch('/api/coupons/validate', {
+  const res = await fetch('/api/v1/coupons/validate', {
     method: 'POST',
     headers: { 'Content-Type':'application/json' },
     body: JSON.stringify(input),

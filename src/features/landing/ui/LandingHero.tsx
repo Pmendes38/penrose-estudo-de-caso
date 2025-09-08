@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import Image from 'next/image';
+import { Logo } from '@/shared/ui/Logo';
 
 const HeroBackground = dynamic(() => import('@/shared/ui/hero-background'), {
   ssr: false,
@@ -17,12 +17,8 @@ export default function LandingHero() {
       <header className="bg-brand-black/90 backdrop-blur-md fixed top-0 inset-x-0 z-50 border-b border-brand-gray-border/20">
         <nav className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/" aria-label="Página inicial" className="flex items-center">
-            <Image
-              src="/assets/WIDE LOGO.svg"
-              alt="Logo da PENRØSE"
-              width={120}
-              height={32}
-              priority
+            <Logo
+              className="h-8 w-auto"
             />
           </Link>
 

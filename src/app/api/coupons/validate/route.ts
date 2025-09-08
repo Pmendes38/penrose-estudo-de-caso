@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/coupons/validate`, {
+    const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/coupons/validate`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       cache: 'no-store',

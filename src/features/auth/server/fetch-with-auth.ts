@@ -3,7 +3,7 @@ import { getAccessToken } from './cookies';
 
 async function tryRefresh(): Promise<boolean> {
   const origin = process.env.NEXT_PUBLIC_APP_ORIGIN ?? 'http://localhost:3000';
-  const res = await fetch(`${origin}/api/auth/refresh`, { method: 'POST', cache: 'no-store' });
+  const res = await fetch(`${origin}/api/v1/auth/refresh`, { method: 'POST', cache: 'no-store' });
   return res.ok;
 }
 

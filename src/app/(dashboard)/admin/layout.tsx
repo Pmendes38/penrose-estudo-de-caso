@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { requireAdminOrRedirect } from '@/shared/lib/auth.server';
 import '@/app/globals.css';
+import { Logo } from '@/shared/ui/Logo';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   requireAdminOrRedirect();
@@ -20,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="flex h-screen bg-brand-black">
       <aside className="w-64 bg-brand-gray-dark hidden lg:block">
         <div className="h-16 flex items-center justify-center bg-brand-gray-darker">
-          <img src="/assets/WIDE LOGO.svg" alt="PENROSE" className="h-8" />
+          <Logo className="h-8" />
         </div>
         <nav className="p-2 space-y-1">
           {nav.map((item) => (

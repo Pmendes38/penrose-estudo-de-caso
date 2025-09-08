@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { publicRegisterAction } from './actions';
+import { Logo } from '@/shared/ui/Logo';
 
 export default function CadastroPage() {
   const [error, setError] = useState('');
@@ -45,7 +46,7 @@ export default function CadastroPage() {
     <div className="min-h-screen bg-brand-black flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <img src="/assets/WIDE LOGO.svg" alt="PENROSE" className="h-12 w-auto mx-auto mb-6" />
+          <Logo className="h-12 w-auto mx-auto mb-6" />
           <h2 className="text-3xl font-bold text-brand-gray-light">Criar Conta</h2>
           <p className="mt-2 text-brand-gray">Cadastre-se para começar suas compras</p>
         </div>

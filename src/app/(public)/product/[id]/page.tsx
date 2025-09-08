@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 
   const title = `${product.name} | Penrøse`;
   const description = product.description ?? 'Action figure Penrøse';
-  const images = (product.images?.length ? product.images : ['/assets/WIDE LOGO.svg'])
+  const images = (product.images?.length ? product.images : ['/assets/wide-logo.svg'])
     .map((src) => (src.startsWith('http') ? src : `${SITE_URL}${src}`));
 
   const canonical = `${SITE_URL}/product/${product.slug ?? params.id}`;

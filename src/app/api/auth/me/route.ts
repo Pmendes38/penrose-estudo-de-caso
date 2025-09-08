@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ authenticated: false }, { status: 200 });
   }
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/auth/me`, {
+  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });

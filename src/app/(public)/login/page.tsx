@@ -1,9 +1,9 @@
-// app/(public)/login/page.tsx
 'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { publicLoginAction } from './actions';
+import { Logo } from '@/shared/ui/Logo';
 
 export default function Login() {
   const [serverError, setServerError] = useState('');
@@ -33,7 +33,7 @@ export default function Login() {
     <div className="min-h-screen bg-brand-black flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <img src="/assets/WIDE LOGO.svg" alt="PENROSE" className="h-12 w-auto mx-auto mb-6" />
+          <Logo className="h-12 w-auto mx-auto mb-6" />
           <h2 className="text-3xl font-bold text-brand-gray-light">Faça seu login</h2>
           <p className="mt-2 text-brand-gray">Conecte-se à sua conta Penrose</p>
         </div>

@@ -1,4 +1,4 @@
-import { fetchPublicProducts } from '@/features/products/api';
+import { fetchPublicProducts } from '@/features/products/api/api';
 import LandingHero from '@/features/landing/ui/LandingHero';
 import LandingReady from '@/features/landing/ui/LandingReady';
 import LandingCatalog from '@/features/landing/ui/LandingCatalog';

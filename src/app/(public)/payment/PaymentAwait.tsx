@@ -16,7 +16,7 @@ export default function PaymentAwait({ paymentId }: Props) {
 
     async function fetchPayment() {
       try {
-        const res = await fetch(`/api/payments/${paymentId}`, { cache: 'no-store' });
+        const res = await fetch(`/api/v1/payments/${paymentId}`, { cache: 'no-store' });
         const p = await res.json();
         setInfo({
           status: p.status,

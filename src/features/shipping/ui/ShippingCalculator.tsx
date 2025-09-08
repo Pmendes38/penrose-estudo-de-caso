@@ -63,7 +63,7 @@ export default function ShippingCalculator({ product, selectedSize, freeShipping
         },
       };
 
-      const result = await api<ShippingOption[]>('/api/shipping/calculate', {
+      const result = await api<ShippingOption[]>('/api/v1/shipping/calculate', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
