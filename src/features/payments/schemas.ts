@@ -14,8 +14,8 @@ export const PaymentSchema = z.object({
   boletoUrl: z.string().optional(),
   identificatorField: z.string().optional(),
   pixPayload: z.string().optional(),
-  createdAt: z.string().or(z.date()).optional(),
-  updatedAt: z.string().or(z.date()).optional(),
+  createdAt: z.union([z.string(), z.date()]).optional(),
+  updatedAt: z.union([z.string(), z.date()]).optional(),
 });
 export type Payment = z.infer<typeof PaymentSchema>;
 
@@ -28,11 +28,22 @@ export const PaginatedPaymentsSchema = z.object({
 });
 export type PaginatedPayments = z.infer<typeof PaginatedPaymentsSchema>;
 
-export type CreatePaymentPayload = {
-  cartItems: Array<{ productId: string; name: string; quantity: number; unitPrice: number; size?: string }>;
-  totalAmount: number;
-  billingType: 'PIX' | 'BOLETO' | 'CREDIT_CARD';
-  customerData: Record<string, any>;
-  selectedShipping?: Record<string, any>;
-  idempotencyKey?: string;
-};
+export const CartItemSchema = z.object({
+  productId: z.string(),
+  name: z.string(),
+  quantity: z.number().int().min(1),
+  unitPrice: z.number().min(0),
+  size: z.string().optional(),
+});
+
+export const CreatePaymentSchema = z.object({
+  cartItems: z.array(CartItemSchema),
+  totalAmount: z.number().min(0),
+  billingType: BillingType,
+  customerData: z.record(z.string(), z.any()),               // ou um shape mais estrito se preferir
+  selectedShipping: z.record(z.string(), z.any()).optional(),
+  idempotencyKey: z.string().optional(),
+});
+
+// derive o type do scema (em vez de declarar manualmente)
+export type CreatePaymentPayload = z.infer<typeof CreatePaymentSchema>;

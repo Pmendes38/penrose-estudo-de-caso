@@ -1,26 +1,46 @@
 'use client';
 
 import { useState } from 'react';
+import { useCart } from '@/shared/context/CartContext';
+import { validateCoupon } from '@/features/coupons/api/client';
+import { useToast } from '@/shared/ui/use-toast';
 
-export default function CouponField({ onApply }: { onApply: (coupon: any) => void }) {
+type Props = {
+  onApply: (data: { code: string; discountTotal: number }) => void;
+};
+
+export default function CouponField({ onApply }: Props) {
   const [code, setCode] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { items, total } = useCart();
+  const { toast } = useToast();
 
   const apply = async () => {
+    if (!code.trim()) return;
     setLoading(true);
-    setError(null);
     try {
-      const res = await fetch('/api/coupons/validate', {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ code }),
+      const payload = {
+        code: code.trim().toUpperCase(),
+        cartTotal: total, // BRL
+        items: items.map((it) => ({
+          productId: it.productId,
+          quantity: it.quantity,
+          unitPrice: it.price,
+          size: (it.meta as any)?.size,
+        })),
+      };
+      const res = await validateCoupon(payload);
+      onApply({ code: res.coupon.code, discountTotal: res.discountTotal });
+      toast({
+        title: 'Cupom aplicado!',
+        description: `Desconto de R$ ${res.discountTotal.toFixed(2)}`,
       });
-      const json = await res.json();
-      if (!res.ok) { setError(json?.message ?? 'Cupom inválido'); return; }
-      onApply(json.coupon);
     } catch (e: any) {
-      setError(e?.message ?? 'Falha ao validar cupom');
+      toast({
+        title: 'Cupom inválido',
+        description: e?.message ?? 'Não foi possível validar o cupom',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -33,11 +53,11 @@ export default function CouponField({ onApply }: { onApply: (coupon: any) => voi
         placeholder="Cupom de desconto"
         value={code}
         onChange={e => setCode(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); apply(); } }}
       />
-      <button onClick={apply} className="btn-secondary" disabled={loading}>
+      <button onClick={apply} className="btn-secondary" disabled={loading || !code.trim()}>
         {loading ? 'Validando…' : 'Aplicar'}
       </button>
-      {error && <span className="text-red-400 text-sm ml-2">{error}</span>}
     </div>
   );
 }

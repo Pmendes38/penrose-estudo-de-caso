@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getPayment } from '@/features/payments/api/api';
+import { envServer } from '@/shared/lib/env.server';
+import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-  try {
-    const payment = await getPayment(params.id);
-    return NextResponse.json(payment, { status: 200 });
-  } catch (e:any) {
-    return NextResponse.json({ message: e?.message ?? 'Erro' }, { status: 400 });
-  }
+  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/payments/${params.id}`, { cache: 'no-store' });
+  const body = await res.text();
+  return new NextResponse(body, {
+    status: res.status,
+    headers: { 'content-type': 'application/json' },
+  });
 }

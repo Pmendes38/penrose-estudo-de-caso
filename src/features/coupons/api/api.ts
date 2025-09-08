@@ -1,9 +1,8 @@
+import 'server-only';
 import { envServer } from '@/shared/lib/env.server';
 import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
 import { z } from 'zod';
-import {
-  CouponSchema, CreateCouponPayload, UpdateCouponPayload, type Coupon,
-} from '../schemas';
+import { CouponSchema, CreateCouponPayload, UpdateCouponPayload, type Coupon } from '../schemas';
 
 const CouponsArray = z.array(CouponSchema);
 
@@ -49,4 +48,21 @@ export async function listAvailableCoupons(): Promise<Coupon[]> {
   const res = await fetch(`${envServer.AUTH_API_URL}/api/coupons/available`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Falha ao buscar cupons disponíveis');
   return CouponsArray.parse(await res.json());
+
+}
+
+export async function validateCoupon(input: {
+  code: string;
+  cartTotal?: number;
+  items?: Array<{ productId: string; quantity: number; unitPrice: number; size?: string }>;
+}): Promise<{ ok: true; coupon: Coupon; discountTotal: number }> {
+  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/coupons/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    cache: 'no-store',
+    body: JSON.stringify(input),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || 'Cupom inválido');
+  return json;
 }

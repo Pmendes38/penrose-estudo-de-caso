@@ -1,19 +1,21 @@
-// src/app/api/coupons/validate/route.ts
 import { NextResponse } from 'next/server';
-import { listAvailableCoupons } from '@/features/coupons/api/api';
+import { envServer } from '@/shared/lib/env.server';
+import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const { code } = await req.json().catch(() => ({}));
-  if (!code) return NextResponse.json({ message: 'Código é obrigatório' }, { status: 400 });
-
-  const coupons = await listAvailableCoupons();
-  const c = coupons.find(x => x.code === String(code).trim().toUpperCase());
-  if (!c) return NextResponse.json({ message: 'Cupom inválido ou expirado' }, { status: 404 });
-
-  const now = new Date();
-  if (!c.active || c.startsAt > now || c.endsAt < now) {
-    return NextResponse.json({ message: 'Cupom fora do período ativo' }, { status: 400 });
+  try {
+    const body = await req.json().catch(() => ({}));
+    const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/coupons/validate`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    return new NextResponse(text, { status: res.status, headers: { 'content-type': 'application/json' } });
+  } catch (e: any) {
+    return NextResponse.json({ message: e?.message || 'Erro ao validar cupom' }, { status: 500 });
   }
-
-  return NextResponse.json({ coupon: c }, { status: 200 });
 }

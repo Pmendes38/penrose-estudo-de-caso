@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
 const Canvas = dynamic(() => import('@react-three/fiber').then(m => m.Canvas), { ssr: false });
-const ShaderPlane = dynamic(() => import('./ShaderPlane'), { ssr: false });
+const ShaderPlane = dynamic(() => import('./shader-plane'), { ssr: false });
 
 export default function HeroBackground() {
   const isMobile = useIsMobile(768);

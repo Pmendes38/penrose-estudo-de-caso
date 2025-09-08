@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createPayment } from '@/features/payments/api/api';
-import { CreatePaymentPayload, BillingType } from '@/features/payments/schemas';
+import { CreatePaymentSchema, BillingType } from '@/features/payments/schemas';
 import { getMe } from '@/features/auth/server/me';
 
 const FormShape = z.object({
@@ -36,7 +36,7 @@ export async function createPaymentAction(_: any, form: FormData) {
   try { customerData = JSON.parse(parsed.data.customerData); } catch { return { ok:false, error:'Cliente inválido' }; }
   try { selectedShipping = parsed.data.selectedShipping ? JSON.parse(parsed.data.selectedShipping) : undefined; } catch {}
 
-  const payload = CreatePaymentPayload.parse({
+  const payload = CreatePaymentSchema.parse({
     cartItems,
     totalAmount: parsed.data.totalAmount,
     billingType: parsed.data.billingType,

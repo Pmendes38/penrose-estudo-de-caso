@@ -1,8 +1,7 @@
-// src/features/shipping/hooks/useShippingQuotes.ts
 'use client';
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
-import { calculateShipping, validatePostalCode } from '../api/api';
+import { calculateShipping, validatePostalCode } from '../api/client';
 import type { CalculateShippingInput, ShippingQuote } from '../schemas';
 
 type State =

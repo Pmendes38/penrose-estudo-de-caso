@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const HeroBackground = dynamic(() => import('@/shared/ui/three/HeroBackground'), {
+const HeroBackground = dynamic(() => import('@/shared/ui/hero-background'), {
   ssr: false,
   loading: () => <div className="h-screen" />,
 });

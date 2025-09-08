@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { LoadingSpinner } from '@/shared/ui/loading/Loading';
+import { LoadingSpinner } from '@/shared/ui/loading';
 import { api } from '@/shared/lib/http';
 import { formatBRL } from '@/shared/lib/format';
 

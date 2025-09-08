@@ -1,5 +1,5 @@
 import React, { memo, forwardRef } from 'react';
-import { ButtonLoader } from '../loading/Loading';
+import { ButtonLoader } from './loading';
 
 type Variant =
   | 'primary'

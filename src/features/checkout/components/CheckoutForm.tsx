@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
-import { createOrderAction } from '@/app/(public)/checkout/actions';
-import { useCart } from '@/shared/context/CartContext';
-
+import { useRouter } from 'next/navigation';
 import ShippingSelector from '@/features/shipping/ui/ShippingSelector';
 import type { CalculateShippingInput, ShippingQuote } from '@/features/shipping/schemas';
+import { useCart } from '@/shared/context/CartContext';
+import { setCheckoutSessionAction } from '@/app/(public)/checkout/actions';
+import CouponField from '@/features/checkout/components/CouponField';
 
 type FormState = {
   nome: string;
@@ -26,32 +26,23 @@ const ESTADOS = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
 ];
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="px-8 py-3 bg-brand-blue text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
-    >
-      {pending ? 'Finalizando…' : 'Continuar para Pagamento'}
-    </button>
-  );
-}
+export default function CheckoutForm() {
+  const router = useRouter();
+  const { items, total } = useCart(); // subtotal (BRL)
 
-export default function CheckoutForm({ coupon }: { coupon?: { code?: string; discountTotal?: number } }) {
   const [formData, setFormData] = useState<FormState>({
     nome: '', email: '', telefone: '', cpf: '',
     cep: '', endereco: '', numero: '', complemento: '',
     bairro: '', cidade: '', estado: '',
   });
   const [clientError, setClientError] = useState<string>('');
-  const { items, total /*, clear*/ } = useCart(); // subtotal em BRL
-
+  const [submitting, setSubmitting] = useState(false);
   const [selectedShipping, setSelectedShipping] = useState<ShippingQuote | null>(null);
 
+  const [coupon, setCoupon] = useState<{ code?: string; discountTotal?: number }>({});
+
   const pkg = useMemo(() => ({
-    weightKg: Math.max(0.2, Math.min(5, items.length * 0.3)), // exemplo simples
+    weightKg: Math.max(0.2, Math.min(5, items.length * 0.3)),
     widthCm: 20,
     heightCm: 10,
     lengthCm: 20,
@@ -75,41 +66,16 @@ export default function CheckoutForm({ coupon }: { coupon?: { code?: string; dis
     [total, shippingTotal, discountTotal]
   );
 
-  const orderItemsJson = useMemo(() => JSON.stringify(items.map(it => ({
-    productId: it.productId,
-    name: it.name,
-    quantity: it.quantity,
-    unitPrice: it.price,
-    size: (it.meta as any)?.size as string | undefined,
-  }))), [items]);
-
-  const notes = useMemo(() => {
-    const line1 = `${formData.endereco}, ${formData.numero}${formData.complemento ? `, ${formData.complemento}` : ''}`;
-    const line2 = `${formData.bairro} - ${formData.cidade}/${formData.estado}, CEP ${formData.cep}`;
-    const buyer = `${formData.nome} — ${formData.email} — ${formData.telefone} — CPF ${formData.cpf}`;
-    return `[ENDEREÇO]\n${line1}\n${line2}\n[CONTATO]\n${buyer}`;
-  }, [formData]);
-
-  const [state, formAction] = useFormState(createOrderAction, { ok: false } as any);
-
-  function handleBeforeSubmit() {
-    try {
-      localStorage.setItem('checkoutData', JSON.stringify(formData));
-      if (selectedShipping) {
-        localStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
-      }
-      setClientError('');
-    } catch {
-      setClientError('Não foi possível salvar dados localmente (navegação privada?)');
-    }
-  }
-
   useEffect(() => {
     try {
       const raw = localStorage.getItem('checkoutData');
       if (raw) setFormData(JSON.parse(raw));
+
       const rawShip = localStorage.getItem('selectedShipping');
       if (rawShip) setSelectedShipping(JSON.parse(rawShip));
+
+      const rawCoupon = localStorage.getItem('couponData');
+      if (rawCoupon) setCoupon(JSON.parse(rawCoupon));
     } catch {}
   }, []);
 
@@ -118,7 +84,60 @@ export default function CheckoutForm({ coupon }: { coupon?: { code?: string; dis
     setFormData((s) => ({ ...s, [name]: value }));
   }
 
-  // ---------------- UI ----------------
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setClientError('');
+
+    try {
+      localStorage.setItem('checkoutData', JSON.stringify(formData));
+      if (selectedShipping) {
+        localStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
+      } else {
+        localStorage.removeItem('selectedShipping');
+      }
+      if (coupon?.code) {
+        localStorage.setItem('couponData', JSON.stringify(coupon));
+      } else {
+        localStorage.removeItem('couponData');
+      }
+    } catch {
+    }
+
+    try {
+      const res = await setCheckoutSessionAction({
+        customerData: {
+          nome: formData.nome,
+          name: formData.nome,
+          email: formData.email,
+          telefone: formData.telefone,
+          phone: formData.telefone,
+          cpf: formData.cpf,
+          cep: formData.cep,
+          endereco: formData.endereco,
+          address: formData.endereco,
+          numero: formData.numero,
+          complemento: formData.complemento,
+          bairro: formData.bairro,
+          cidade: formData.cidade,
+          estado: formData.estado,
+        },
+        selectedShipping: selectedShipping ?? null,
+        couponCode: coupon?.code ?? undefined,
+      });
+
+      if (!res?.ok) {
+        throw new Error(res?.error || 'Falha ao preparar checkout');
+      }
+
+      router.push('/payment'); // /payment lê a sessão e chama createPayment
+    } catch (err: any) {
+      setClientError(err?.message ?? 'Não foi possível prosseguir para o pagamento.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-brand-gray-dark border border-brand-gray-border rounded-lg p-8">
@@ -126,12 +145,7 @@ export default function CheckoutForm({ coupon }: { coupon?: { code?: string; dis
           Dados de Entrega
         </h2>
 
-        <form
-          action={formAction}
-          className="space-y-6"
-          noValidate
-          onSubmit={handleBeforeSubmit}
-        >
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {/* Informações Pessoais */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -207,19 +221,37 @@ export default function CheckoutForm({ coupon }: { coupon?: { code?: string; dis
           {/* Frete */}
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-2 text-brand-gray-light">Frete</h3>
-            <ShippingSelector
-              input={shippingInput}
-              onSelect={setSelectedShipping}
-            />
+            <ShippingSelector input={shippingInput} onSelect={setSelectedShipping} />
+          </div>
+
+          {/* Cupom */}
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2 text-brand-gray-light">Cupom</h3>
+            <CouponField onApply={(c) => setCoupon(c)} />
+            {coupon?.code && (
+              <p className="text-sm text-brand-gray mt-2">
+                Aplicado: <span className="text-brand-gray-light font-medium">{coupon.code}</span>
+              </p>
+            )}
           </div>
 
           {/* Totais */}
           <div className="mt-6 space-y-1 text-sm text-brand-gray-light">
-            <div className="flex justify-between"><span>Subtotal</span><span>{total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span></div>
-            <div className="flex justify-between"><span>Frete</span><span>{shippingTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span></div>
-            <div className="flex justify-between"><span>Descontos</span><span>-{discountTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span></div>
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Frete</span>
+              <span>{shippingTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Descontos</span>
+              <span>-{(discountTotal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+            </div>
             <div className="flex justify-between font-semibold text-white">
-              <span>Total</span><span>{grandTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+              <span>Total</span>
+              <span>{grandTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
             </div>
           </div>
 
@@ -229,22 +261,6 @@ export default function CheckoutForm({ coupon }: { coupon?: { code?: string; dis
               {clientError}
             </div>
           )}
-          {state?.error && (
-            <div className="bg-red-900/40 border border-red-600 text-red-200 px-4 py-3 rounded-lg">
-              {state.error}
-            </div>
-          )}
-
-          {/* Campos ocultos lidos pela Server Action */}
-          <input type="hidden" name="items" value={orderItemsJson} />
-          <input type="hidden" name="subtotal" value={String(total)} />
-          <input type="hidden" name="shippingTotal" value={String(shippingTotal)} />
-          <input type="hidden" name="discountTotal" value={String(discountTotal)} />
-          <input type="hidden" name="grandTotal" value={String(grandTotal)} />
-          <input type="hidden" name="couponCode" value={coupon?.code ?? ''} />
-          <input type="hidden" name="notes" value={notes} />
-          {/* shipping selecionado (o backend pode usar em payments) */}
-          <input type="hidden" name="selectedShipping" value={selectedShipping ? JSON.stringify(selectedShipping) : ''} />
 
           {/* Ações */}
           <div className="flex justify-end gap-4">
@@ -255,7 +271,13 @@ export default function CheckoutForm({ coupon }: { coupon?: { code?: string; dis
             >
               Voltar
             </button>
-            <SubmitButton />
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-8 py-3 bg-brand-blue text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+            >
+              {submitting ? 'Preparando…' : 'Continuar para Pagamento'}
+            </button>
           </div>
         </form>
       </div>

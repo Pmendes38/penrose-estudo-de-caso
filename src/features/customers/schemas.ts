@@ -1,3 +1,4 @@
+// src/features/customers/schemas.ts
 import { z } from 'zod';
 
 export const CustomerSchema = z.object({
@@ -7,8 +8,10 @@ export const CustomerSchema = z.object({
   phone: z.string().optional().nullable(),
   totalOrders: z.number().int().nonnegative(),
   totalSpent: z.number().nonnegative(),
-  lastOrder: z.string().or(z.string().datetime()), // mantém flex
+  lastOrder: z.coerce.date(), // converte string ISO -> Date automaticamente
   status: z.enum(['active', 'inactive']).default('active'),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
 });
 
 export type Customer = z.infer<typeof CustomerSchema>;

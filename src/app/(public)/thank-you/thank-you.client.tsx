@@ -1,14 +1,34 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import ClearCartOnMount from '@/features/cart/clear-on-mount';
+import { useState } from 'react';
 
 export default function ThankYouClient() {
+  const sp = useSearchParams();
+  const orderId = sp.get('order') || '';
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(orderId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-brand-black flex items-center justify-center">
+      {/* Limpa carrinho e dados do checkout AO ENTRAR nesta página */}
+      <ClearCartOnMount />
+
       <div className="max-w-md w-full mx-auto text-center px-6">
         <div className="mb-8">
           <div className="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-6">
-            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
             </svg>
           </div>
@@ -16,6 +36,26 @@ export default function ThankYouClient() {
           <p className="text-brand-gray-light text-lg leading-relaxed">
             Seu pedido foi recebido com sucesso e está sendo processado.
           </p>
+
+          {orderId ? (
+            <div className="mt-5 inline-flex items-center gap-2 rounded-md border border-brand-gray-border bg-brand-gray-dark px-3 py-2">
+              <span className="text-sm text-brand-gray">ID do pedido:</span>
+              <code className="text-sm text-brand-gray-light">{orderId}</code>
+              <button
+                onClick={copy}
+                className="ml-2 rounded border border-brand-gray-border px-2 py-1 text-xs text-brand-gray-light hover:bg-white/10"
+              >
+                {copied ? 'Copiado!' : 'Copiar'}
+              </button>
+              {/* ajuste a rota abaixo conforme seu dashboard de pedidos */}
+              <Link
+                href={`/account/orders/${orderId}`}
+                className="ml-2 rounded border border-brand-gray-border px-2 py-1 text-xs text-brand-blue hover:bg-white/10"
+              >
+                Ver pedido
+              </Link>
+            </div>
+          ) : null}
         </div>
 
         <div className="bg-brand-gray-dark rounded-lg p-6 mb-8 border border-brand-gray-border">
@@ -63,7 +103,7 @@ export default function ThankYouClient() {
 function Item({ titulo, desc }: { titulo: string; desc: string }) {
   return (
     <div className="flex items-start space-x-3">
-      <div className="w-2 h-2 bg-brand-blue rounded-full mt-2 flex-shrink-0"></div>
+      <div className="w-2 h-2 bg-brand-blue rounded-full mt-2 flex-shrink-0" />
       <div>
         <p className="text-white font-medium">{titulo}</p>
         <p className="text-brand-gray text-sm">{desc}</p>

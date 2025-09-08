@@ -1,40 +1,46 @@
 // src/features/products/ui/ProductCard.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import OptimizedImage from '@/shared/ui/optimized-image/index';
+import OptimizedImage from '@/shared/ui/optimized-image';
 import Button from '@/shared/ui/button';
 import { formatBRL } from '@/shared/lib/format';
 import { useCart } from '@/shared/context/CartContext';
-import type { ProductView } from '@/features/products/schemas';
-
-type Size = { name?: string; label?: string; price: number };
+import type { ProductView } from '@/features/products/normalizers';
 
 export default function ProductCard({ product }: { product: ProductView }) {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [showSizeSelector, setShowSizeSelector] = useState(false);
   const { addItem } = useCart();
 
-  const lowest = product.sizes?.length ? Math.min(...product.sizes.map((s: Size) => s.price)) : (product.price ?? 0);
-  const highest = product.sizes?.length ? Math.max(...product.sizes.map((s: Size) => s.price)) : lowest;
-  const multi = product.sizes && product.sizes.length > 1 && lowest !== highest;
+  // Com base nas variações normalizadas
+  const { lowest, highest, multi } = useMemo(() => {
+    if (product.sizes?.length) {
+      const values = product.sizes.map(s => s.priceBRL);
+      const lo = Math.min(...values);
+      const hi = Math.max(...values);
+      return { lowest: lo, highest: hi, multi: product.sizes.length > 1 && lo !== hi };
+    }
+    return { lowest: product.priceBRL, highest: product.priceBRL, multi: false };
+  }, [product.sizes, product.priceBRL]);
 
   const handleAddToCart = () => {
     if (product.sizes?.length && !selectedSize) {
       setShowSizeSelector(true);
       return;
     }
-    const sizeData = product.sizes?.find((s: Size) => (s.label || s.name) === selectedSize);
-    const price = sizeData?.price ?? lowest;
+
+    const sizeData = product.sizes?.find(s => (s.label || s.name) === selectedSize);
+    const price = sizeData?.priceBRL ?? lowest;
 
     addItem({
       productId: product.id,
       name: product.name,
-      price,
+      price, // em BRL
       quantity: 1,
       images: product.images,
-      image: product.images?.[0],
+      image: product.image,
       variantKey: selectedSize || null,
       meta: { selectedSize },
     });
@@ -48,7 +54,7 @@ export default function ProductCard({ product }: { product: ProductView }) {
       <Link href={`/produto/${product.id}`} className="block relative">
         <div className="relative overflow-hidden">
           <OptimizedImage
-            src={product.images?.[0] || '/assets/placeholder-product.jpg'}
+            src={product.image || '/assets/placeholder-product.jpg'}
             alt={`Action Figure ${product.name}`}
             width={400}
             height={300}
@@ -115,7 +121,7 @@ export default function ProductCard({ product }: { product: ProductView }) {
                           : 'border-brand-gray-border text-brand-gray hover:border-brand-blue/50 hover:bg-brand-gray-border/20'
                       }`}
                       aria-pressed={selected}
-                      aria-label={`Tamanho ${label} - ${formatBRL(s.price)}`}
+                      aria-label={`Tamanho ${label} - ${formatBRL(s.priceBRL)}`}
                     >
                       <div className="text-center font-medium">{label}</div>
                     </button>
