@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import ProductCard from '@/features/products/ui/ProductCard';
 import type { Product } from '@/features/products/schemas';
-import type { ProductView } from '@/features/products/normalizers'
+import type { ProductView } from '@/features/products/normalizers';
 import { normalizeProducts } from '@/features/products/normalizers';
 
 function isReady(p: any) {
@@ -14,7 +14,7 @@ function isReady(p: any) {
   return false;
 }
 
-export default function LandingReady({ products }: { products: Product[] | any[] }) {
+export default function LandingReady({ products }: { products: Product[] }) {
   const ready = useMemo(() => (products || []).filter(isReady), [products]);
   if (ready.length === 0) return null;
 

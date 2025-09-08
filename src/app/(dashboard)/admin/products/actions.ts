@@ -1,21 +1,17 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { envServer } from '@/shared/lib/env.server';
+import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
 
 export async function toggleProductStatusAction(id: string, current: 'active'|'inactive') {
-  const token = cookies().get('accessToken')?.value;
   const next = current === 'active' ? 'inactive' : 'active';
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/products/admin/${id}`, {
+  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/products/admin/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ status: next }),
+    headers: { 'Content-Type': 'application/json' },
     cache: 'no-store',
+    body: JSON.stringify({ status: next }),
   });
 
   if (!res.ok) {
@@ -23,6 +19,6 @@ export async function toggleProductStatusAction(id: string, current: 'active'|'i
     throw new Error(data?.message || 'Erro ao atualizar produto');
   }
 
-  revalidatePath('/admin/produtos');
+  revalidatePath('/admin/products');
   return { ok: true };
 }

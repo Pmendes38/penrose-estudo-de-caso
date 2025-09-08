@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import '@/app/globals.css';
-import { CartProvider } from '@/shared/context/CartContext';
+import Providers from './providers';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     'arte colecionável',
   ],
   authors: [{ name: 'Penrøse' }],
-  themeColor: '#00A9E0',
   manifest: '/site.webmanifest',
   icons: {
     icon: '/favicon.ico',
@@ -40,15 +39,15 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#00A9E0',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className="bg-brand-black text-white antialiased">
-        <CartProvider>{children}</CartProvider>
+        <Providers>{children}</Providers>
 
-        {/* Service Worker Registration – seguro para CSP, sem inline JS */}
         <Script id="sw-register" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {

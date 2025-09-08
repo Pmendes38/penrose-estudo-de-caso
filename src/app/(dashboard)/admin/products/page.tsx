@@ -1,7 +1,8 @@
-import { cookies } from 'next/headers';
-import ProductsTable from './table';
+// src/app/(dashboard)/admin/products/page.tsx
 import { z } from 'zod';
 import { envServer } from '@/shared/lib/env.server';
+import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
+import ProductsTable from './table';
 
 const SP = z.object({
   q: z.string().optional(),
@@ -10,9 +11,26 @@ const SP = z.object({
   pageSize: z.coerce.number().int().positive().max(100).default(20),
 });
 
+// opcional: use seu ProductPageSchema; aqui um fallback minimalista:
+const AdminProductPage = z.object({
+  items: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    category: z.string().nullable().optional(),
+    priceCents: z.number().int().nonnegative(),
+    stock: z.number().int().nonnegative().optional(),
+    status: z.enum(['active','inactive']),
+    images: z.array(z.string()).default([]),
+    createdAt: z.string().optional().nullable(),
+    updatedAt: z.string().optional().nullable(),
+  })),
+  total: z.number().int(),
+  page: z.number().int(),
+  pageSize: z.number().int(),
+});
+
 export default async function AdminProdutos({ searchParams }: { searchParams: Record<string,string|undefined> }) {
   const { q, status, page, pageSize } = SP.parse(searchParams);
-  const token = cookies().get('accessToken')?.value;
 
   const url = new URL(`${envServer.AUTH_API_URL}/api/products/admin`);
   url.searchParams.set('page', String(page));
@@ -20,13 +38,7 @@ export default async function AdminProdutos({ searchParams }: { searchParams: Re
   if (q) url.searchParams.set('q', q);
   if (status) url.searchParams.set('status', status);
 
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    cache: 'no-store',
-  });
+  const res = await fetchWithAuth(url.toString(), { cache: 'no-store' });
 
   if (res.status === 401 || res.status === 403) {
     return (
@@ -40,6 +52,17 @@ export default async function AdminProdutos({ searchParams }: { searchParams: Re
     throw new Error(data?.message || 'Erro ao buscar produtos');
   }
 
-  const data = await res.json(); // { items, total, page, pageSize }
-  return <ProductsTable data={data} />;
+  const data = AdminProductPage.parse(await res.json());
+
+  // normalização para UI (price em BRL base 1.00)
+  const normalized = {
+    ...data,
+    items: data.items.map(p => ({
+      ...p,
+      price: p.priceCents / 100,
+      image: p.images?.[0] ?? null,
+    })),
+  };
+
+  return <ProductsTable data={normalized} />;
 }

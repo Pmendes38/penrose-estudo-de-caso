@@ -1,3 +1,4 @@
+// src/app/(dashboard)/admin/products/table.tsx
 'use client';
 
 import Image from 'next/image';
@@ -7,10 +8,27 @@ import { useTransition } from 'react';
 import { toggleProductStatusAction } from './actions';
 
 function formatBRL(n: number) {
-  return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n ?? 0);
+  return new Intl.NumberFormat('pt-BR',{ style:'currency', currency:'BRL' }).format(n ?? 0);
 }
 
-export default function ProductsTable({ data }: { data: { items: any[]; total: number; page: number; pageSize: number } }) {
+type ProductRow = {
+  id: string;
+  name: string;
+  category?: string | null;
+  price: number;      // já normalizado no server
+  stock?: number;
+  status: 'active' | 'inactive';
+  image?: string | null;
+};
+
+type TableData = {
+  items: ProductRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export default function ProductsTable({ data }: { data: TableData }) {
   const router = useRouter();
   const params = useSearchParams();
   const [pending, start] = useTransition();
@@ -27,12 +45,12 @@ export default function ProductsTable({ data }: { data: { items: any[]; total: n
     router.replace(`?${next.toString()}`, { scroll: false });
   };
 
-  const onToggle = (p: any) => {
+  const onToggle = (p: ProductRow) => {
     start(async () => {
       try {
         await toggleProductStatusAction(p.id, p.status);
       } catch (e: any) {
-        alert(e.message ?? 'Erro ao atualizar produto');
+        alert(e?.message ?? 'Erro ao atualizar produto'); // se tiver toast, use-o aqui
       }
     });
   };
@@ -95,7 +113,7 @@ export default function ProductsTable({ data }: { data: { items: any[]; total: n
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Image
-                    src={p.image ?? '/assets/products/venom/venom-1.jpg'}
+                    src={p.image ?? '/assets/placeholder-product.jpg'}
                     alt={p.name ?? 'Produto'}
                     width={64}
                     height={64}
@@ -105,7 +123,7 @@ export default function ProductsTable({ data }: { data: { items: any[]; total: n
                     <h4 className="text-lg font-medium text-brand-gray-light">{p.name ?? 'Produto'}</h4>
                     <p className="text-sm text-brand-gray">{p.category ?? '-'}</p>
                     <div className="flex items-center gap-4 mt-1">
-                      <span className="text-brand-blue font-semibold">{formatBRL(p.price ?? 0)}</span>
+                      <span className="text-brand-blue font-semibold">{formatBRL(p.price)}</span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         p.status === 'active' ? 'bg-green-900/50 text-green-200' : 'bg-red-900/50 text-red-200'
                       }`}>
@@ -153,7 +171,7 @@ export default function ProductsTable({ data }: { data: { items: any[]; total: n
 
         {/* Paginação */}
         <div className="px-6 py-4 border-t border-brand-gray-border flex items-center justify-between text-sm text-brand-gray">
-          <span>Página {page} de {Math.max(1, Math.ceil((data.total ?? 0) / pageSize))}</span>
+          <span>Página {page} de {totalPages}</span>
           <div className="flex gap-2">
             <button className="px-3 py-1 rounded bg-gray-800 border border-gray-700 disabled:opacity-50"
               disabled={page <= 1}
@@ -162,7 +180,7 @@ export default function ProductsTable({ data }: { data: { items: any[]; total: n
               Anterior
             </button>
             <button className="px-3 py-1 rounded bg-gray-800 border border-gray-700 disabled:opacity-50"
-              disabled={page >= Math.max(1, Math.ceil((data.total ?? 0) / pageSize))}
+              disabled={page >= totalPages}
               onClick={() => setParam('page', String(page + 1))}
             >
               Próxima

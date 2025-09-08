@@ -1,19 +1,37 @@
-// app/(admin)/orders/table.tsx
 'use client';
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
-import { updateOrderStatusAction } from './actions';
+import { updateStatusDirectAction } from './actions';
+import type { Order, OrderStatus } from '@/features/orders/schemas';
 
 function formatBRL(n: number) {
-  return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n ?? 0);
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n ?? 0);
 }
-function formatDate(v: string) {
-  return new Date(v).toLocaleDateString('pt-BR');
+function formatDate(v: string | Date) {
+  const d = new Date(v as any);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('pt-BR');
 }
 
-export default function OrdersTable({ data }: { data: { items: any[]; total: number; page: number; pageSize: number } }) {
+const ALL_STATUSES: OrderStatus[] = [
+  'pending',
+  'processing',
+  'paid',
+  'shipped',
+  'delivered',
+  'canceled',
+  'refunded',
+];
+
+type TableData = {
+  items: Order[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export default function OrdersTable({ data }: { data: TableData }) {
   const router = useRouter();
   const params = useSearchParams();
   const [pending, start] = useTransition();
@@ -27,17 +45,15 @@ export default function OrdersTable({ data }: { data: { items: any[]; total: num
 
   const setParam = (k: string, v?: string) => {
     const next = new URLSearchParams(params);
-    if (!v) next.delete(k); else next.set(k, v);
+    if (!v) next.delete(k);
+    else next.set(k, v);
     router.replace(`?${next.toString()}`, { scroll: false });
   };
 
-  const updateStatus = (id: string, s: string) => {
+  const updateStatus = (id: string, s: OrderStatus) => {
     start(async () => {
-      try {
-        await updateOrderStatusAction(id, s);
-      } catch (e: any) {
-        alert(e.message ?? 'Erro ao atualizar status');
-      }
+      const res = await updateStatusDirectAction(id, s);
+      if (!res.ok) alert(res.error ?? 'Erro ao atualizar status');
     });
   };
 
@@ -54,7 +70,7 @@ export default function OrdersTable({ data }: { data: { items: any[]; total: num
       <div className="flex flex-col sm:flex-row gap-4">
         <input
           type="search"
-          placeholder="Buscar por ID do pedido ou cliente…"
+          placeholder="Buscar por # do pedido ou cliente…"
           className="flex-1 bg-brand-gray-dark border border-brand-gray-border text-brand-gray-light py-2 px-4 rounded-lg focus:outline-none focus:border-brand-blue"
           defaultValue={q}
           onChange={(e) => setParam('q', e.target.value || undefined)}
@@ -70,9 +86,11 @@ export default function OrdersTable({ data }: { data: { items: any[]; total: num
           <option value="">Todos os status</option>
           <option value="pending">Pendente</option>
           <option value="processing">Processando</option>
+          <option value="paid">Pago</option>
           <option value="shipped">Enviado</option>
           <option value="delivered">Entregue</option>
-          <option value="cancelled">Cancelado</option>
+          <option value="canceled">Cancelado</option>
+          <option value="refunded">Estornado</option>
         </select>
       </div>
 
@@ -89,30 +107,39 @@ export default function OrdersTable({ data }: { data: { items: any[]; total: num
             <div key={order.id} className="p-6 hover:bg-brand-gray/30 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <h4 className="text-lg font-medium text-brand-gray-light">Pedido #{order.id}</h4>
-                  <p className="text-sm text-brand-gray">{order.customer} • {order.email}</p>
+                  <h4 className="text-lg font-medium text-brand-gray-light">
+                    Pedido #{order.orderNumber}
+                  </h4>
+                  <p className="text-sm text-brand-gray">Cliente: {order.customerId}</p>
                   <div className="flex items-center gap-4 mt-2">
-                    <span className="text-brand-blue font-semibold">{formatBRL(order.total)}</span>
-                    <span className="text-sm text-brand-gray">{order.items} {order.items === 1 ? 'item' : 'itens'}</span>
-                    <span className="text-sm text-brand-gray">{formatDate(order.date)}</span>
+                    <span className="text-brand-blue font-semibold">
+                      {formatBRL(order.grandTotal)}
+                    </span>
+                    <span className="text-sm text-brand-gray">
+                      {order.items?.length ?? 0} {order.items?.length === 1 ? 'item' : 'itens'}
+                    </span>
+                    <span className="text-sm text-brand-gray">{formatDate(order.createdAt)}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/pedidos/${order.id}`} className="text-brand-blue hover:text-blue-400 px-3 py-1 rounded">
+                  <Link
+                    href={`/admin/orders/${order.id}`}
+                    className="text-brand-blue hover:text-blue-400 px-3 py-1 rounded"
+                  >
                     👁️ Ver
                   </Link>
                   <select
                     className="bg-brand-gray-dark border border-brand-gray-border text-brand-gray-light py-1 px-2 rounded text-sm focus:outline-none focus:border-brand-blue"
                     defaultValue={order.status}
-                    onChange={(e) => updateStatus(order.id, e.target.value)}
+                    onChange={(e) => updateStatus(order.id, e.target.value as OrderStatus)}
                     disabled={pending}
                   >
-                    <option value="pending">Pendente</option>
-                    <option value="processing">Processando</option>
-                    <option value="shipped">Enviado</option>
-                    <option value="delivered">Entregue</option>
-                    <option value="cancelled">Cancelado</option>
+                    {ALL_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -126,7 +153,9 @@ export default function OrdersTable({ data }: { data: { items: any[]; total: num
 
         {/* Paginação */}
         <div className="px-6 py-4 border-t border-brand-gray-border flex items-center justify-between text-sm text-brand-gray">
-          <span>Página {page} de {totalPages}</span>
+          <span>
+            Página {page} de {totalPages}
+          </span>
           <div className="flex gap-2">
             <button
               className="px-3 py-1 rounded bg-gray-800 border border-gray-700 disabled:opacity-50"

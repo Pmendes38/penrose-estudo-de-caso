@@ -4,12 +4,12 @@ import { useMemo, useTransition } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/features/products/ui/ProductCard';
 import type { Product } from '@/features/products/schemas';
-import type { ProductView } from '@/features/products/normalizers'
+import type { ProductView } from '@/features/products/normalizers';
 import { normalizeProducts } from '@/features/products/normalizers';
 
 const FILTERS = ['all', 'anime', 'serie', 'filme', 'dorama', 'promocao'] as const;
 
-export default function LandingCatalog({ products }: { products: Product[] | any[] }) {
+export default function LandingCatalog({ products }: { products: Product[] }) {
   const params = useSearchParams();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
