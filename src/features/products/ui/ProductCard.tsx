@@ -51,7 +51,7 @@ export default function ProductCard({ product }: { product: ProductView }) {
 
   return (
     <article className="relative bg-brand-gray-dark rounded-2xl shadow-soft overflow-hidden hover:shadow-hard transition-all duration-300 hover:-translate-y-2 border border-brand-gray-border/50 hover:border-brand-blue/30">
-      <Link href={`/produto/${product.id}`} className="block relative">
+      <Link href={`/product/${product.id}`} className="block relative">
         <div className="relative overflow-hidden">
           <OptimizedImage
             src={product.image || '/assets/placeholder-product.jpg'}
@@ -66,7 +66,7 @@ export default function ProductCard({ product }: { product: ProductView }) {
       </Link>
 
       <div className="p-6">
-        <Link href={`/produto/${product.id}`} className="block mb-4">
+        <Link href={`/product/${product.id}`} className="block mb-4">
           <h3 className="text-lg font-semibold text-brand-gray-light mb-2 hover:text-brand-blue transition-colors line-clamp-2">
             {product.name}
           </h3>
@@ -146,7 +146,7 @@ export default function ProductCard({ product }: { product: ProductView }) {
             {product.sizes?.length && !selectedSize ? 'Selecione um tamanho' : 'Adicionar ao Carrinho'}
           </Button>
 
-          <Link href={`/produto/${product.id}`} className="block">
+          <Link href={`/product/${product.id}`} className="block">
             <Button variant="outline" size="md" fullWidth>
               Ver Detalhes
             </Button>

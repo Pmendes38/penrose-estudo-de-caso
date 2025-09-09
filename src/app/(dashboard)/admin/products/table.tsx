@@ -71,7 +71,7 @@ export default function ProductsTable({ data }: { data: TableData }) {
             ↻ Atualizar
           </button>
           <Link
-            href="/admin/produtos/novo"
+            href="/admin/products/new"
             className="bg-brand-blue hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
           >
             ➕ Novo Produto
@@ -135,10 +135,10 @@ export default function ProductsTable({ data }: { data: TableData }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/produtos/editar/${p.id}`} className="text-brand-blue hover:text-blue-400 px-3 py-1 rounded">
+                  <Link href={`/admin/products/editar/${p.id}`} className="text-brand-blue hover:text-blue-400 px-3 py-1 rounded">
                     ✏️ Editar
                   </Link>
-                  <Link href={`/produto/${p.id}`} target="_blank" className="text-brand-gray hover:text-brand-gray-light px-3 py-1 rounded">
+                  <Link href={`/product/${p.id}`} target="_blank" className="text-brand-gray hover:text-brand-gray-light px-3 py-1 rounded">
                     👁️ Ver
                   </Link>
                   <button
@@ -161,7 +161,7 @@ export default function ProductsTable({ data }: { data: TableData }) {
             <h3 className="text-lg font-medium text-brand-gray-light mb-2">Nenhum produto encontrado</h3>
             <p className="text-brand-gray mb-4">Comece criando seu primeiro produto.</p>
             <Link
-              href="/admin/produtos/novo"
+              href="/admin/products/new"
               className="bg-brand-blue hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg inline-flex items-center"
             >
               ➕ Criar Primeiro Produto

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { CreateAdminPayload, UpdateAdminPayload } from '@/features/admins/schemas';
-import { createAdmin, updateAdmin, deleteAdmin } from '@/features/admins/api/api';
+import { createAdmin, updateAdmin, deleteAdmin } from '@/features/admins/api';
 
 export async function createAdminAction(_: any, form: FormData) {
   const parsed = CreateAdminPayload.safeParse({

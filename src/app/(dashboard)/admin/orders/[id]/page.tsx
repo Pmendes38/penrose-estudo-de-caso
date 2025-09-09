@@ -1,5 +1,5 @@
 // src/app/(dashboard)/admin/orders/[id]/page.tsx
-import { getOrderAdmin } from '@/features/orders/api/api';
+import { getOrderAdmin } from '@/features/orders/api';
 import StatusForm from './ui/StatusForm';
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {

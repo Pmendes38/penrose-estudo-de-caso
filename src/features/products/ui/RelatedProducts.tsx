@@ -128,7 +128,7 @@ export default function RelatedProducts({ currentProduct, allProducts, onProduct
                       Ver Detalhes
                     </button>
                     <Link
-                      href={`/produto/${p.id}`}
+                      href={`/product/${p.id}`}
                       onClick={(e) => e.stopPropagation()}
                       className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-md text-sm"
                     >

@@ -12,7 +12,7 @@ export default function NovoProdutoPage() {
       <div className="bg-brand-gray-dark rounded-lg border border-brand-gray-border p-6">
         <ProductForm
           onCreateAction={createProductAction}
-          onCancelHref="/admin/produtos"
+          onCancelHref="/admin/products"
         />
       </div>
     </div>

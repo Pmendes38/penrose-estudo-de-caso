@@ -9,7 +9,7 @@ export async function saveProductAction(id: string, formData: FormData) {
   const token = cookies().get('accessToken')?.value;
   const payload = Object.fromEntries(formData.entries());
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/products/admin/${id}`, {
+  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/admin/products/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -24,6 +24,6 @@ export async function saveProductAction(id: string, formData: FormData) {
     throw new Error(data?.message || 'Erro ao atualizar produto');
   }
 
-  revalidatePath('/admin/produtos');
-  redirect('/admin/produtos');
+  revalidatePath('/admin/products');
+  redirect('/admin/products');
 }

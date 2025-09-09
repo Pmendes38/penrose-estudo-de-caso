@@ -1,32 +1,37 @@
 import 'server-only';
 import { envServer } from '@/shared/lib/env.server';
 import { getAccessToken } from './cookies';
-import { ExternalMeSchema, AuthUserSchema, type AuthUser } from './schemas';
+import {
+  AuthUserSchema,
+  type AuthUser,
+  JwtPayloadSchema,
+  MeEnvelopeSchema,
+} from '../schemas';
 
-function normalizeRole(rawRole?: string | null, roles?: string[] | null) {
-  const r = (rawRole ?? '').toLowerCase();
-  const arr = (roles ?? []).map((s) => s.toLowerCase());
-  if (r === 'admin' || arr.includes('admin')) return 'admin' as const;
-  if (r === 'customer' || r === 'cliente' || arr.includes('customer') || arr.includes('cliente')) {
-    return 'customer' as const;
+function mapToAuthUser(payload: unknown): AuthUser {
+  const env = MeEnvelopeSchema.safeParse(payload);
+  if (env.success) {
+    const p = env.data.user;
+    return AuthUserSchema.parse({
+      id: p.sub,
+      email: p.email,
+      name: p.name ?? null,
+      role: p.role,
+    });
   }
-  return undefined;
-}
 
-/** Mapeia o payload externo (backend) para nosso AuthUser canônico. */
-function mapExternalToAuthUser(payload: unknown): AuthUser {
-  const ext = ExternalMeSchema.parse(payload);
-  const role = normalizeRole(ext.role ?? undefined, ext.roles ?? undefined);
+  const jwt = JwtPayloadSchema.safeParse(payload);
+  if (jwt.success) {
+    const p = jwt.data;
+    return AuthUserSchema.parse({
+      id: p.sub,
+      email: p.email,
+      name: p.name ?? null,
+      role: p.role,
+    });
+  }
 
-  return AuthUserSchema.parse({
-    id: String(ext.id),
-    email: ext.email,
-    name: ext.name ?? null,
-    role,
-    avatarUrl: ext.avatarUrl ?? null,
-    createdAt: ext.createdAt ?? null,
-    updatedAt: ext.updatedAt ?? null,
-  });
+  return AuthUserSchema.parse(payload);
 }
 
 export async function getMe(): Promise<AuthUser | null> {
@@ -57,7 +62,7 @@ export async function getMe(): Promise<AuthUser | null> {
   }
 
   try {
-    return mapExternalToAuthUser(data);
+    return mapToAuthUser(data);
   } catch (e) {
     if (process.env.NODE_ENV !== 'production') {
       console.error('[getMe] Parse error:', e);

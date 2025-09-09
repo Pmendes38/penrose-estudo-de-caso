@@ -5,7 +5,7 @@ import {
   updateOrderStatusAdmin,
   cancelOrderAdmin,
   refundOrderAdmin,
-} from '@/features/orders/api/api';
+} from '@/features/orders/api';
 import {
   UpdateOrderStatusPayload,
   OrderStatus,

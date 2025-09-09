@@ -36,10 +36,10 @@ export default function AdminDashboard() {
   }, []);
 
   const quickActions = [
-    { name: 'Novo Produto', href: '/admin/produtos/novo', icon: '➕', color: 'bg-green-600' },
-    { name: 'Ver Pedidos', href: '/admin/pedidos', icon: '📋', color: 'bg-blue-600' },
-    { name: 'Relatórios', href: '/admin/relatorios', icon: '📊', color: 'bg-purple-600' },
-    { name: 'Configurações', href: '/admin/configuracoes', icon: '⚙️', color: 'bg-gray-600' },
+    { name: 'Novo Produto', href: '/admin/products/new', icon: '➕', color: 'bg-green-600' },
+    { name: 'Ver Pedidos', href: '/admin/orders', icon: '📋', color: 'bg-blue-600' },
+    { name: 'Relatórios', href: '/admin/reports', icon: '📊', color: 'bg-purple-600' },
+    { name: 'Configurações', href: '/admin/settings', icon: '⚙️', color: 'bg-gray-600' },
   ];
 
   if (isLoading) {
@@ -93,7 +93,7 @@ export default function AdminDashboard() {
           </div>
           <div className="bg-brand-gray px-5 py-3">
             <div className="text-sm">
-              <Link href="/admin/produtos" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
+              <Link href="/admin/products" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
                 Ver todos produtos
               </Link>
             </div>
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
           </div>
           <div className="bg-brand-gray px-5 py-3">
             <div className="text-sm">
-              <Link href="/admin/pedidos" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
+              <Link href="/admin/orders" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
                 Ver todos pedidos
               </Link>
             </div>
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
           </div>
           <div className="bg-brand-gray px-5 py-3">
             <div className="text-sm">
-              <Link href="/admin/clientes" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
+              <Link href="/admin/customers" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
                 Ver todos clientes
               </Link>
             </div>
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
           </div>
           <div className="bg-brand-gray px-5 py-3">
             <div className="text-sm">
-              <Link href="/admin/relatorios" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
+              <Link href="/admin/reports" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
                 Ver relatórios
               </Link>
             </div>

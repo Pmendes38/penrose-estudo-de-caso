@@ -1,5 +1,5 @@
 // src/app/(dashboard)/admin/orders/page.tsx
-import { listOrdersAdmin } from '@/features/orders/api/api';
+import { listOrdersAdmin } from '@/features/orders/api';
 
 export const dynamic = 'force-dynamic';
 

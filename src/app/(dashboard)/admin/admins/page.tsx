@@ -1,5 +1,5 @@
 // src/app/(dashboard)/admin/admins/page.tsx
-import { listAdmins } from '@/features/admins/api/api';
+import { listAdmins } from '@/features/admins/api';
 
 export const dynamic = 'force-dynamic';
 

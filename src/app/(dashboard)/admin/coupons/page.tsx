@@ -1,5 +1,5 @@
 // src/app/(dashboard)/admin/coupons/page.tsx
-import { listAdminCoupons } from '@/features/coupons/api/api';
+import { listAdminCoupons } from '@/features/coupons/api';
 
 export const dynamic = 'force-dynamic';
 

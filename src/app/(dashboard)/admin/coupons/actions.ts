@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import {
   createCoupon, updateCoupon, deleteCoupon,
-} from '@/features/coupons/api/api';
+} from '@/features/coupons/api';
 import {
   CreateCouponPayload, UpdateCouponPayload,
 } from '@/features/coupons/schemas';

@@ -32,7 +32,7 @@ const AdminProductPage = z.object({
 export default async function AdminProdutos({ searchParams }: { searchParams: Record<string,string|undefined> }) {
   const { q, status, page, pageSize } = SP.parse(searchParams);
 
-  const url = new URL(`${envServer.AUTH_API_URL}/api/v1/products/admin`);
+  const url = new URL(`${envServer.AUTH_API_URL}/api/v1/admin/products`);
   url.searchParams.set('page', String(page));
   url.searchParams.set('pageSize', String(pageSize));
   if (q) url.searchParams.set('q', q);

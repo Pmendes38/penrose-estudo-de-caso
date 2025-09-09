@@ -22,7 +22,7 @@ export async function createProductAction(formData: FormData) {
   }
 
   const token = cookies().get('accessToken')?.value;
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/products/admin`, {
+  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/admin/products`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,6 +40,6 @@ export async function createProductAction(formData: FormData) {
     throw new Error(data?.message || 'Erro ao criar produto');
   }
 
-  revalidatePath('/admin/produtos');
-  redirect('/admin/produtos');
+  revalidatePath('/admin/products');
+  redirect('/admin/products');
 }

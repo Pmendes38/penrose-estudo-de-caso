@@ -9,12 +9,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const nav = [
     { name: 'Dashboard', href: '/admin', icon: '📊' },
-    { name: 'Products', href: '/admin/produtos', icon: '📦' },
-    { name: 'Orders', href: '/admin/pedidos', icon: '🛒' },
-    { name: 'Customers', href: '/admin/clientes', icon: '👥' },
-    { name: 'Reports', href: '/admin/relatorios', icon: '📈' },
-    { name: 'Coupons', href: '/admin/cupons', icon: '🎟️' },
-    { name: 'Settings', href: '/admin/configuracoes', icon: '⚙️' },
+    { name: 'Produtos', href: '/admin/products', icon: '📦' },
+    { name: 'Pedidos', href: '/admin/orders', icon: '🛒' },
+    { name: 'Clientes', href: '/admin/customers', icon: '👥' },
+    { name: 'Relatórios', href: '/admin/reports', icon: '📈' },
+    { name: 'Cupons', href: '/admin/coupons', icon: '🎟️' },
+    { name: 'Configurações', href: '/admin/settings', icon: '⚙️' },
   ];
 
   return (

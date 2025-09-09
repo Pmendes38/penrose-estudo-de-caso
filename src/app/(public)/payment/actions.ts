@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { createPayment } from '@/features/payments/api/api';
+import { createPayment } from '@/features/payments/api';
 import { CreatePaymentSchema, BillingType } from '@/features/payments/schemas';
 import { getMe } from '@/features/auth/server/me';
 

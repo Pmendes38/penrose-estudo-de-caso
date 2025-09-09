@@ -1,42 +1,47 @@
-// src/app/(dashboard)/admin/products/_actions.ts
 'use server';
 
-import { revalidatePath, redirect } from 'next/navigation';
-import { ProductSchema } from '@/features/products/schemas';
-import { createProduct, updateProduct } from '@/features/products/api/api';
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
+import { createProduct, updateProduct } from '@/features/products/api';
+import {
+  CreateProductFormSchema,
+  UpdateProductFormSchema,
+} from '@/features/products/form-schemas';
 
-function parseForm(formData: FormData) {
-  const images = String(formData.get('images') || '')
-    .split(',').map(s => s.trim()).filter(Boolean);
-  const tags = String(formData.get('tags') || '')
-    .split(',').map(s => s.trim()).filter(Boolean);
-
+function readFormData(fd: FormData) {
   return {
-    name: String(formData.get('name') || '').trim(),
-    category: String(formData.get('category') || '').trim(),
-    price: formData.get('price'),
-    stock: formData.get('stock') ?? 0,
-    status: (String(formData.get('status')) === 'inactive' ? 'inactive' : 'active') as 'active' | 'inactive',
-    description: String(formData.get('description') || '').trim(),
-    images,
-    tags,
+    name: String(fd.get('name') ?? ''),
+    category: String(fd.get('category') ?? ''),
+    price: String(fd.get('price') ?? ''),
+    stock: String(fd.get('stock') ?? ''),
+    status: String(fd.get('status') ?? 'active') as any,
+    description: String(fd.get('description') ?? ''),
+    images: String(fd.get('images') ?? ''),
+    tags: String(fd.get('tags') ?? ''),
+    sku: String(fd.get('sku') ?? ''),
   };
 }
 
 export async function createProductAction(formData: FormData) {
-  const parsed = ProductSchema.safeParse(parseForm(formData));
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Dados inválidos');
+  const parsed = CreateProductFormSchema.safeParse(readFormData(formData));
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    throw new Error(issue?.message ?? 'Dados inválidos');
+  }
 
   await createProduct(parsed.data);
-  revalidatePath('/admin/produtos');
-  redirect('/admin/produtos');
+  revalidatePath('/admin/products');
+  redirect('/admin/products');
 }
 
 export async function updateProductAction(id: string, _prev: unknown, formData: FormData) {
-  const parsed = ProductSchema.safeParse(parseForm(formData));
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Dados inválidos');
+  const parsed = UpdateProductFormSchema.safeParse(readFormData(formData));
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    throw new Error(issue?.message ?? 'Dados inválidos');
+  }
 
   await updateProduct(id, parsed.data);
-  revalidatePath('/admin/produtos');
-  redirect('/admin/produtos');
+  revalidatePath('/admin/products');
+  redirect('/admin/products');
 }

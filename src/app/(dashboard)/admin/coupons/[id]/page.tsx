@@ -1,4 +1,4 @@
-import { listAdminCoupons } from '@/features/coupons/api/api';
+import { listAdminCoupons } from '@/features/coupons/api';
 import EditForm from './ui/EditForm';
 
 export default async function EditCouponPage({ params }: { params: { id: string } }) {
