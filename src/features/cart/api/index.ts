@@ -1,4 +1,13 @@
-import { AddItemInput, Cart, PrepareCheckoutResult, QuoteResult, ShippingQuoteInput, ShippingSelectInput, UpdateItemInput } from '../schema';
+// src/features/cart/api/index.ts
+import {
+  AddItemInput,
+  Cart,
+  PrepareCheckoutResult,
+  QuoteResult,
+  ShippingQuoteInput,
+  ShippingSelectInput,
+  UpdateItemInput,
+} from '../schema';
 
 const BASE =
   (process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '') ?? '') || ''; // ex.: https://api.seudominio.com
@@ -125,50 +134,104 @@ async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<{ data: 
   if (opts.cookie) (init.headers as Record<string, string>)['cookie'] = opts.cookie;
   if (wantsBody) init.body = JSON.stringify(opts.body);
 
-  const res = await fetch(path, init);
+  let res: Response;
+  try {
+    res = await fetch(path, init);
+  } catch (err: any) {
+    // Falha de rede, timeout, CORS, etc.
+    throw new ApiError(0, err?.message || 'network_error', 'network_error', err);
+  }
 
   updateETagFromResponse(res);
 
+  // Tenta extrair payload de erro (quando houver)
   if (!res.ok) {
     let payload: any = null;
     try {
       payload = await res.json();
     } catch {
-      /* ignore */
+      try {
+        const txt = await res.text();
+        if (txt) payload = { message: txt };
+      } catch {
+        /* ignore */
+      }
     }
-    const code = payload?.message ?? payload?.code ?? payload?.error;
+    const code = payload?.code ?? payload?.error ?? payload?.message;
     const msg =
-      typeof code === 'string'
+      typeof payload?.message === 'string'
+        ? payload.message
+        : typeof code === 'string'
         ? code
-        : `HTTP ${res.status}${payload?.message ? `: ${payload.message}` : ''}`;
-    throw new ApiError(res.status, msg, payload?.code ?? payload?.message, payload);
+        : `HTTP ${res.status}${res.statusText ? `: ${res.statusText}` : ''}`;
+
+    throw new ApiError(res.status, msg, typeof code === 'string' ? code : undefined, payload);
   }
 
-  const data = (await res.json()) as T;
-  return { data, res };
+  try {
+    const data = (await res.json()) as T;
+    return { data, res };
+  } catch (err: any) {
+    // Resposta sem JSON válido
+    throw new ApiError(res.status, err?.message || 'invalid_json', 'invalid_json', err);
+  }
 }
 
+/**
+ * Re-executa a operação ao detectar:
+ * - 409 version_mismatch  -> faz GET para atualizar ETag e tenta 1x
+ * - 400 missing_cart_cookie / 404 cart_not_found -> cria carrinho e tenta 1x
+ */
 async function mutWithRetry<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (err) {
-    if (err instanceof ApiError && err.status === 409 && err.code === 'version_mismatch') {
-      // Atualiza o ETag fazendo GET e tenta 1 vez de novo
-      await getCart().catch(() => null);
-      return await fn();
+    // Caso não seja ApiError, encapsula e relança
+    const e = err instanceof ApiError ? err : new ApiError(-1, (err as any)?.message || 'unknown_error');
+
+    // 409: versão desatualizada -> faz GET (atualiza ETag) e reexecuta
+    if (e.status === 409 && (e.code === 'version_mismatch' || /version/i.test(e.message))) {
+      try {
+        await getCart().catch(() => null); // Atualiza ETag silenciosamente
+        return await fn();
+      } catch (err2) {
+        throw err2 instanceof ApiError ? err2 : new ApiError(-1, (err2 as any)?.message || 'unknown_error');
+      }
     }
-    throw err;
+
+    // recria carrinho e tenta de novo quando o backend sinaliza ausência do carrinho
+    const isMissingCart =
+      (e.status === 400 && e.code === 'missing_cart_cookie') ||
+      (e.status === 404 && (e.code === 'cart_not_found' || e.code === 'not_found'));
+
+    if (isMissingCart) {
+      try {
+        await createCart(); // cria um novo carrinho
+        await getCart().catch(() => null); // garante ETag do novo carrinho
+        return await fn();
+      } catch (err2) {
+        throw err2 instanceof ApiError ? err2 : new ApiError(-1, (err2 as any)?.message || 'unknown_error');
+      }
+    }
+
+    // Qualquer outro erro
+    throw e;
   }
 }
 
 export async function createCart(options?: { cookie?: string; signal?: AbortSignal }): Promise<Cart> {
-  const { data } = await apiFetch<Cart>(`${CART_BASE}`, {
-    method: 'POST',
-    body: {},
-    cookie: options?.cookie,
-    signal: options?.signal,
-  });
-  return data;
+  try {
+    const { data } = await apiFetch<Cart>(`${CART_BASE}`, {
+      method: 'POST',
+      body: {},
+      cookie: options?.cookie,
+      signal: options?.signal,
+    });
+    return data;
+  } catch (err) {
+    // Não propaga erro bruto
+    throw err instanceof ApiError ? err : new ApiError(-1, (err as any)?.message || 'unknown_error');
+  }
 }
 
 export async function getCart(options?: {
@@ -185,10 +248,23 @@ export async function getCart(options?: {
     return data;
   } catch (err) {
     const e = err as ApiError;
+    // Se não houver cookie de carrinho, cria automaticamente quando solicitado
     if (options?.createIfMissing && e.status === 400 && e.code === 'missing_cart_cookie') {
-      return await createCart({ cookie: options.cookie, signal: options?.signal });
+      try {
+        return await createCart({ cookie: options.cookie, signal: options?.signal });
+      } catch (err2) {
+        throw err2 instanceof ApiError ? err2 : new ApiError(-1, (err2 as any)?.message || 'unknown_error');
+      }
     }
-    throw err;
+    // Se o backend retornar not_found para um carrinho antigo, cria um novo quando createIfMissing=true
+    if (options?.createIfMissing && e.status === 404 && (e.code === 'cart_not_found' || e.code === 'not_found')) {
+      try {
+        return await createCart({ cookie: options.cookie, signal: options?.signal });
+      } catch (err2) {
+        throw err2 instanceof ApiError ? err2 : new ApiError(-1, (err2 as any)?.message || 'unknown_error');
+      }
+    }
+    throw e;
   }
 }
 
@@ -196,7 +272,10 @@ export async function ensureCart(options?: { cookie?: string; signal?: AbortSign
   return getCart({ ...options, createIfMissing: true });
 }
 
-export async function addItem(input: AddItemInput, options?: { cookie?: string; signal?: AbortSignal }): Promise<Cart> {
+export async function addItem(
+  input: AddItemInput,
+  options?: { cookie?: string; signal?: AbortSignal },
+): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
 
   return mutWithRetry(async () => {
@@ -228,7 +307,10 @@ export async function updateItem(
   });
 }
 
-export async function removeItem(itemId: string, options?: { cookie?: string; signal?: AbortSignal }): Promise<Cart> {
+export async function removeItem(
+  itemId: string,
+  options?: { cookie?: string; signal?: AbortSignal },
+): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
 
   return mutWithRetry(async () => {
@@ -241,7 +323,10 @@ export async function removeItem(itemId: string, options?: { cookie?: string; si
   });
 }
 
-export async function applyCoupon(code: string, options?: { cookie?: string; signal?: AbortSignal }): Promise<Cart> {
+export async function applyCoupon(
+  code: string,
+  options?: { cookie?: string; signal?: AbortSignal },
+): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
 
   return mutWithRetry(async () => {
@@ -255,7 +340,10 @@ export async function applyCoupon(code: string, options?: { cookie?: string; sig
   });
 }
 
-export async function removeCoupon(code: string, options?: { cookie?: string; signal?: AbortSignal }): Promise<Cart> {
+export async function removeCoupon(
+  code: string,
+  options?: { cookie?: string; signal?: AbortSignal },
+): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
 
   return mutWithRetry(async () => {
@@ -274,13 +362,17 @@ export async function quoteShipping(
 ): Promise<QuoteResult> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
 
-  const { data } = await apiFetch<QuoteResult>(`${CART_BASE}/shipping/quote`, {
-    method: 'POST',
-    body: input,
-    cookie: options?.cookie,
-    signal: options?.signal,
-  });
-  return data;
+  try {
+    const { data } = await apiFetch<QuoteResult>(`${CART_BASE}/shipping/quote`, {
+      method: 'POST',
+      body: input,
+      cookie: options?.cookie,
+      signal: options?.signal,
+    });
+    return data;
+  } catch (err) {
+    throw err instanceof ApiError ? err : new ApiError(-1, (err as any)?.message || 'unknown_error');
+  }
 }
 
 export async function selectShipping(
@@ -300,15 +392,19 @@ export async function selectShipping(
   });
 }
 
-export async function prepareCheckout(options?: { cookie?: string; signal?: AbortSignal }): Promise<PrepareCheckoutResult> {
+export async function prepareCheckout(
+  options?: { cookie?: string; signal?: AbortSignal },
+): Promise<PrepareCheckoutResult> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
 
-  const { data } = await apiFetch<PrepareCheckoutResult>(`${CART_BASE}/checkout/prepare`, {
-    method: 'POST',
-    cookie: options?.cookie,
-    signal: options?.signal,
+  return mutWithRetry(async () => {
+    const { data } = await apiFetch<PrepareCheckoutResult>(`${CART_BASE}/checkout/prepare`, {
+      method: 'POST',
+      cookie: options?.cookie,
+      signal: options?.signal,
+    });
+    return data;
   });
-  return data;
 }
 
 export function getCartId(c: Cart): string | undefined {

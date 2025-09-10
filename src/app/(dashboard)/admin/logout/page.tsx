@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { adminLogoutAction } from './action';
+import { userLogoutAction } from './action';
 
 function Button() {
   const { pending } = useFormStatus();
@@ -18,7 +18,7 @@ function Button() {
 
 export default function LogoutPage() {
   return (
-    <form action={adminLogoutAction} className="grid place-items-center min-h-[50vh] gap-4">
+    <form action={userLogoutAction} className="grid place-items-center min-h-[50vh] gap-4">
       <p className="text-brand-gray-light">Tem certeza que deseja sair?</p>
       <Button />
     </form>

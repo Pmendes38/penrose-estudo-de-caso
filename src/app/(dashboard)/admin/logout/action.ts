@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { clearAuthCookies } from '@/features/auth/server/cookies';
 
-export async function adminLogoutAction() {
+export async function userLogoutAction() {
   clearAuthCookies();
   redirect('/login');
 }

@@ -33,12 +33,12 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
 
   const [method, setMethod] = useState<'PIX'|'BOLETO'|'CREDIT_CARD'>('PIX');
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
-  const [selectedShipping, setSelectedShipping] = useState<any | null>(null);
+  const [sessionShipping, setSessionShipping] = useState<any | null>(null);
   const [couponCode, setCouponCode] = useState<string | undefined>();
 
   useEffect(() => {
     if (session?.customerData) setCheckoutData(session.customerData as any);
-    if (session?.selectedShipping) setSelectedShipping(session.selectedShipping);
+    if (session?.selectedShipping) setSessionShipping(session.selectedShipping);
     if (session?.couponCode) setCouponCode(session.couponCode || undefined);
 
     try {
@@ -48,7 +48,7 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
       }
       if (!session?.selectedShipping) {
         const rawShip = localStorage.getItem('selectedShipping');
-        if (rawShip) setSelectedShipping(JSON.parse(rawShip));
+        if (rawShip) setSessionShipping(JSON.parse(rawShip));
       }
       if (!session?.couponCode) {
         const rawCoupon = localStorage.getItem('couponData');
@@ -57,6 +57,7 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
     } catch {}
   }, [session?.customerData, session?.selectedShipping, session?.couponCode]);
 
+  // Envio os itens (em BRL) para o backend validar composição
   const cartItemsJson = useMemo(() => {
     const items = (cart?.items ?? []).map((i) => ({
       productId: i.productId ?? i.sku,
@@ -68,24 +69,29 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
     return JSON.stringify(items);
   }, [cart?.items]);
 
-  const shippingFromCartCents = Math.max(0, Number(cart?.shippingTotal ?? 0)); // centavos
-  const selectedShippingCents = selectedShipping?.priceBRL
-    ? Math.round(Number(selectedShipping.priceBRL) * 100)
-    : 0;
+  // Total vem do carrinho (fonte da verdade)
+  const totalCents = Math.max(0, Number(cart?.grandTotal ?? 0));
+  const totalAmount = totalCents / 100; // BRL
 
-  const itemsSubtotalCents = Math.max(0, Number(cart?.itemsSubtotal ?? 0));
-  const discountCents      = Math.max(0, Number(cart?.discountTotal ?? 0));
-  const taxCents           = Math.max(0, Number(cart?.taxTotal ?? 0));
+  // Frete a enviar no form: sessão > carrinho (normalizado) > vazio
+  const shippingForForm = useMemo(() => {
+    if (sessionShipping) return sessionShipping;
+    if (cart?.shipping) {
+      return {
+        serviceCode: cart.shipping.serviceCode,
+        label: cart.shipping.label,
+        priceBRL: Math.max(0, Number(cart.shipping.amount ?? 0)) / 100,
+        days: cart.shipping.days,
+        eta: cart.shipping.eta,
+        isFree: cart.shipping.isFree,
+      };
+    }
+    return undefined;
+  }, [sessionShipping, cart?.shipping]);
 
-  const effectiveShippingCents = shippingFromCartCents > 0 ? shippingFromCartCents : selectedShippingCents;
-
-  const computedTotalCents = cart
-    ? Math.max(0, itemsSubtotalCents - discountCents + effectiveShippingCents + taxCents)
-    : 0;
-
-  const totalAmount = useMemo(
-    () => computedTotalCents / 100, // BRL
-    [computedTotalCents]
+  const selectedShippingJson = useMemo(
+    () => (shippingForForm ? JSON.stringify(shippingForForm) : ''),
+    [shippingForForm],
   );
 
   const customerDataJson = useMemo(() => JSON.stringify({
@@ -105,27 +111,20 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
     couponCode,
   }), [checkoutData, couponCode]);
 
-  const selectedShippingJson = useMemo(
-    () => (selectedShipping ? JSON.stringify(selectedShipping) : ''),
-    [selectedShipping]
-  );
-
   const idempotencyKey = useMemo(() => {
     const snap = JSON.stringify({
       method,
       cartId: (cart as any)?._id ?? (cart as any)?.id ?? null,
       version: cart?.version ?? null,
-      totalAmount,
-      selectedShipping: selectedShipping?.id ?? null,
+      grandTotal: totalCents,
+      shipping: shippingForForm?.serviceCode ?? null,
     });
     return `cart:${hashString(snap)}`;
-  }, [method, cart?.version, cart, totalAmount, selectedShipping]);
+  }, [method, cart, cart?.version, totalCents, shippingForForm]);
 
-  const [state, formAction] = useFormState(createPaymentAction, { ok:false } as any);
+  const [state, formAction] = useFormState(createPaymentAction, { ok: false } as any);
 
-  if (state.ok && state.paymentId) {
-    return <PaymentAwait paymentId={state.paymentId} />;
-  }
+  if (state.ok && state.paymentId) return <PaymentAwait paymentId={state.paymentId} />;
 
   if (isLoading) {
     return (
@@ -158,13 +157,13 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
       {/* método de pagamento */}
       <div className="space-y-3">
         <label className="flex items-center gap-2">
-          <input type="radio" name="m" checked={method==='PIX'} onChange={() => setMethod('PIX')} /> PIX
+          <input type="radio" name="m" checked={method === 'PIX'} onChange={() => setMethod('PIX')} /> PIX
         </label>
         <label className="flex items-center gap-2">
-          <input type="radio" name="m" checked={method==='BOLETO'} onChange={() => setMethod('BOLETO')} /> Boleto
+          <input type="radio" name="m" checked={method === 'BOLETO'} onChange={() => setMethod('BOLETO')} /> Boleto
         </label>
         <label className="flex items-center gap-2">
-          <input type="radio" name="m" checked={method==='CREDIT_CARD'} onChange={() => setMethod('CREDIT_CARD')} /> Cartão de crédito
+          <input type="radio" name="m" checked={method === 'CREDIT_CARD'} onChange={() => setMethod('CREDIT_CARD')} /> Cartão de crédito
         </label>
       </div>
 

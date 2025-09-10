@@ -1,14 +1,35 @@
 'use client';
 import useSWR from 'swr';
 import { useCallback, useState } from 'react';
-import type { Cart, AddItemInput, UpdateItemInput, ShippingSelectInput, QuoteResult } from '../schema';
-import { getCart, addItem, updateItem, removeItem, applyCoupon, removeCoupon, quoteShipping, selectShipping, prepareCheckout } from '../api';
+import type {
+  Cart,
+  AddItemInput,
+  UpdateItemInput,
+  ShippingSelectInput,
+  QuoteResult,
+} from '../schema';
+import {
+  getCart,
+  addItem,
+  updateItem,
+  removeItem,
+  applyCoupon,
+  removeCoupon,
+  quoteShipping,
+  selectShipping,
+  prepareCheckout,
+} from '../api';
 
-export function useCart() {
-  const { data, error, isLoading, mutate } = useSWR<Cart>('/cart', () => getCart({ createIfMissing: true }), {
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-  });
+export function useCart(opts?: { fallbackData?: Cart }) {
+  const { data, error, isLoading, mutate } = useSWR<Cart>(
+    '/cart',
+    () => getCart({ createIfMissing: true }),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      fallbackData: opts?.fallbackData,
+    },
+  );
 
   const [quotes, setQuotes] = useState<QuoteResult | null>(null);
 

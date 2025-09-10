@@ -1,95 +1,120 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import {
-  createCoupon, updateCoupon, deleteCoupon,
-} from '@/features/coupons/api';
-import {
-  CreateCouponPayload, UpdateCouponPayload,
-} from '@/features/coupons/schemas';
+import { z } from 'zod';
+import { createCoupon, updateCoupon, deleteCoupon } from '@/features/coupons/api';
 
+// 🔹 Exporte o shape que o useFormState espera
 export type State = { ok: boolean; error?: string };
 
-function toIsoFromLocal(input?: string | null): string | undefined {
-  if (!input) return undefined;
-  const d = new Date(input);
-  if (Number.isNaN(d.getTime())) return undefined;
-  return d.toISOString();
-}
+const FormSchema = z.object({
+  code: z.string().min(1),
+  description: z.string().min(1),
+  type: z.enum(['PERCENT', 'FIXED']),
+  value: z.coerce.number().positive(),
+  minimumOrderValue: z.coerce.number().min(0).optional(),
+  maxRedemptions: z.coerce.number().min(1).optional(),
+  startsAt: z.string().min(1),
+  endsAt: z.string().min(1),
+  // Aceitaremos CSV ou JSON (string) nos campos abaixo
+  productIds: z.string().optional(),
+  sizes: z.string().optional(),
+  active: z.string().optional(), // 'true' | 'false'
+});
 
-function firstZodIssue(errors: unknown): string {
-  try {
-    // @ts-ignore
-    const issues = errors?.issues ?? [];
-    return issues[0]?.message ?? 'Dados inválidos';
-  } catch {
-    return 'Dados inválidos';
+// Suporta CSV ("a,b,c") OU JSON ('["a","b","c"]')
+function parseList(value?: string) {
+  if (!value) return [] as string[];
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+  if (trimmed.startsWith('[')) {
+    try {
+      const arr = JSON.parse(trimmed);
+      return Array.isArray(arr) ? arr.map((s) => String(s)) : [];
+    } catch {
+      return [];
+    }
   }
+  return trimmed
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 export async function createCouponAction(_: State, form: FormData): Promise<State> {
-  const startsAtLocal = String(form.get('startsAt') ?? '');
-  const endsAtLocal   = String(form.get('endsAt') ?? '');
-
-  const data = {
-    code: String(form.get('code') ?? ''),
-    description: String(form.get('description') ?? ''),
-    type: String(form.get('type') ?? 'PERCENT'),
-    value: Number(form.get('value') ?? 0),
-    minimumOrderValue: form.get('minimumOrderValue') ? Number(form.get('minimumOrderValue')) : undefined,
-    maxRedemptions: form.get('maxRedemptions') ? Number(form.get('maxRedemptions')) : undefined,
-    startsAt: toIsoFromLocal(startsAtLocal) ?? '',
-    endsAt: toIsoFromLocal(endsAtLocal) ?? '',
-    productIds: (String(form.get('productIds') ?? '').trim() || '')
-      .split(',').map(s => s.trim()).filter(Boolean),
-    sizes: (String(form.get('sizes') ?? '').trim() || '')
-      .split(',').map(s => s.trim()).filter(Boolean),
-    active: String(form.get('active') ?? 'true') === 'true',
-  };
-
-  const parsed = CreateCouponPayload.safeParse(data);
-  if (!parsed.success) return { ok:false, error: firstZodIssue(parsed.error) };
-
   try {
-    await createCoupon(parsed.data);
+    // Normaliza campos vazios para undefined (evita NaN do z.coerce.number())
+    const rawObj = Object.fromEntries(form.entries());
+    for (const k of ['minimumOrderValue', 'maxRedemptions'] as const) {
+      if (rawObj[k] === '') rawObj[k] = undefined;
+    }
+
+    const parsed = FormSchema.safeParse(rawObj);
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos' };
+    }
+
+    const d = parsed.data;
+
+    await createCoupon({
+      code: d.code.trim().toUpperCase(),
+      description: d.description.trim(),
+      type: d.type,
+      value: d.value,
+      minimumOrderValue: d.minimumOrderValue,
+      maxRedemptions: d.maxRedemptions,
+      startsAt: d.startsAt,
+      endsAt: d.endsAt,
+      productIds: parseList(d.productIds),
+      sizes: parseList(d.sizes),
+      active: d.active ? d.active === 'true' : true,
+    });
+
     revalidatePath('/admin/coupons');
-    return { ok:true };
+    revalidatePath('/coupons');
+    return { ok: true };
   } catch (e: any) {
-    return { ok:false, error: e?.message ?? 'Falha ao criar cupom' };
+    return { ok: false, error: e?.message || 'Falha ao criar cupom' };
   }
 }
 
-export async function updateCouponAction(id: string, _: State, form: FormData): Promise<State> {
-  const startsAtLocal = form.get('startsAt') ? String(form.get('startsAt')) : undefined;
-  const endsAtLocal   = form.get('endsAt') ? String(form.get('endsAt')) : undefined;
-
-  const data = {
-    code: form.get('code') ? String(form.get('code')) : undefined,
-    description: form.get('description') ? String(form.get('description')) : undefined,
-    type: form.get('type') ? String(form.get('type')) : undefined,
-    value: form.get('value') ? Number(form.get('value')) : undefined,
-    minimumOrderValue: form.get('minimumOrderValue') ? Number(form.get('minimumOrderValue')) : undefined,
-    maxRedemptions: form.get('maxRedemptions') ? Number(form.get('maxRedemptions')) : undefined,
-    startsAt: startsAtLocal ? toIsoFromLocal(startsAtLocal) : undefined,
-    endsAt: endsAtLocal ? toIsoFromLocal(endsAtLocal) : undefined,
-    productIds: form.get('productIds')
-      ? String(form.get('productIds')).split(',').map(s => s.trim()).filter(Boolean)
-      : undefined,
-    sizes: form.get('sizes')
-      ? String(form.get('sizes')).split(',').map(s => s.trim()).filter(Boolean)
-      : undefined,
-    active: form.get('active') ? String(form.get('active')) === 'true' : undefined,
-  };
-
-  const parsed = UpdateCouponPayload.safeParse(data);
-  if (!parsed.success) return { ok:false, error: firstZodIssue(parsed.error) };
-
+export async function updateCouponAction(
+  id: string,
+  _: State,
+  form: FormData,
+): Promise<State> {
   try {
-    await updateCoupon(id, parsed.data);
+    const rawObj = Object.fromEntries(form.entries());
+    for (const k of ['minimumOrderValue', 'maxRedemptions'] as const) {
+      if (rawObj[k] === '') rawObj[k] = undefined;
+    }
+
+    const parsed = FormSchema.partial().safeParse(rawObj);
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos' };
+    }
+
+    const d = parsed.data;
+
+    await updateCoupon(id, {
+      code: d.code ? d.code.trim().toUpperCase() : undefined,
+      description: d.description?.trim(),
+      type: d.type as any,
+      value: d.value,
+      minimumOrderValue: d.minimumOrderValue,
+      maxRedemptions: d.maxRedemptions,
+      startsAt: d.startsAt,
+      endsAt: d.endsAt,
+      productIds: d.productIds ? parseList(d.productIds) : undefined,
+      sizes: d.sizes ? parseList(d.sizes) : undefined,
+      active: d.active ? d.active === 'true' : undefined,
+    });
+
     revalidatePath('/admin/coupons');
-    return { ok:true };
+    revalidatePath('/coupons');
+    return { ok: true };
   } catch (e: any) {
-    return { ok:false, error: e?.message ?? 'Falha ao atualizar cupom' };
+    return { ok: false, error: e?.message || 'Falha ao atualizar cupom' };
   }
 }
 
@@ -97,8 +122,9 @@ export async function deleteCouponAction(id: string): Promise<State> {
   try {
     await deleteCoupon(id);
     revalidatePath('/admin/coupons');
-    return { ok:true };
+    revalidatePath('/coupons');
+    return { ok: true };
   } catch (e: any) {
-    return { ok:false, error: (e as any)?.message ?? 'Falha ao remover cupom' };
+    return { ok: false, error: e?.message || 'Falha ao excluir cupom' };
   }
 }
