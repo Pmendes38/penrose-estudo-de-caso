@@ -1,4 +1,3 @@
-// src/features/shipping/api.ts
 import { envServer } from '@/shared/lib/env.server';
 import {
   CalculateShippingInput,
@@ -11,7 +10,7 @@ import {
   type ShippingService,
 } from '../schemas';
 
-const BASE = `${envServer.AUTH_API_URL}/api/v1/shipping`;
+const BASE = `${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/shipping`;
 
 export async function validatePostalCode(postalCode: string) {
   const res = await fetch(`${BASE}/validate-postal-code`, {

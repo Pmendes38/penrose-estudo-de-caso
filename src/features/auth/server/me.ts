@@ -38,7 +38,7 @@ export async function getMe(): Promise<AuthUser | null> {
   const token = getAccessToken();
   if (!token) return null;
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/me`, {
+  const res = await fetch(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });

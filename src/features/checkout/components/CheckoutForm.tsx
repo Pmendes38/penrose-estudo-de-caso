@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ShippingSelector from '@/features/shipping/ui/ShippingSelector';
 import type { CalculateShippingInput, ShippingQuote } from '@/features/shipping/schemas';
-import { useCart } from '@/shared/context/CartContext';
+import { useCart } from '@/features/cart/hooks/useCart';
 import { setCheckoutSessionAction } from '@/app/(public)/checkout/actions';
 import CouponField from '@/features/checkout/components/CouponField';
 
@@ -28,7 +28,12 @@ const ESTADOS = [
 
 export default function CheckoutForm() {
   const router = useRouter();
-  const { items, total } = useCart(); // subtotal (BRL)
+
+  const { cart, isLoading } = useCart();
+  const items = cart?.items ?? [];
+
+  const subtotalBRL = useMemo(() => (cart?.itemsSubtotal ?? 0) / 100, [cart?.itemsSubtotal]);
+  const cartDiscountBRL = useMemo(() => (cart?.discountTotal ?? 0) / 100, [cart?.discountTotal]);
 
   const [formData, setFormData] = useState<FormState>({
     nome: '', email: '', telefone: '', cpf: '',
@@ -41,31 +46,43 @@ export default function CheckoutForm() {
 
   const [coupon, setCoupon] = useState<{ code?: string; discountTotal?: number }>({});
 
-  const pkg = useMemo(() => ({
-    weightKg: Math.max(0.2, Math.min(5, items.length * 0.3)),
-    widthCm: 20,
-    heightCm: 10,
-    lengthCm: 20,
-    declaredValue: total,
-  }), [items, total]);
+  // Peso estimado e pacote (espelha a lógica do backend com defaults)
+  const pkg = useMemo(() => {
+    const weightKg =
+      items.reduce((sum, it: any) => {
+        const unitGrams = Number(it?.weightGrams ?? 300);
+        const qty = Math.max(1, Number(it?.quantity) || 1);
+        return sum + (unitGrams / 1000) * qty;
+      }, 0) || 1;
+
+    return {
+      weightKg: Math.max(0.2, Math.min(30, weightKg)), // limites razoáveis
+      widthCm: 20,
+      heightCm: 10,
+      lengthCm: 20,
+      declaredValue: Math.max(0, subtotalBRL - cartDiscountBRL),
+    };
+  }, [items, subtotalBRL, cartDiscountBRL]);
 
   const shippingInput: CalculateShippingInput | null = useMemo(() => {
-    if (!formData.cep) return null;
+    const cep = (formData.cep || '').trim();
+    if (!cep) return null;
     return {
-      destination: { postalCode: formData.cep },
+      destination: { postalCode: cep },
       packages: [pkg],
-      cartTotal: total,
+      cartTotal: Math.max(0, subtotalBRL - cartDiscountBRL),
       preferCheapest: true,
     };
-  }, [formData.cep, pkg, total]);
+  }, [formData.cep, pkg, subtotalBRL, cartDiscountBRL]);
 
-  const discountTotal = coupon?.discountTotal ?? 0;
-  const shippingTotal = selectedShipping?.priceBRL ?? 0;
-  const grandTotal = useMemo(
-    () => Math.max(0, total + shippingTotal - discountTotal),
-    [total, shippingTotal, discountTotal]
+  const couponDiscountBRL = coupon?.discountTotal ?? 0;
+  const shippingTotalBRL = selectedShipping?.priceBRL ?? 0;
+  const grandTotalBRL = useMemo(
+    () => Math.max(0, subtotalBRL - cartDiscountBRL - couponDiscountBRL + shippingTotalBRL),
+    [subtotalBRL, cartDiscountBRL, couponDiscountBRL, shippingTotalBRL]
   );
 
+  // Prefill com dados salvos
   useEffect(() => {
     try {
       const raw = localStorage.getItem('checkoutData');
@@ -89,7 +106,20 @@ export default function CheckoutForm() {
     setSubmitting(true);
     setClientError('');
 
+    // bloqueia avanço se carrinho ainda não carregou ou está vazio
+    if (isLoading) {
+      setClientError('Aguarde o carregamento do carrinho.');
+      setSubmitting(false);
+      return;
+    }
+    if (!items.length) {
+      setClientError('Seu carrinho está vazio.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
+      // Persistência local simples (para /payment recuperar)
       localStorage.setItem('checkoutData', JSON.stringify(formData));
       if (selectedShipping) {
         localStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
@@ -101,8 +131,7 @@ export default function CheckoutForm() {
       } else {
         localStorage.removeItem('couponData');
       }
-    } catch {
-    }
+    } catch {}
 
     try {
       const res = await setCheckoutSessionAction({
@@ -239,19 +268,21 @@ export default function CheckoutForm() {
           <div className="mt-6 space-y-1 text-sm text-brand-gray-light">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>{total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+              <span>{subtotalBRL.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
             </div>
             <div className="flex justify-between">
               <span>Frete</span>
-              <span>{shippingTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+              <span>{shippingTotalBRL.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
             </div>
             <div className="flex justify-between">
-              <span>Descontos</span>
-              <span>-{(discountTotal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+              <span>Descontos (carrinho + cupom)</span>
+              <span>
+                -{(cartDiscountBRL + couponDiscountBRL).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+              </span>
             </div>
             <div className="flex justify-between font-semibold text-white">
               <span>Total</span>
-              <span>{grandTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+              <span>{grandTotalBRL.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
             </div>
           </div>
 
@@ -273,7 +304,7 @@ export default function CheckoutForm() {
             </button>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || isLoading}
               className="px-8 py-3 bg-brand-blue text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
             >
               {submitting ? 'Preparando…' : 'Continuar para Pagamento'}

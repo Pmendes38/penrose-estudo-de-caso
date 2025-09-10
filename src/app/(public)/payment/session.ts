@@ -9,7 +9,7 @@ export type CheckoutSession = {
   couponCode?: string | null;
 };
 
-const COOKIE_KEY = 'checkout_session_v1';
+const COOKIE_KEY = 'checkout_session';
 
 export async function getCheckoutSession(): Promise<CheckoutSession> {
   const raw = cookies().get(COOKIE_KEY)?.value;

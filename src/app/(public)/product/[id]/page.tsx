@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import Link from 'next/link';
-import { fetchPublicProduct } from '@/features/products/api';
+import { getProduct } from '@/features/products/api';
 import { formatBRL } from '@/shared/lib/format';
 import type { Product } from '@/features/products/schemas';
 import Gallery from './gallery.client';
@@ -15,7 +15,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://exemplo.invalid';
 type PageParams = { params: { id: string } };
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
-  const product = await fetchPublicProduct(params.id).catch(() => null);
+  const product = await getProduct(params.id).catch(() => null);
   if (!product) return { title: 'Produto não encontrado | Penrøse' };
 
   const title = `${product.name} | Penrøse`;
@@ -78,7 +78,7 @@ function ProductJsonLd({ product }: { product: Product }) {
 }
 
 export default async function ProductPage({ params }: PageParams) {
-  const product = await fetchPublicProduct(params.id).catch(() => null);
+  const product = await getProduct(params.id).catch(() => null);
   if (!product) notFound();
 
   const images = product.images?.length ? product.images : ['/assets/wide-logo.svg'];

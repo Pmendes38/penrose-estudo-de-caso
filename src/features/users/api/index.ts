@@ -31,7 +31,7 @@ import {
   type UpdateUserEnvelope,
 } from '../schemas';
 
-const BASE = `${envServer.AUTH_API_URL}/api/v1/user`;
+const BASE = `${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/user`;
 
 /* ================= Perfil ================ */
 

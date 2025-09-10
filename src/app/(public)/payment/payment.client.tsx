@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useCart } from '@/shared/context/CartContext';
+import { useCart } from '@/features/cart/hooks/useCart';
 import { useFormState, useFormStatus } from 'react-dom';
 import { createPaymentAction } from './actions';
 import PaymentAwait from './PaymentAwait';
@@ -29,7 +29,8 @@ function SubmitBtn() {
 }
 
 export default function PaymentClient({ session }: { session?: CheckoutSession }) {
-  const { items, total } = useCart(); // subtotal
+  const { cart, isLoading, error: cartError } = useCart();
+
   const [method, setMethod] = useState<'PIX'|'BOLETO'|'CREDIT_CARD'>('PIX');
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
   const [selectedShipping, setSelectedShipping] = useState<any | null>(null);
@@ -54,21 +55,37 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
         if (rawCoupon) setCouponCode(JSON.parse(rawCoupon)?.code || undefined);
       }
     } catch {}
-  }, []);
+  }, [session?.customerData, session?.selectedShipping, session?.couponCode]);
 
-  const cartItemsJson = useMemo(() => JSON.stringify(items.map(i => ({
-    productId: i.productId,
-    name: i.name,
-    quantity: i.quantity,
-    unitPrice: i.price,
-    size: (i.meta as any)?.size,
-  }))), [items]);
+  const cartItemsJson = useMemo(() => {
+    const items = (cart?.items ?? []).map((i) => ({
+      productId: i.productId ?? i.sku,
+      name: i.name ?? i.sku,
+      quantity: i.quantity,
+      unitPrice: Math.max(0, Number(i.unitPrice ?? 0)) / 100, // BRL
+      size: (i.variant as any)?.size,
+    }));
+    return JSON.stringify(items);
+  }, [cart?.items]);
 
-  const shippingTotal = Number(selectedShipping?.priceBRL || 0);
-  const discountTotal = 0; // se precisar, calcule do lado do front (ou deixe pro backend)
+  const shippingFromCartCents = Math.max(0, Number(cart?.shippingTotal ?? 0)); // centavos
+  const selectedShippingCents = selectedShipping?.priceBRL
+    ? Math.round(Number(selectedShipping.priceBRL) * 100)
+    : 0;
+
+  const itemsSubtotalCents = Math.max(0, Number(cart?.itemsSubtotal ?? 0));
+  const discountCents      = Math.max(0, Number(cart?.discountTotal ?? 0));
+  const taxCents           = Math.max(0, Number(cart?.taxTotal ?? 0));
+
+  const effectiveShippingCents = shippingFromCartCents > 0 ? shippingFromCartCents : selectedShippingCents;
+
+  const computedTotalCents = cart
+    ? Math.max(0, itemsSubtotalCents - discountCents + effectiveShippingCents + taxCents)
+    : 0;
+
   const totalAmount = useMemo(
-    () => Math.max(0, total + shippingTotal - discountTotal),
-    [total, shippingTotal, discountTotal]
+    () => computedTotalCents / 100, // BRL
+    [computedTotalCents]
   );
 
   const customerDataJson = useMemo(() => JSON.stringify({
@@ -94,14 +111,44 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
   );
 
   const idempotencyKey = useMemo(() => {
-    const snap = JSON.stringify({ method, items, totalAmount, selectedShipping });
+    const snap = JSON.stringify({
+      method,
+      cartId: (cart as any)?._id ?? (cart as any)?.id ?? null,
+      version: cart?.version ?? null,
+      totalAmount,
+      selectedShipping: selectedShipping?.id ?? null,
+    });
     return `cart:${hashString(snap)}`;
-  }, [method, items, totalAmount, selectedShipping]);
+  }, [method, cart?.version, cart, totalAmount, selectedShipping]);
 
   const [state, formAction] = useFormState(createPaymentAction, { ok:false } as any);
 
   if (state.ok && state.paymentId) {
     return <PaymentAwait paymentId={state.paymentId} />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <p className="text-brand-gray">Carregando carrinho…</p>
+      </div>
+    );
+  }
+
+  if (cartError) {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <p className="text-red-400">Erro ao carregar carrinho: {String(cartError?.message || cartError)}</p>
+      </div>
+    );
+  }
+
+  if (!cart || !(cart.items ?? []).length) {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <p className="text-brand-gray">Seu carrinho está vazio.</p>
+      </div>
+    );
   }
 
   return (

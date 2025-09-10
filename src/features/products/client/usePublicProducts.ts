@@ -10,7 +10,8 @@ const fetcher = (url: string) => fetch(url).then(r => {
 
 export function usePublicProducts(query: Q = {}) {
   const params = new URLSearchParams(Object.entries(query as Record<string, any>).filter(([,v]) => v != null) as any).toString();
-  const key = `/api/v1/products/public${params ? `?${params}` : ''}`;
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const key = `${apiBaseUrl}/api/v1/products${params ? `?${params}` : ''}`;
   const { data, error, isLoading, mutate } = useSWR(key, fetcher);
   return { data, error, isLoading, mutate };
 }

@@ -6,7 +6,7 @@ import { CustomersPageSchema } from '../schemas';
 type FetchParams = { page?: number; pageSize?: number; q?: string };
 
 export async function fetchAdminCustomers({ page = 1, pageSize = 20, q }: FetchParams) {
-  const url = new URL(`${envServer.AUTH_API_URL}/api/customers/admin`);
+  const url = new URL(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/customers/admin`);
   url.searchParams.set('page', String(page));
   url.searchParams.set('pageSize', String(pageSize));
   if (q) url.searchParams.set('q', q);

@@ -6,18 +6,23 @@ import Link from 'next/link';
 import OptimizedImage from '@/shared/ui/optimized-image';
 import Button from '@/shared/ui/button';
 import { formatBRL } from '@/shared/lib/format';
-import { useCart } from '@/shared/context/CartContext';
+import { useCart } from '@/features/cart/hooks/useCart';
 import type { ProductView } from '@/features/products/normalizers';
+import { useToast } from '@/shared/ui/use-toast';
 
 export default function ProductCard({ product }: { product: ProductView }) {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [showSizeSelector, setShowSizeSelector] = useState(false);
-  const { addItem } = useCart();
+  const [adding, setAdding] = useState(false);
 
-  // Com base nas variações normalizadas
+  // novo hook do carrinho (conectado ao backend)
+  const { add } = useCart();
+  const { toast } = useToast();
+
+  // Preço exibido (apenas UI). O backend define o preço final no add().
   const { lowest, highest, multi } = useMemo(() => {
     if (product.sizes?.length) {
-      const values = product.sizes.map(s => s.priceBRL);
+      const values = product.sizes.map((s) => s.priceBRL);
       const lo = Math.min(...values);
       const hi = Math.max(...values);
       return { lowest: lo, highest: hi, multi: product.sizes.length > 1 && lo !== hi };
@@ -25,33 +30,54 @@ export default function ProductCard({ product }: { product: ProductView }) {
     return { lowest: product.priceBRL, highest: product.priceBRL, multi: false };
   }, [product.sizes, product.priceBRL]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (product.sizes?.length && !selectedSize) {
       setShowSizeSelector(true);
       return;
     }
 
-    const sizeData = product.sizes?.find(s => (s.label || s.name) === selectedSize);
-    const price = sizeData?.priceBRL ?? lowest;
+    const sizeData = product.sizes?.find((s) => (s.label || s.name) === selectedSize);
+    // sku de preferência por variação; fallback para sku do produto; por último id.
+    const sku =
+      (sizeData as any)?.sku ||
+      (product as any)?.sku ||
+      String(product.id);
 
-    addItem({
-      productId: product.id,
-      name: product.name,
-      price, // em BRL
-      quantity: 1,
-      images: product.images,
-      image: product.image,
-      variantKey: selectedSize || null,
-      meta: { selectedSize },
-    });
+    setAdding(true);
+    try {
+      await add({
+        sku,
+        quantity: 1,
+        // envie metadados da variação (o backend usa para mesclar itens iguais)
+        variant: selectedSize ? { size: selectedSize } : undefined,
+        // opcionais (se seu catálogo trouxer):
+        // weightGrams: product.weightGrams ?? undefined,
+        // dimensions: product.dimensions ?? undefined,
+      });
 
-    setSelectedSize('');
-    setShowSizeSelector(false);
+      toast({
+        title: 'Adicionado ao carrinho',
+        description: `${product.name}${selectedSize ? ` • ${selectedSize}` : ''}`,
+      });
+
+      setSelectedSize('');
+      setShowSizeSelector(false);
+    } catch (e: any) {
+      toast({
+        title: 'Não foi possível adicionar',
+        description: e?.message || 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setAdding(false);
+    }
   };
+
+  const productHref = `/product/${encodeURIComponent((product as any).slug ?? product.id)}`;
 
   return (
     <article className="relative bg-brand-gray-dark rounded-2xl shadow-soft overflow-hidden hover:shadow-hard transition-all duration-300 hover:-translate-y-2 border border-brand-gray-border/50 hover:border-brand-blue/30">
-      <Link href={`/product/${product.id}`} className="block relative">
+      <Link href={productHref} className="block relative">
         <div className="relative overflow-hidden">
           <OptimizedImage
             src={product.image || '/assets/placeholder-product.jpg'}
@@ -66,7 +92,7 @@ export default function ProductCard({ product }: { product: ProductView }) {
       </Link>
 
       <div className="p-6">
-        <Link href={`/product/${product.id}`} className="block mb-4">
+        <Link href={productHref} className="block mb-4">
           <h3 className="text-lg font-semibold text-brand-gray-light mb-2 hover:text-brand-blue transition-colors line-clamp-2">
             {product.name}
           </h3>
@@ -75,7 +101,10 @@ export default function ProductCard({ product }: { product: ProductView }) {
         {!!product.tags?.length && (
           <div className="flex flex-wrap gap-2 mb-4">
             {product.tags.slice(0, 3).map((tag, i) => (
-              <span key={tag + i} className="px-3 py-1 bg-brand-gray-border/30 text-brand-gray text-xs rounded-full border border-brand-gray-border">
+              <span
+                key={tag + i}
+                className="px-3 py-1 bg-brand-gray-border/30 text-brand-gray text-xs rounded-full border border-brand-gray-border"
+              >
                 {tag}
               </span>
             ))}
@@ -110,17 +139,21 @@ export default function ProductCard({ product }: { product: ProductView }) {
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((s) => {
                   const label = s.label || s.name || '';
-                  const selected = selectedSize === label;
+                  const isSelected = selectedSize === label;
                   return (
                     <button
                       key={label}
-                      onClick={() => setSelectedSize(label)}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSize(label);
+                        setShowSizeSelector(false);
+                      }}
                       className={`px-4 py-2.5 text-sm border rounded-lg transition-all ${
-                        selected
+                        isSelected
                           ? 'border-brand-blue bg-brand-blue/20 text-brand-blue shadow-glow'
                           : 'border-brand-gray-border text-brand-gray hover:border-brand-blue/50 hover:bg-brand-gray-border/20'
                       }`}
-                      aria-pressed={selected}
+                      aria-pressed={isSelected}
                       aria-label={`Tamanho ${label} - ${formatBRL(s.priceBRL)}`}
                     >
                       <div className="text-center font-medium">{label}</div>
@@ -138,15 +171,19 @@ export default function ProductCard({ product }: { product: ProductView }) {
         <div className="space-y-3">
           <Button
             onClick={handleAddToCart}
-            disabled={!!product.sizes?.length && !selectedSize}
+            disabled={adding || (!!product.sizes?.length && !selectedSize)}
             variant="primary"
             size="md"
             fullWidth
           >
-            {product.sizes?.length && !selectedSize ? 'Selecione um tamanho' : 'Adicionar ao Carrinho'}
+            {adding
+              ? 'Adicionando…'
+              : product.sizes?.length && !selectedSize
+              ? 'Selecione um tamanho'
+              : 'Adicionar ao Carrinho'}
           </Button>
 
-          <Link href={`/product/${product.id}`} className="block">
+          <Link href={productHref} className="block">
             <Button variant="outline" size="md" fullWidth>
               Ver Detalhes
             </Button>

@@ -9,19 +9,19 @@ export async function listOrdersAdmin(params?: { page?: number; pageSize?: numbe
   const qs = new URLSearchParams();
   if (params?.page) qs.set('page', String(params.page));
   if (params?.pageSize) qs.set('pageSize', String(params.pageSize));
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/orders/admin?${qs}`, { cache: 'no-store' });
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin?${qs}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
   return PagedOrdersSchema.parse(await res.json());
 }
 
 export async function getOrderAdmin(id: string): Promise<Order> {
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/orders/admin/${id}`, { cache: 'no-store' });
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
   return OrderSchema.parse(await res.json());
 }
 
 export async function updateOrderStatusAdmin(id: string, payload: UpdateOrderStatusPayload) {
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/orders/admin/${id}/status`, {
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin/${id}/status`, {
     method: 'PUT',
     headers: { 'Content-Type':'application/json' },
     cache: 'no-store',
@@ -34,20 +34,20 @@ export async function updateOrderStatusAdmin(id: string, payload: UpdateOrderSta
 }
 
 export async function cancelOrderAdmin(id: string) {
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/orders/admin/${id}/cancel`, { method: 'PUT', cache: 'no-store' });
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin/${id}/cancel`, { method: 'PUT', cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
   return await res.json();
 }
 
 export async function refundOrderAdmin(id: string) {
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/orders/admin/${id}/refund`, { method: 'PUT', cache: 'no-store' });
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin/${id}/refund`, { method: 'PUT', cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
   return await res.json();
 }
 
 // Customer
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/orders`, {
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders`, {
     method: 'POST',
     headers: { 'Content-Type':'application/json' },
     cache: 'no-store',
@@ -61,7 +61,7 @@ export async function listMyOrders(customerId: string, params?: { page?: number;
   const qs = new URLSearchParams();
   if (params?.page) qs.set('page', String(params.page));
   if (params?.pageSize) qs.set('pageSize', String(params.pageSize));
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/orders/me/${customerId}?${qs}`, { cache: 'no-store' });
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/me/${customerId}?${qs}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
   return PagedOrdersSchema.parse(await res.json());
 }

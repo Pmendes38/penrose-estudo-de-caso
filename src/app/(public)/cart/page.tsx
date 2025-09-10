@@ -1,5 +1,15 @@
-import CartPage from '@/features/cart/components/CartPage';
+import { cookies } from 'next/headers';
+import { getCart } from '@/features/cart/api';
+import CartPageClient from '@/features/cart/ui/CartPageClient';
 
-export default function CartRoute() {
-  return <CartPage />;
+export const dynamic = 'force-dynamic'; 
+
+export default async function CartPage() {
+  const cookieHeader = cookies().toString();
+  let cart = null;
+  try {
+    cart = await getCart({ createIfMissing: true });
+  } catch {
+  }
+  return <CartPageClient initialCart={cart ?? undefined} />;
 }

@@ -3,6 +3,12 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { Logo } from '@/shared/ui/Logo';
 import { getUserRole } from '@/features/auth/server/cookies';
+import dynamic from 'next/dynamic';
+
+const CartHeaderButton = dynamic(
+  () => import('@/features/cart/ui/CartHeaderButton'),
+  { ssr: false } // opcional; pode ser true também
+);
 
 export default function AppHeader() {
   const jar = cookies();
@@ -20,6 +26,9 @@ export default function AppHeader() {
           <Link href="/catalog" className="text-brand-gray-light hover:text-white">
             Ver Catálogo
           </Link>
+
+          {/* botão do carrinho aparece somente após login */}
+          {hasToken && <CartHeaderButton visible={true} />}
 
           {hasToken && role === 'customer' && (
             <Link href="/customer" className="text-brand-gray-light hover:text-white">

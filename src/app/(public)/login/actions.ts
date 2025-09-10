@@ -44,7 +44,7 @@ export async function loginAction(_: LoginState, form: FormData): Promise<LoginS
 
   const nextRaw = String(form.get('next') ?? '');
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/auth/login`, {
+  const res = await fetch(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     cache: 'no-store',

@@ -2,8 +2,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { LoadingSpinner } from '@/shared/ui/loading';
-import { api } from '@/shared/lib/http';
 import { formatBRL } from '@/shared/lib/format';
+import { validatePostalCode, calculateShipping } from '@/features/shipping/api/client';
+import type { CalculateShippingInput, ShippingQuote } from '@/features/shipping/schemas';
 
 type Props = {
   product: { id: string; name: string; weight?: number; length?: number; width?: number; height?: number };
@@ -11,17 +12,9 @@ type Props = {
   freeShippingMin?: number;
 };
 
-type ShippingOption = {
-  id: string;
-  name: string;
-  price: number;
-  company?: { name?: string };
-  description?: string;
-};
-
 export default function ShippingCalculator({ product, selectedSize, freeShippingMin = 400 }: Props) {
   const [cep, setCep] = useState('');
-  const [options, setOptions] = useState<ShippingOption[]>([]);
+  const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [calculated, setCalculated] = useState(false);
@@ -35,7 +28,7 @@ export default function ShippingCalculator({ product, selectedSize, freeShipping
     setCep(masked);
     if (calculated) {
       setCalculated(false);
-      setOptions([]);
+      setQuotes([]);
       setError('');
     }
   }
@@ -46,34 +39,28 @@ export default function ShippingCalculator({ product, selectedSize, freeShipping
 
     setLoading(true);
     setError('');
-    setOptions([]);
+    setQuotes([]);
 
     try {
-      const payload = {
-        cep: numericCep,
-        product: {
-          id: product.id,
-          name: product.name,
-          price: selectedSize.price,
-          weight: product.weight ?? 1,
-          length: product.length ?? 20,
-          width: product.width ?? 15,
-          height: product.height ?? 10,
-          selectedSize,
-        },
+      const { valid, normalized } = await validatePostalCode(numericCep);
+      if (!valid) throw new Error('CEP inválido');
+
+      const input: CalculateShippingInput = {
+        destination: { postalCode: normalized },
+        packages: [{
+          weightKg: (product.weight ?? 1),     // ajuste se tiver peso por variação
+          widthCm:  (product.width  ?? 15),
+          heightCm: (product.height ?? 10),
+          lengthCm: (product.length ?? 20),
+          declaredValue: selectedSize.price,   // opcional: valor declarado
+        }],
+        cartTotal: selectedSize.price,          // opcional: influencia frete grátis
+        preferCheapest: true,
       };
 
-      const result = await api<ShippingOption[]>('/api/v1/shipping/calculate', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-
-      if (Array.isArray(result) && result.length) {
-        setOptions(result);
-        setCalculated(true);
-      } else {
-        setError('Não foi possível calcular o frete para este CEP');
-      }
+      const res = await calculateShipping(input);
+      setQuotes(res.quotes);
+      setCalculated(true);
     } catch (e: any) {
       setError(e?.message || 'Erro ao calcular frete. Tente novamente.');
     } finally {
@@ -108,31 +95,24 @@ export default function ShippingCalculator({ product, selectedSize, freeShipping
           disabled={loading || !validCep}
           className="px-4 py-2 bg-brand-blue hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
         >
-          {loading ? (
-            <>
-              <LoadingSpinner size="sm" />
-              Calculando…
-            </>
-          ) : (
-            'Calcular'
-          )}
+          {loading ? (<><LoadingSpinner size="sm" /> Calculando…</>) : 'Calcular'}
         </button>
       </div>
 
       {error && <div className="mt-2 text-red-400 text-sm bg-red-900/20 border border-red-500/30 rounded-lg p-2">{error}</div>}
 
-      {calculated && options.length > 0 && (
+      {calculated && quotes.length > 0 && (
         <div className="mt-3 space-y-2">
           <h5 className="text-sm font-medium text-gray-300">Opções de entrega para {cep}:</h5>
-          {options.map((op, i) => (
-            <div key={op.id ?? i} className="bg-gray-700/50 rounded-lg p-3 border border-gray-600">
+          {quotes.map((q) => (
+            <div key={q.id} className="bg-gray-700/50 rounded-lg p-3 border border-gray-600">
               <div className="flex justify-between">
-                <span className="font-medium text-white">{op.name}</span>
-                <span className="text-brand-blue font-bold">{op.price === 0 ? 'GRÁTIS' : formatBRL(op.price)}</span>
+                <span className="font-medium text-white">{q.name}</span>
+                <span className="text-brand-blue font-bold">{q.isFree ? 'GRÁTIS' : formatBRL(q.priceBRL)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-400">
-                <span>{op.company?.name ?? 'Transportadora'}</span>
-                <span>{op.description ?? 'Prazo a confirmar'}</span>
+                <span>{q.company?.name ?? 'Transportadora'}</span>
+                <span>{q.description ?? `${q.deliveryDays} dias úteis`}</span>
               </div>
             </div>
           ))}

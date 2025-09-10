@@ -12,7 +12,7 @@ import {
 } from '../schemas';
 import { fetchWithAuth } from '../server/fetch-with-auth';
 
-const BASE = `${envServer.AUTH_API_URL}/api/v1/auth`;
+const BASE = `${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth`;
 
 export async function login(email: string, password: string): Promise<AuthResult> {
   const res = await fetch(`${BASE}/login`, {

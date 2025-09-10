@@ -43,7 +43,7 @@ export default function LandingHero() {
               Entrar
             </Link>
             <Link
-              href="/carrinho"
+              href="/cart"
               className="relative text-brand-gray hover:text-white p-3 rounded-lg hover:bg-brand-gray-dark/50"
               aria-label="Carrinho"
             >

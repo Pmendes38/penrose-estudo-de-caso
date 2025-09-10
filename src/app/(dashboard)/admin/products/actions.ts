@@ -7,7 +7,7 @@ import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
 export async function toggleProductStatusAction(id: string, current: 'active'|'inactive') {
   const next = current === 'active' ? 'inactive' : 'active';
 
-  const res = await fetchWithAuth(`${envServer.AUTH_API_URL}/api/v1/admin/products/${id}`, {
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/products/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     cache: 'no-store',

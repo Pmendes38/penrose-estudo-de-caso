@@ -14,8 +14,8 @@ import {
   UpdateProductDtoSchema,
 } from '../schemas';
 
-const PUBLIC_BASE = `${envServer.AUTH_API_URL}/api/v1/products`;
-const ADMIN_BASE  = `${envServer.AUTH_API_URL}/api/v1/admin/products`;
+const PUBLIC_BASE = `${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/products`;
+const ADMIN_BASE  = `${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/products`;
 
 function toQuery(q: Record<string, any> = {}) {
   const u = new URLSearchParams();

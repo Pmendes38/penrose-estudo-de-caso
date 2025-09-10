@@ -9,7 +9,7 @@ export async function saveProductAction(id: string, formData: FormData) {
   const token = cookies().get('accessToken')?.value;
   const payload = Object.fromEntries(formData.entries());
 
-  const res = await fetch(`${envServer.AUTH_API_URL}/api/v1/admin/products/${id}`, {
+  const res = await fetch(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/products/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

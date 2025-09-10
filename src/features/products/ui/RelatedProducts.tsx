@@ -1,4 +1,3 @@
-// src/components/RelatedProducts/RelatedProducts.tsx
 'use client';
 
 import { useMemo } from 'react';
