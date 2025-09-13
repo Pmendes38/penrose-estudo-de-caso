@@ -1,16 +1,26 @@
 import 'server-only';
 import { api } from '@/shared/lib/http';
-import { PaginatedPaymentsSchema, type PaginatedPayments } from '../schemas';
+import {
+  PaginatedPaymentsSchema,
+  type PaginatedPayments,
+  PaymentStatus,
+  BillingType,
+} from '../schemas';
+
+import { z } from 'zod';
 
 type Filters = Partial<{
-  status: string;
-  billingType: string;
+  status: z.infer<typeof PaymentStatus>;
+  billingType: z.infer<typeof BillingType>;
   orderId: string;
   providerPaymentId: string;
 }>;
 
-export async function fetchAdminPayments(opts: { page?: number; pageSize?: number; filters?: Filters } = {}): Promise<PaginatedPayments> {
+export async function fetchAdminPayments(
+  opts: { page?: number; pageSize?: number; filters?: Filters } = {},
+): Promise<PaginatedPayments> {
   const { page = 1, pageSize = 20, filters = {} } = opts;
+
   const search = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),

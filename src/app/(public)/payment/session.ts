@@ -15,7 +15,19 @@ export async function getCheckoutSession(): Promise<CheckoutSession> {
   const raw = cookies().get(COOKIE_KEY)?.value;
   if (!raw) return {};
   try {
-    return JSON.parse(raw) as CheckoutSession;
+    const str = (() => {
+      try { return decodeURIComponent(raw); } catch { return raw; }
+    })();
+    const parsed = JSON.parse(str);
+    if (parsed && typeof parsed === 'object') {
+      const safe: CheckoutSession = {
+        customerData: parsed.customerData ?? null,
+        selectedShipping: parsed.selectedShipping ?? null,
+        couponCode: typeof parsed.couponCode === 'string' ? parsed.couponCode : null,
+      };
+      return safe;
+    }
+    return {};
   } catch {
     return {};
   }

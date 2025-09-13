@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Props = { paymentId: string };
+
+const TERMINALS = new Set(['CONFIRMED', 'CANCELED', 'REFUNDED', 'FAILED']);
 
 export default function PaymentAwait({ paymentId }: Props) {
   const [error, setError] = useState<string>('');
@@ -10,14 +12,32 @@ export default function PaymentAwait({ paymentId }: Props) {
     status?: string; billingType?: 'PIX'|'BOLETO'|'CREDIT_CARD';
     boletoUrl?: string; identificatorField?: string; pixPayload?: string; orderId?: string;
   }>({});
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    let stop = false;
+    let stopped = false;
+    let attempt = 0;
+    const MAX_DELAY = 10000; // 10s
+    const MAX_TIME_MS = 3 * 60 * 1000; // 3 minutos
+    const start = Date.now();
 
-    async function fetchPayment() {
+    async function tick() {
+      if (stopped) return;
+      if (Date.now() - start > MAX_TIME_MS) return;
+
+      attempt += 1;
+      const delay = Math.min(1000 * Math.pow(1.4, attempt), MAX_DELAY);
+
+      abortRef.current?.abort();
+      abortRef.current = new AbortController();
+
       try {
-        const res = await fetch(`/api/v1/payments/${paymentId}`, { cache: 'no-store' });
+        const res = await fetch(`/api/v1/payments/${encodeURIComponent(paymentId)}`, {
+          cache: 'no-store',
+          signal: abortRef.current.signal,
+        });
         const p = await res.json();
+
         setInfo({
           status: p.status,
           billingType: p.billingType,
@@ -31,18 +51,25 @@ export default function PaymentAwait({ paymentId }: Props) {
           window.location.href = `/thank-you?order=${p.orderId}`;
           return;
         }
-      } catch (e:any) {
+        if (!TERMINALS.has(p.status)) {
+          setTimeout(tick, delay);
+        }
+      } catch (e: any) {
         setError(e?.message ?? 'Falha ao consultar pagamento');
+        setTimeout(tick, delay);
       }
-      if (!stop) setTimeout(fetchPayment, 3000);
     }
 
-    fetchPayment();
-    return () => { stop = true; };
+    tick();
+    return () => {
+      stopped = true;
+      abortRef.current?.abort();
+    };
   }, [paymentId]);
 
   const isPix = info.billingType === 'PIX';
   const isBoleto = info.billingType === 'BOLETO';
+  const isTerminal = info.status ? TERMINALS.has(info.status) : false;
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -52,8 +79,11 @@ export default function PaymentAwait({ paymentId }: Props) {
       {isPix && (
         <div className="space-y-3">
           <p>Copie o código PIX abaixo e pague no seu app bancário:</p>
-          <textarea readOnly className="w-full h-32 bg-brand-black border border-brand-gray-border rounded p-3"
-            value={info.pixPayload ?? 'Gerando QR…'} />
+          <textarea
+            readOnly
+            className="w-full h-32 bg-brand-black border border-brand-gray-border rounded p-3"
+            value={info.pixPayload ?? 'Gerando QR…'}
+          />
           <button
             className="px-4 py-2 border rounded"
             onClick={() => navigator.clipboard.writeText(info.pixPayload ?? '')}
@@ -68,7 +98,7 @@ export default function PaymentAwait({ paymentId }: Props) {
       {isBoleto && (
         <div className="space-y-3">
           {info.boletoUrl && (
-            <a href={info.boletoUrl} target="_blank" className="px-4 py-2 bg-brand-blue rounded inline-block">
+            <a href={info.boletoUrl} target="_blank" rel="noreferrer" className="px-4 py-2 bg-brand-blue rounded inline-block text-white">
               Abrir boleto
             </a>
           )}
@@ -83,7 +113,17 @@ export default function PaymentAwait({ paymentId }: Props) {
 
       {error && <p className="text-red-400">{error}</p>}
 
-      <p className="text-sm text-brand-gray">Esta página atualiza automaticamente a cada poucos segundos.</p>
+      {!isTerminal && (
+        <p className="text-sm text-brand-gray">Esta página atualiza automaticamente a cada poucos segundos.</p>
+      )}
+      {isTerminal && info.status !== 'CONFIRMED' && (
+        <div className="text-sm text-brand-gray space-y-2">
+          <p>O pagamento foi finalizado com status: <strong>{info.status}</strong>.</p>
+          {info.orderId && (
+            <a className="underline" href={`/orders/${encodeURIComponent(info.orderId)}`}>Ver pedido</a>
+          )}
+        </div>
+      )}
     </div>
   );
 }

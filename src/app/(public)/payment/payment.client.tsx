@@ -54,33 +54,35 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
         const rawCoupon = localStorage.getItem('couponData');
         if (rawCoupon) setCouponCode(JSON.parse(rawCoupon)?.code || undefined);
       }
-    } catch {}
+    } catch {/* ignore */}
   }, [session?.customerData, session?.selectedShipping, session?.couponCode]);
 
-  // Envio os itens (em BRL) para o backend validar composição
   const cartItemsJson = useMemo(() => {
-    const items = (cart?.items ?? []).map((i) => ({
-      productId: i.productId ?? i.sku,
-      name: i.name ?? i.sku,
-      quantity: i.quantity,
-      unitPrice: Math.max(0, Number(i.unitPrice ?? 0)) / 100, // BRL
-      size: (i.variant as any)?.size,
-    }));
+    const items = (cart?.items ?? []).map((i) => {
+      const unitPriceBRL = Number((Math.max(0, Number(i.unitPrice ?? 0)) / 100).toFixed(2));
+      return {
+        productId: i.productId ?? i.sku,
+        name: i.name ?? i.sku,
+        quantity: i.quantity,
+        unitPrice: unitPriceBRL, // BRL com 2 casas
+        size: (i.variant as any)?.size,
+      };
+    });
     return JSON.stringify(items);
   }, [cart?.items]);
 
-  // Total vem do carrinho (fonte da verdade)
   const totalCents = Math.max(0, Number(cart?.grandTotal ?? 0));
-  const totalAmount = totalCents / 100; // BRL
+  const totalAmount = Number((totalCents / 100).toFixed(2)); // BRL
 
-  // Frete a enviar no form: sessão > carrinho (normalizado) > vazio
   const shippingForForm = useMemo(() => {
     if (sessionShipping) return sessionShipping;
     if (cart?.shipping) {
+      const priceBRL = Number((Math.max(0, Number(cart.shipping.amount ?? 0)) / 100).toFixed(2));
       return {
         serviceCode: cart.shipping.serviceCode,
         label: cart.shipping.label,
-        priceBRL: Math.max(0, Number(cart.shipping.amount ?? 0)) / 100,
+        priceBRL,
+        price: priceBRL,
         days: cart.shipping.days,
         eta: cart.shipping.eta,
         isFree: cart.shipping.isFree,
@@ -99,18 +101,25 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
     email: checkoutData?.email,
     telefone: checkoutData?.telefone,
     phone: checkoutData?.telefone,
+    cpfCnpj: checkoutData?.cpf,
     cpf: checkoutData?.cpf,
+    postalCode: checkoutData?.cep,
     cep: checkoutData?.cep,
-    endereco: checkoutData?.endereco,
     address: checkoutData?.endereco,
+    endereco: checkoutData?.endereco,
+    addressNumber: checkoutData?.numero,
     numero: checkoutData?.numero,
     complemento: checkoutData?.complemento,
+    province: checkoutData?.bairro,
     bairro: checkoutData?.bairro,
+    city: checkoutData?.cidade,
     cidade: checkoutData?.cidade,
+    state: checkoutData?.estado,
     estado: checkoutData?.estado,
     couponCode,
   }), [checkoutData, couponCode]);
 
+  // Idempotência também no client (ajuda a evitar duplo clique/duplo submit)
   const idempotencyKey = useMemo(() => {
     const snap = JSON.stringify({
       method,
@@ -124,7 +133,9 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
 
   const [state, formAction] = useFormState(createPaymentAction, { ok: false } as any);
 
-  if (state.ok && state.paymentId) return <PaymentAwait paymentId={state.paymentId} />;
+  if (state.ok && state.paymentId) {
+    return <PaymentAwait paymentId={state.paymentId} />;
+  }
 
   if (isLoading) {
     return (

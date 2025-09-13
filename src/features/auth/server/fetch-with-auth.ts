@@ -1,12 +1,33 @@
 import 'server-only';
-import { getAccessToken } from './cookies';
+import { cookies } from 'next/headers';
+import { getAccessToken, setAuthCookies } from './cookies';
+
+function apiBase() {
+  return (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4001').replace(/\/+$/, '');
+}
 
 async function tryRefreshInternal(): Promise<boolean> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4001'}/api/auth/refresh`, {
+  const res = await fetch(`${apiBase()}/api/v1/auth/refresh`, {
     method: 'POST',
     cache: 'no-store',
+    headers: {
+      cookie: cookies().toString(),
+    },
   });
-  return res.ok;
+
+  if (!res.ok) return false;
+
+  try {
+    const data = await res.json().catch(() => null);
+    if (data?.accessToken) {
+      await setAuthCookies(data.accessToken, data.role ?? 'customer', {
+        refreshToken: data.refreshToken,
+      });
+    }
+  } catch {
+  }
+
+  return true;
 }
 
 export async function fetchWithAuth(input: string, init: RequestInit = {}) {

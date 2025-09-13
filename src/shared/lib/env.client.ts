@@ -10,7 +10,7 @@ const ClientEnv = z.object({
 
 const NEXT_PUBLIC_API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_URL ?? // caso você ainda use esse nome
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? // caso você ainda use esse nome
   (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : undefined);
 
 export const envClient = ClientEnv.parse({

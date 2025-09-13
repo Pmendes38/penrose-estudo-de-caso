@@ -1,4 +1,3 @@
-// src/features/cart/api/index.ts
 import {
   AddItemInput,
   Cart,
@@ -9,13 +8,10 @@ import {
   UpdateItemInput,
 } from '../schema';
 
-const BASE =
-  (process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '') ?? '') || ''; // ex.: https://api.seudominio.com
-
+const BASE = (process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '') ?? '') || '';
 const CART_BASE = `${BASE}/api/v1/cart`;
 
 let cartETag: string | null = null;
-
 const ETAG_STORAGE_KEY = 'cart:etag';
 
 function loadETagFromStorage() {
@@ -56,18 +52,23 @@ export function setCartETag(tag: string | null) {
   saveETagToStorage(tag);
 }
 
-async function sha256Base64(s: string): Promise<string> {
-  if (typeof window !== 'undefined' && window.crypto?.subtle) {
-    const data = new TextEncoder().encode(s);
-    const digest = await window.crypto.subtle.digest('SHA-256', data);
-    return btoa(String.fromCharCode(...new Uint8Array(digest)));
+async function sha256Base64(input: string): Promise<string> {
+  const subtle = globalThis.crypto?.subtle;
+  if (subtle) {
+    const data = new TextEncoder().encode(input);
+    const digest = await subtle.digest('SHA-256', data);
+    const bytes = new Uint8Array(digest);
+
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+
+    let b64: string;
+    if (typeof btoa !== 'undefined') b64 = btoa(binary);
+    else b64 = Buffer.from(bytes).toString('base64');
+
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
   }
-  try {
-    const nodeCrypto = require('crypto') as typeof import('crypto');
-    return nodeCrypto.createHash('sha256').update(s).digest('base64');
-  } catch {
-    return `rnd_${Math.random().toString(36).slice(2)}_${Date.now()}`;
-  }
+  return `rnd_${Math.random().toString(36).slice(2)}_${Date.now()}`;
 }
 
 async function buildIdempotencyKey(method: string, path: string, body?: unknown) {
@@ -108,11 +109,16 @@ type FetchOpts = {
   retryOnVersionMismatch?: boolean;
 };
 
+function extractErrorCode(payload: any): string | undefined {
+  if (typeof payload?.code === 'string') return payload.code;
+  if (typeof payload?.message === 'string') return payload.message;
+  if (typeof payload?.error === 'string') return payload.error;
+  return undefined;
+}
+
 async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<{ data: T; res: Response }> {
   const method = opts.method ?? 'GET';
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-  };
+  const headers: Record<string, string> = { Accept: 'application/json' };
 
   const isMut = method !== 'GET';
   const wantsBody = opts.body !== undefined;
@@ -128,23 +134,22 @@ async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<{ data: 
   const init: RequestInit = {
     method,
     headers,
-    credentials: 'include',
+    credentials: 'include', // mantém cookie de sessão/cartId
     signal: opts.signal,
   };
-  if (opts.cookie) (init.headers as Record<string, string>)['cookie'] = opts.cookie;
+
   if (wantsBody) init.body = JSON.stringify(opts.body);
+  if (opts.cookie) (init.headers as Record<string, string>)['cookie'] = opts.cookie;
 
   let res: Response;
   try {
     res = await fetch(path, init);
   } catch (err: any) {
-    // Falha de rede, timeout, CORS, etc.
     throw new ApiError(0, err?.message || 'network_error', 'network_error', err);
   }
 
   updateETagFromResponse(res);
 
-  // Tenta extrair payload de erro (quando houver)
   if (!res.ok) {
     let payload: any = null;
     try {
@@ -157,7 +162,7 @@ async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<{ data: 
         /* ignore */
       }
     }
-    const code = payload?.code ?? payload?.error ?? payload?.message;
+    const code = extractErrorCode(payload);
     const msg =
       typeof payload?.message === 'string'
         ? payload.message
@@ -165,56 +170,48 @@ async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<{ data: 
         ? code
         : `HTTP ${res.status}${res.statusText ? `: ${res.statusText}` : ''}`;
 
-    throw new ApiError(res.status, msg, typeof code === 'string' ? code : undefined, payload);
+    throw new ApiError(res.status, msg, code, payload);
   }
 
   try {
     const data = (await res.json()) as T;
     return { data, res };
   } catch (err: any) {
-    // Resposta sem JSON válido
     throw new ApiError(res.status, err?.message || 'invalid_json', 'invalid_json', err);
   }
 }
 
-/**
- * Re-executa a operação ao detectar:
- * - 409 version_mismatch  -> faz GET para atualizar ETag e tenta 1x
- * - 400 missing_cart_cookie / 404 cart_not_found -> cria carrinho e tenta 1x
- */
 async function mutWithRetry<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (err) {
-    // Caso não seja ApiError, encapsula e relança
     const e = err instanceof ApiError ? err : new ApiError(-1, (err as any)?.message || 'unknown_error');
 
-    // 409: versão desatualizada -> faz GET (atualiza ETag) e reexecuta
     if (e.status === 409 && (e.code === 'version_mismatch' || /version/i.test(e.message))) {
       try {
-        await getCart().catch(() => null); // Atualiza ETag silenciosamente
+        await getCart().catch(() => null);
         return await fn();
       } catch (err2) {
         throw err2 instanceof ApiError ? err2 : new ApiError(-1, (err2 as any)?.message || 'unknown_error');
       }
     }
 
-    // recria carrinho e tenta de novo quando o backend sinaliza ausência do carrinho
+    const marker = (e.code ?? e.message ?? '').toString();
+    const isNotFoundCode = ['cart_not_found', 'not_found', 'Not Found'].includes(marker);
     const isMissingCart =
-      (e.status === 400 && e.code === 'missing_cart_cookie') ||
-      (e.status === 404 && (e.code === 'cart_not_found' || e.code === 'not_found'));
+      (e.status === 400 && marker === 'missing_cart_cookie') ||
+      (e.status === 404 && isNotFoundCode);
 
     if (isMissingCart) {
       try {
-        await createCart(); // cria um novo carrinho
-        await getCart().catch(() => null); // garante ETag do novo carrinho
+        await createCart();
+        await getCart().catch(() => null);
         return await fn();
       } catch (err2) {
         throw err2 instanceof ApiError ? err2 : new ApiError(-1, (err2 as any)?.message || 'unknown_error');
       }
     }
 
-    // Qualquer outro erro
     throw e;
   }
 }
@@ -229,7 +226,6 @@ export async function createCart(options?: { cookie?: string; signal?: AbortSign
     });
     return data;
   } catch (err) {
-    // Não propaga erro bruto
     throw err instanceof ApiError ? err : new ApiError(-1, (err as any)?.message || 'unknown_error');
   }
 }
@@ -248,16 +244,12 @@ export async function getCart(options?: {
     return data;
   } catch (err) {
     const e = err as ApiError;
-    // Se não houver cookie de carrinho, cria automaticamente quando solicitado
-    if (options?.createIfMissing && e.status === 400 && e.code === 'missing_cart_cookie') {
-      try {
-        return await createCart({ cookie: options.cookie, signal: options?.signal });
-      } catch (err2) {
-        throw err2 instanceof ApiError ? err2 : new ApiError(-1, (err2 as any)?.message || 'unknown_error');
-      }
-    }
-    // Se o backend retornar not_found para um carrinho antigo, cria um novo quando createIfMissing=true
-    if (options?.createIfMissing && e.status === 404 && (e.code === 'cart_not_found' || e.code === 'not_found')) {
+    const marker = (e.code ?? e.message ?? '').toString();
+    const isNotFound =
+      e.status === 404 && ['cart_not_found', 'not_found', 'Not Found'].includes(marker);
+    const isMissingCookie = e.status === 400 && marker === 'missing_cart_cookie';
+
+    if (options?.createIfMissing && (isNotFound || isMissingCookie)) {
       try {
         return await createCart({ cookie: options.cookie, signal: options?.signal });
       } catch (err2) {
@@ -277,7 +269,6 @@ export async function addItem(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   return mutWithRetry(async () => {
     const { data } = await apiFetch<Cart>(`${CART_BASE}/items`, {
       method: 'POST',
@@ -295,7 +286,6 @@ export async function updateItem(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   return mutWithRetry(async () => {
     const { data } = await apiFetch<Cart>(`${CART_BASE}/items/${encodeURIComponent(itemId)}`, {
       method: 'PATCH',
@@ -312,7 +302,6 @@ export async function removeItem(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   return mutWithRetry(async () => {
     const { data } = await apiFetch<Cart>(`${CART_BASE}/items/${encodeURIComponent(itemId)}`, {
       method: 'DELETE',
@@ -328,7 +317,6 @@ export async function applyCoupon(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   return mutWithRetry(async () => {
     const { data } = await apiFetch<Cart>(`${CART_BASE}/coupons`, {
       method: 'POST',
@@ -345,7 +333,6 @@ export async function removeCoupon(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   return mutWithRetry(async () => {
     const { data } = await apiFetch<Cart>(`${CART_BASE}/coupons/${encodeURIComponent(code)}`, {
       method: 'DELETE',
@@ -361,7 +348,6 @@ export async function quoteShipping(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<QuoteResult> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   try {
     const { data } = await apiFetch<QuoteResult>(`${CART_BASE}/shipping/quote`, {
       method: 'POST',
@@ -380,7 +366,6 @@ export async function selectShipping(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<Cart> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   return mutWithRetry(async () => {
     const { data } = await apiFetch<Cart>(`${CART_BASE}/shipping/select`, {
       method: 'POST',
@@ -396,7 +381,6 @@ export async function prepareCheckout(
   options?: { cookie?: string; signal?: AbortSignal },
 ): Promise<PrepareCheckoutResult> {
   await ensureCart({ cookie: options?.cookie, signal: options?.signal });
-
   return mutWithRetry(async () => {
     const { data } = await apiFetch<PrepareCheckoutResult>(`${CART_BASE}/checkout/prepare`, {
       method: 'POST',

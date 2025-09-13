@@ -3,6 +3,8 @@ import { z } from 'zod';
 export const BillingType = z.enum(['PIX', 'BOLETO', 'CREDIT_CARD']);
 export const PaymentStatus = z.enum(['PENDING','AUTHORIZED','CONFIRMED','CANCELED','REFUNDED','FAILED']);
 
+const IsoDate = z.union([z.string(), z.date()]).transform((v) => (typeof v === 'string' ? new Date(v) : v));
+
 export const PaymentSchema = z.object({
   id: z.string(),
   orderId: z.string(),
@@ -14,8 +16,8 @@ export const PaymentSchema = z.object({
   boletoUrl: z.string().optional(),
   identificatorField: z.string().optional(),
   pixPayload: z.string().optional(),
-  createdAt: z.union([z.string(), z.date()]).optional(),
-  updatedAt: z.union([z.string(), z.date()]).optional(),
+  createdAt: IsoDate.optional(),
+  updatedAt: IsoDate.optional(),
 });
 export type Payment = z.infer<typeof PaymentSchema>;
 
@@ -37,13 +39,11 @@ export const CartItemSchema = z.object({
 });
 
 export const CreatePaymentSchema = z.object({
-  cartItems: z.array(CartItemSchema),
+  cartItems: z.array(CartItemSchema).min(1, 'Carrinho vazio'),
   totalAmount: z.number().min(0),
   billingType: BillingType,
-  customerData: z.record(z.string(), z.any()),               // ou um shape mais estrito se preferir
+  customerData: z.record(z.string(), z.any()),
   selectedShipping: z.record(z.string(), z.any()).optional(),
   idempotencyKey: z.string().optional(),
 });
-
-// derive o type do scema (em vez de declarar manualmente)
 export type CreatePaymentPayload = z.infer<typeof CreatePaymentSchema>;
