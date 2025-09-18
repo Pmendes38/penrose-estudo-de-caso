@@ -1,7 +1,7 @@
 'use client';
 import { useCart } from '@/features/cart/hooks/useCart';
-import type { Cart } from '@/features/cart/schema';
-import { useState, useTransition } from 'react';
+import type { Cart, ShippingSelectInput } from '@/features/cart/schema';
+import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function CartPageClient({ initialCart }: { initialCart?: Cart }) {
@@ -23,6 +23,20 @@ export default function CartPageClient({ initialCart }: { initialCart?: Cart }) 
   const [postal, setPostal] = useState('');
   const [isPending, startTransition] = useTransition();
 
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [nonCommercial, setNonCommercial] = useState(false);
+  const [invoiceKey, setInvoiceKey] = useState('');
+  const [receipt, setReceipt] = useState(false);
+  const [ownHand, setOwnHand] = useState(false);
+  const [agencyId, setAgencyId] = useState('');
+
+  const selectedQuote = useMemo(
+    () => quotes?.quotes.find((q) => q.serviceCode === selectedService) ?? null,
+    [quotes, selectedService],
+  );
+
+  const requiresAgency = !!selectedQuote?.me?.requiresAgency;
+
   if (isLoading && !cart) return <div className="p-6">Carregando carrinho…</div>;
   if (!cart) return <div className="p-6">Seu carrinho está vazio.</div>;
 
@@ -30,6 +44,25 @@ export default function CartPageClient({ initialCart }: { initialCart?: Cart }) 
   const discount = centsToBRL(cart.discountTotal);
   const shipping = centsToBRL(cart.shippingTotal);
   const total = centsToBRL(cart.grandTotal);
+
+  async function handleSelectShipping() {
+    if (!selectedService || !quotes) return;
+
+    const payload: ShippingSelectInput = {
+      serviceCode: selectedService,
+      address: { postalCode: quotes.postalCode },
+      nonCommercial,
+      invoiceKey: invoiceKey || undefined,
+      receipt,
+      ownHand,
+      agencyId: requiresAgency ? agencyId || undefined : undefined,
+      // platform/tags são opcionais; envie se quiser customizar
+    };
+
+    const updated = await selectShip(payload);
+    // limpar seleção local após sucesso
+    setSelectedService(updated.shipping?.serviceCode ?? null);
+  }
 
   return (
     <div className="mx-auto max-w-5xl p-6 grid gap-6 md:grid-cols-[1fr_380px]">
@@ -127,11 +160,50 @@ export default function CartPageClient({ initialCart }: { initialCart?: Cart }) 
             />
             <button
               className="rounded bg-black px-4 py-2 text-white"
-              onClick={() => requestQuotes(postal)}
+              onClick={() => {
+                setSelectedService(null);
+                requestQuotes(postal);
+              }}
               disabled={!postal}
             >
               Calcular
             </button>
+          </div>
+
+          {/* Opções extras para ME */}
+          <div className="grid gap-2 md:grid-cols-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={nonCommercial}
+                onChange={(e) => setNonCommercial(e.target.checked)}
+              />
+              Remessa não comercial
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={receipt}
+                onChange={(e) => setReceipt(e.target.checked)}
+              />
+              Aviso de recebimento
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={ownHand}
+                onChange={(e) => setOwnHand(e.target.checked)}
+              />
+              Mão própria
+            </label>
+            {!nonCommercial && (
+              <input
+                className="rounded border px-3 py-2 text-sm md:col-span-2"
+                placeholder="Chave da NF-e (44 dígitos)"
+                value={invoiceKey}
+                onChange={(e) => setInvoiceKey(e.target.value)}
+              />
+            )}
           </div>
 
           {quotes?.quotes?.length ? (
@@ -141,20 +213,48 @@ export default function CartPageClient({ initialCart }: { initialCart?: Cart }) 
                   <input
                     type="radio"
                     name="ship"
-                    onChange={() =>
-                      selectShip({ serviceCode: q.serviceCode, address: { postalCode: quotes.postalCode } })
-                    }
-                    checked={cart.shipping?.serviceCode === q.serviceCode}
+                    onChange={() => setSelectedService(q.serviceCode)}
+                    checked={selectedService === q.serviceCode}
                   />
                   <div className="flex-1">
                     <div className="font-medium">{q.label}</div>
                     <div className="text-xs text-gray-500">
                       {q.days ? `${q.days} dia(s)` : 'prazo informado no rastreio'}
+                      {q.me?.requiresAgency ? ' • coleta/entrega via agência' : ''}
                     </div>
                   </div>
                   <div className="font-semibold">{q.isFree ? 'Grátis' : centsToBRL(q.amount)}</div>
                 </label>
               ))}
+
+              {/* Campo da agência quando necessário */}
+              {requiresAgency && (
+                <div className="flex gap-2">
+                  <input
+                    className="flex-1 rounded border px-3 py-2 text-sm"
+                    placeholder="ID da agência"
+                    value={agencyId}
+                    onChange={(e) => setAgencyId(e.target.value)}
+                  />
+                  <span className="text-xs text-gray-500 self-center">
+                    Informe a agência exigida pelo serviço selecionado.
+                  </span>
+                </div>
+              )}
+
+              <div className="pt-2">
+                <button
+                  className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+                  onClick={handleSelectShipping}
+                  disabled={
+                    !selectedService ||
+                    (!nonCommercial && !invoiceKey.trim()) ||
+                    (requiresAgency && !agencyId.trim())
+                  }
+                >
+                  Selecionar frete
+                </button>
+              </div>
             </div>
           ) : null}
         </div>

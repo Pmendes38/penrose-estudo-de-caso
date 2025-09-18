@@ -134,7 +134,7 @@ async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<{ data: 
   const init: RequestInit = {
     method,
     headers,
-    credentials: 'include', // mantém cookie de sessão/cartId
+    credentials: 'include',
     signal: opts.signal,
   };
 

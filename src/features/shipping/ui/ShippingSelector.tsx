@@ -1,25 +1,37 @@
-// src/features/shipping/ui/ShippingSelector.tsx
 'use client';
-
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { CalculateShippingInput, ShippingQuote } from '../schemas';
 import { useShippingQuotes } from '../hooks/useShippingQuotes';
+import { formatBRL } from '@/shared/lib/format';
 
 type Props = {
-  input: CalculateShippingInput | null; // você monta a partir do CEP + pacote do carrinho
+  input: CalculateShippingInput | null;
   onSelect?: (q: ShippingQuote | null) => void;
 };
 
 export default function ShippingSelector({ input, onSelect }: Props) {
   const { state, selected, setSelected, isPending, fetchTransition } = useShippingQuotes();
 
+  // chave estável para evitar JSON.stringify no deps
+  const key = useMemo(() => {
+    if (!input) return '';
+    const { destination, packages, preferCheapest, cartTotal } = input;
+    return JSON.stringify({
+      postalCode: destination.postalCode,
+      pkg0: packages[0],
+      preferCheapest: !!preferCheapest,
+      cartTotal: cartTotal ?? null,
+    });
+  }, [input]);
+
   useEffect(() => {
     if (input) fetchTransition(input);
-  }, [JSON.stringify(input)]); // memo simples; na prática use um objeto memozado
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
 
   useEffect(() => {
     onSelect?.(selected);
-  }, [selected]);
+  }, [onSelect, selected]);
 
   if (!input) {
     return <p className="text-sm text-brand-gray">Informe CEP e itens para calcular frete.</p>;
@@ -41,8 +53,14 @@ export default function ShippingSelector({ input, onSelect }: Props) {
     <div className="space-y-2">
       {state.status === 'success' && state.quotes.map((q) => {
         const id = `ship_${q.id}`;
+        const isBest = state.best?.id === q.id;
         return (
-          <label key={q.id} htmlFor={id} className="flex items-center gap-3 p-3 rounded border border-brand-gray-border hover:bg-brand-gray/20">
+          <label
+            key={q.id}
+            htmlFor={id}
+            className={`flex items-center gap-3 p-3 rounded border border-brand-gray-border hover:bg-brand-gray/20 ${isBest ? 'ring-1 ring-brand-blue/60' : ''}`}
+            aria-label={`${q.name} ${q.company.name} ${q.deliveryDays} dias`}
+          >
             <input
               id={id}
               type="radio"
@@ -56,18 +74,19 @@ export default function ShippingSelector({ input, onSelect }: Props) {
                 {q.name} • {q.company.name}
               </div>
               <div className="text-sm text-brand-gray">
-                {q.description ?? `${q.deliveryDays} dias úteis`} • ETA {q.etaDate ? new Date(q.etaDate).toLocaleDateString('pt-BR') : '—'}
+                {q.description ?? `${q.deliveryDays} dias úteis`}
+                {q.etaDate ? ` • ETA ${new Date(q.etaDate).toLocaleDateString('pt-BR')}` : ''}
+                {isBest ? ' • Melhor opção' : ''}
               </div>
             </div>
             <div className="font-semibold">
-              {(q.priceBRL).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              {formatBRL(q.priceBRL)}
               {q.isFree && <span className="ml-2 text-xs bg-green-900/40 border border-green-700 px-2 py-0.5 rounded">Frete grátis</span>}
             </div>
           </label>
         );
       })}
 
-      {/* Campo oculto para enviar no form (JSON) */}
       <input type="hidden" name="selectedShipping" value={selected ? JSON.stringify(selected) : ''} />
     </div>
   );

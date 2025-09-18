@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { calculateShipping, validatePostalCode } from '../api/client';
 import type { CalculateShippingInput, ShippingQuote } from '../schemas';
 
@@ -15,7 +15,14 @@ export function useShippingQuotes() {
   const [selected, setSelected] = useState<ShippingQuote | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const abortRef = useRef<AbortController | null>(null);
+
   async function fetchQuotes(input: CalculateShippingInput) {
+    // cancela requisição anterior (race safety)
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+
     setState({ status: 'loading' });
     try {
       const { valid, normalized } = await validatePostalCode(input.destination.postalCode);
@@ -25,9 +32,16 @@ export function useShippingQuotes() {
         ...input,
         destination: { postalCode: normalized },
       });
-      setState({ status: 'success', quotes: res.quotes, best: res.bestQuote ?? undefined });
-      setSelected(res.bestQuote ?? res.quotes[0] ?? null);
+
+      if (ac.signal.aborted) return;
+
+      const quotes = Array.isArray(res?.quotes) ? res.quotes : [];
+      const best = res?.bestQuote ?? quotes[0] ?? null;
+
+      setState({ status: 'success', quotes, best });
+      setSelected(best);
     } catch (e: any) {
+      if (ac.signal.aborted) return;
       setState({ status: 'error', message: e?.message || 'Falha ao calcular frete' });
     }
   }

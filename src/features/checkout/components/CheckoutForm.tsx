@@ -26,6 +26,8 @@ const ESTADOS = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
 ];
 
+function onlyDigits(v: string) { return String(v || '').replace(/\D/g, ''); }
+
 export default function CheckoutForm() {
   const router = useRouter();
 
@@ -46,7 +48,7 @@ export default function CheckoutForm() {
 
   const [coupon, setCoupon] = useState<{ code?: string; discountTotal?: number }>({});
 
-  // Peso estimado e pacote (espelha a lógica do backend com defaults)
+  // Peso/pacote (alinha com backend)
   const pkg = useMemo(() => {
     const weightKg =
       items.reduce((sum, it: any) => {
@@ -56,7 +58,7 @@ export default function CheckoutForm() {
       }, 0) || 1;
 
     return {
-      weightKg: Math.max(0.2, Math.min(30, weightKg)), // limites razoáveis
+      weightKg: Math.max(0.2, Math.min(30, weightKg)),
       widthCm: 20,
       heightCm: 10,
       lengthCm: 20,
@@ -82,15 +84,13 @@ export default function CheckoutForm() {
     [subtotalBRL, cartDiscountBRL, couponDiscountBRL, shippingTotalBRL]
   );
 
-  // Prefill com dados salvos
+  // Prefill
   useEffect(() => {
     try {
       const raw = localStorage.getItem('checkoutData');
       if (raw) setFormData(JSON.parse(raw));
-
       const rawShip = localStorage.getItem('selectedShipping');
       if (rawShip) setSelectedShipping(JSON.parse(rawShip));
-
       const rawCoupon = localStorage.getItem('couponData');
       if (rawCoupon) setCoupon(JSON.parse(rawCoupon));
     } catch {}
@@ -106,7 +106,6 @@ export default function CheckoutForm() {
     setSubmitting(true);
     setClientError('');
 
-    // bloqueia avanço se carrinho ainda não carregou ou está vazio
     if (isLoading) {
       setClientError('Aguarde o carregamento do carrinho.');
       setSubmitting(false);
@@ -117,20 +116,25 @@ export default function CheckoutForm() {
       setSubmitting(false);
       return;
     }
+    const cepDigits = onlyDigits(formData.cep);
+    if (cepDigits.length !== 8) {
+      setClientError('Informe um CEP válido (8 dígitos).');
+      setSubmitting(false);
+      return;
+    }
+    if (!selectedShipping?.id) {
+      setClientError('Selecione uma opção de frete.');
+      setSubmitting(false);
+      return;
+    }
 
+    // Persistência local (qualquer erro aqui não bloqueia)
     try {
-      // Persistência local simples (para /payment recuperar)
       localStorage.setItem('checkoutData', JSON.stringify(formData));
-      if (selectedShipping) {
-        localStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
-      } else {
-        localStorage.removeItem('selectedShipping');
-      }
-      if (coupon?.code) {
-        localStorage.setItem('couponData', JSON.stringify(coupon));
-      } else {
-        localStorage.removeItem('couponData');
-      }
+      if (selectedShipping) localStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
+      else localStorage.removeItem('selectedShipping');
+      if (coupon?.code) localStorage.setItem('couponData', JSON.stringify(coupon));
+      else localStorage.removeItem('couponData');
     } catch {}
 
     try {
@@ -159,7 +163,9 @@ export default function CheckoutForm() {
         throw new Error(res?.error || 'Falha ao preparar checkout');
       }
 
-      router.push('/payment'); // /payment lê a sessão e chama createPayment
+      // você pode enviar `?draft=...` para a página de pagamento se preferir
+      // router.push(`/payment?draft=${encodeURIComponent(res.draftId)}`);
+      router.push('/payment');
     } catch (err: any) {
       setClientError(err?.message ?? 'Não foi possível prosseguir para o pagamento.');
     } finally {

@@ -1,23 +1,30 @@
-// src/features/shipping/ui/ShippingPlayground.tsx
 'use client';
 import { useMemo, useState } from 'react';
 import ShippingSelector from './ShippingSelector';
 import type { CalculateShippingInput } from '../schemas';
 import { formatBRL } from '@/shared/lib/format';
+import { formatCep, isValidCep } from '@/features/shipping/lib/cep';
+import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 
 export default function ShippingPlayground() {
-  const [cep, setCep] = useState('');
+  const [rawCep, setRawCep] = useState('');
+  const [preferCheapest, setPreferCheapest] = useState(true);
+  const [cartTotal, setCartTotal] = useState<number | ''>('');
   const [pkg, setPkg] = useState({ weightKg: 0.5, widthCm: 20, heightCm: 10, lengthCm: 20, declaredValue: 0 });
 
-  const validCep = /^\d{5}-?\d{3}$/.test(cep);
+  const cep = formatCep(rawCep);
+  const debouncedCep = useDebouncedValue(cep, 400);
+
+  const validCep = isValidCep(debouncedCep);
   const input: CalculateShippingInput | null = useMemo(() => {
     if (!validCep) return null;
     return {
-      destination: { postalCode: cep },
+      destination: { postalCode: debouncedCep },
       packages: [pkg],
-      preferCheapest: true,
+      preferCheapest,
+      cartTotal: typeof cartTotal === 'number' ? cartTotal : undefined,
     };
-  }, [cep, pkg, validCep]);
+  }, [debouncedCep, pkg, preferCheapest, cartTotal, validCep]);
 
   return (
     <div className="space-y-4 rounded-xl border border-brand-gray-border p-4 bg-brand-gray-dark/40">
@@ -26,11 +33,9 @@ export default function ShippingPlayground() {
           <span className="text-sm text-brand-gray">CEP</span>
           <input
             value={cep}
-            onChange={(e) => {
-              const d = e.target.value.replace(/\D/g, '').slice(0, 8);
-              setCep(d.length > 5 ? `${d.slice(0,5)}-${d.slice(5)}` : d);
-            }}
+            onChange={(e) => setRawCep(e.target.value)}
             placeholder="00000-000"
+            inputMode="numeric"
             className="bg-brand-black border border-brand-gray-border rounded px-3 py-2 text-brand-gray-light"
           />
         </label>
@@ -40,6 +45,8 @@ export default function ShippingPlayground() {
             type="number"
             value={pkg.declaredValue}
             onChange={(e) => setPkg({ ...pkg, declaredValue: Number(e.target.value || 0) })}
+            min={0}
+            step={1}
             className="bg-brand-black border border-brand-gray-border rounded px-3 py-2 text-brand-gray-light"
           />
         </label>
@@ -61,6 +68,28 @@ export default function ShippingPlayground() {
             />
           </label>
         ))}
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={preferCheapest}
+            onChange={(e) => setPreferCheapest(e.target.checked)}
+          />
+          <span className="text-sm text-brand-gray">Preferir a opção mais barata</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <span className="text-sm text-brand-gray">Total do carrinho (para frete grátis)</span>
+          <input
+            type="number"
+            min={0}
+            placeholder="0"
+            value={cartTotal}
+            onChange={(e) => setCartTotal(e.target.value === '' ? '' : Number(e.target.value))}
+            className="bg-brand-black border border-brand-gray-border rounded px-3 py-2 text-brand-gray-light w-40"
+          />
+        </label>
       </div>
 
       <div className="text-sm text-brand-gray">

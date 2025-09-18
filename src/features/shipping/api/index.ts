@@ -24,7 +24,6 @@ export async function validatePostalCode(postalCode: string) {
 }
 
 export async function calculateShipping(input: CalculateShippingInput): Promise<ShippingQuoteResponse> {
-  // valida tipagem antes de enviar
   CalculateShippingInputSchema.parse(input);
   const res = await fetch(`${BASE}/calculate`, {
     method: 'POST',
@@ -37,10 +36,9 @@ export async function calculateShipping(input: CalculateShippingInput): Promise<
 }
 
 export async function listShippingServices(): Promise<ShippingService[]> {
-  // GET pode ser cacheado com revalidate (via fetch options)
   const res = await fetch(`${BASE}/services`, {
     method: 'GET',
-    next: { revalidate: 60 * 60 }, // 1h
+    next: { revalidate: 60 * 60 },
   });
   if (!res.ok) throw new Error(await res.text());
   const data = await res.json();
@@ -58,7 +56,6 @@ export async function trackShipment(trackingCode: string) {
   return TrackShipmentResponseSchema.parse(await res.json());
 }
 
-// opcional: demo
 export async function demoCalculate(postalCode: string) {
   const url = new URL(`${BASE}/demo/calculate`);
   url.searchParams.set('postalCode', postalCode);

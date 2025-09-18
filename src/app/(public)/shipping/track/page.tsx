@@ -1,5 +1,5 @@
-// src/app/(public)/shipping/track/page.tsx
 import TrackForm from '@/features/shipping/ui/TrackForm';
+
 export const metadata = { title: 'Rastrear Pedido | Penrøse' };
 
 export default function TrackPage() {

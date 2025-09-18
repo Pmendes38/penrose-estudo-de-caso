@@ -14,12 +14,12 @@ export type CartItem = {
   image?: string;
   variant?: Record<string, string>;
   quantity: number;
-  unitPrice: number;
+  unitPrice: number; // centavos
   listPrice?: number;
   discounts: CartItemDiscount[];
   weightGrams?: number;
   dimensions?: CartItemDimensions;
-  total: number;
+  total: number; // centavos
 };
 
 export type Cart = {
@@ -32,11 +32,11 @@ export type Cart = {
 
   items: CartItem[];
 
-  itemsSubtotal: number;
-  discountTotal: number;
-  shippingTotal: number;
-  taxTotal: number;
-  grandTotal: number;
+  itemsSubtotal: number; // centavos
+  discountTotal: number; // centavos
+  shippingTotal: number; // centavos
+  taxTotal: number;      // centavos
+  grandTotal: number;    // centavos
 
   coupons: string[];
 
@@ -44,10 +44,29 @@ export type Cart = {
   shipping?: {
     serviceCode: string;
     label: string;
-    amount: number;
+    amount: number; // centavos
     days?: number;
     eta?: string;
     isFree?: boolean;
+    provider?: 'melhor-envio';
+    me?: {
+      serviceId?: string;
+      companyId?: string;
+      agencyId?: string;
+      fromPostal?: string; // dígitos
+      toPostal?: string;   // dígitos
+      options?: {
+        insurance_value?: number;
+        receipt?: boolean;
+        own_hand?: boolean;
+        non_commercial?: boolean;
+        invoice_key?: string;
+        platform?: string;
+        tags?: Array<{ tag: string; url?: string }>;
+      };
+      volumes?: Array<{ height: number; width: number; length: number; weight: number }>;
+      products?: Array<{ name: string; quantity: number; unitary_value: number; weight?: number }>;
+    };
   };
 
   version: number;
@@ -56,15 +75,19 @@ export type Cart = {
 };
 
 export type QuoteResult = {
-  postalCode: string;
+  postalCode: string; // 8 dígitos
   quotes: Array<{
     serviceCode: string;
     label: string;
-    amount: number;
+    amount: number; // centavos
     days: number;
     eta?: string;
     isFree?: boolean;
     source?: string;
+    me?: {
+      companyId?: string;
+      requiresAgency?: boolean;
+    };
   }>;
 };
 
@@ -90,7 +113,17 @@ export type UpdateItemInput = {
 
 export type ShippingQuoteInput = { address: Record<string, any> };
 
+export type TagInput = { tag: string; url?: string };
+
 export type ShippingSelectInput = {
   serviceCode: string;
   address?: Record<string, any>;
+  // Novos campos para Melhor Envio
+  nonCommercial?: boolean;
+  invoiceKey?: string;
+  agencyId?: string;
+  receipt?: boolean;
+  ownHand?: boolean;
+  platform?: string;
+  tags?: TagInput[];
 };
