@@ -1,5 +1,5 @@
 import ProductForm from '@/features/products/ui/ProductForm';
-import { createProductAction } from '../_actions';
+import { createProductAction } from './actions';
 
 export default function NovoProdutoPage() {
   return (

@@ -1,43 +1,55 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { envServer } from '@/shared/lib/env.server';
+import { createProduct, uploadProductImages } from '@/features/products/api';
 
-const ProductInput = z.object({
+const ServerFormSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  price: z.coerce.number().nonnegative().optional(),
-  category: z.string().optional(),
-  description: z.string().optional(),
+  category: z.string().min(1, 'Categoria é obrigatória'),
+  price: z.coerce.number().nonnegative().default(0), // BRL
+  stock: z.coerce.number().int().nonnegative().default(0),
+  status: z.enum(['active', 'inactive']).default('active'),
+  description: z.string().optional().default(''),
+  images: z.string().optional(), // CSV opcional (URLs)
+  tags: z.string().optional(),   // CSV opcional
 });
 
+function csvToArray(s?: string) {
+  return (s ?? '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
 export async function createProductAction(formData: FormData) {
+  // 1) Parse text fields
   const raw = Object.fromEntries(formData.entries());
-  const parsed = ProductInput.safeParse(raw);
+  const parsed = ServerFormSchema.safeParse(raw);
   if (!parsed.success) {
     const msg = parsed.error.issues[0]?.message ?? 'Dados inválidos';
     throw new Error(msg);
   }
 
-  const token = cookies().get('accessToken')?.value;
-  const res = await fetch(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/products`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(parsed.data),
-    cache: 'no-store',
-  });
+  const v = parsed.data;
 
-  if (res.status === 401 || res.status === 403) {
-    throw new Error('Não autorizado. Faça login novamente.');
-  }
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data?.message || 'Erro ao criar produto');
+  const dto = {
+    name: v.name,
+    category: v.category,
+    priceCents: Math.round(v.price * 100), // <<<<<<<<<<<<<< AQUI ESTÁ O PONTO
+    stock: v.stock,
+    status: v.status,
+    description: v.description ?? '',
+    images: csvToArray(v.images),
+    tags: csvToArray(v.tags),
+  };
+
+  const product = await createProduct(dto as any);
+
+  const files = (formData.getAll('files') as unknown as File[]).filter(Boolean);
+  if (files.length) {
+    await uploadProductImages(product.id, files);
   }
 
   revalidatePath('/admin/products');

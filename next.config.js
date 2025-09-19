@@ -2,25 +2,23 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'projeto-penrose.vercel.app' },
-      { protocol: 'http', hostname: 'localhost' },
-    ],
+      { protocol: 'http',  hostname: 'localhost', port: '3000', pathname: '/api/v1/files/**' },
+      { protocol: 'https', hostname: 'projeto-penrose.vercel.app', pathname: '/api/v1/files/**' },
 
-    domains: [
-      'images.tcdn.com.br',
-      'cdn.awsli.com.br'
+      { protocol: 'https', hostname: 'images.tcdn.com.br', pathname: '/**' },
+      { protocol: 'https', hostname: 'cdn.awsli.com.br',   pathname: '/**' },
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 31536000, // 1 year
+    minimumCacheTTL: 31536000,
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
+    contentDispositionType: 'inline',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4001';
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001';
     return [
       {
         source: '/api/:path*',
@@ -101,9 +99,7 @@ const nextConfig = {
   },
 
   async redirects() {
-    return [
-      { source: '/home', destination: '/', permanent: true },
-    ];
+    return [{ source: '/home', destination: '/', permanent: true }];
   },
 };
 

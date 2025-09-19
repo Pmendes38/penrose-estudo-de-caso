@@ -1,4 +1,3 @@
-// src/features/products/api/api.ts
 import 'server-only';
 import { envServer } from '@/shared/lib/env.server';
 import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
@@ -26,8 +25,6 @@ function toQuery(q: Record<string, any> = {}) {
   const s = u.toString();
   return s ? `?${s}` : '';
 }
-
-/* -------------------- Público -------------------- */
 
 export async function fetchPublicProducts(query: Partial<{
   search: string;
@@ -64,7 +61,6 @@ export async function getProductCached(idOrSlug: string, revalidateSeconds = 300
   return env.product;
 }
 
-/* -------------------- Admin (autenticado) -------------------- */
 
 export async function listAdminProducts(query?: {
   q?: string; // alias local para "search"
@@ -76,14 +72,13 @@ export async function listAdminProducts(query?: {
     page: query?.page,
     pageSize: query?.pageSize,
   };
-  const res = await fetchWithAuth(`${ADMIN_BASE}/page${toQuery(mapped)}`, {
+  const res = await fetchWithAuth(`${ADMIN_BASE}${toQuery(mapped)}`, {
     cache: 'no-store',
   });
   if (!res.ok) throw new Error(await res.text());
   return ProductPageSchema.parse(await res.json());
 }
 
-// (Alias para não quebrar importações existentes)
 export { listAdminProducts as listProducts };
 
 export async function createProduct(input: CreateProductDto): Promise<Product> {
@@ -112,7 +107,6 @@ export async function updateProduct(id: string, input: UpdateProductDto): Promis
   return ProductSchema.parse(json.product);
 }
 
-// (opcional) helpers adicionais
 export async function deleteProduct(id: string) {
   const res = await fetchWithAuth(`${ADMIN_BASE}/${encodeURIComponent(id)}`, {
     method: 'DELETE',
@@ -120,4 +114,20 @@ export async function deleteProduct(id: string) {
   });
   if (!res.ok) throw new Error(await res.text());
   return true;
+}
+
+export async function uploadProductImages(productId: string, files: File[]): Promise<string[]> {
+  if (!files.length) return [];
+  const fd = new FormData();
+  for (const f of files) fd.append('files', f);
+
+  const res = await fetchWithAuth(`${ADMIN_BASE}/${encodeURIComponent(productId)}/images/upload`, {
+    method: 'POST',
+    body: fd,
+    cache: 'no-store',
+  });
+
+  if (!res.ok) throw new Error(await res.text());
+  const json = await res.json();
+  return Array.isArray(json?.urls) ? json.urls : [];
 }

@@ -34,13 +34,9 @@ type Props = {
     sizes?: Array<{ price?: number }>;
     mainImage?: string;
   }>;
-  /** use um OU outro */
   onCreateAction?: ServerAction;
   onUpdateAction?: ServerAction;
-
-  /** fallback para ambientes sem Server Action */
   onSave?: (payload: BasePayload) => Promise<any>;
-
   onCancelHref?: string;
   serverError?: string;
 };
@@ -120,12 +116,13 @@ export default function ProductForm({
 
   const [clientError, setClientError] = useState<string>('');
   const [loadingLegacy, setLoadingLegacy] = useState(false);
+  const [previews, setPreviews] = useState<string[]>([]); // pré-visualizações locais
 
   const hasServerAction = Boolean(onCreateAction || onUpdateAction);
   const action = onUpdateAction ?? onCreateAction;
 
   async function handleLegacySubmit(e: React.FormEvent<HTMLFormElement>) {
-    if (hasServerAction || !onSave) return; // quem manda é o Server Action
+    if (hasServerAction || !onSave) return;
     e.preventDefault();
     setClientError('');
     setLoadingLegacy(true);
@@ -164,7 +161,6 @@ export default function ProductForm({
     ? { action }
     : { onSubmit: handleLegacySubmit as React.FormEventHandler<HTMLFormElement> };
 
-  // `fieldset` bloqueia inputs enquanto pending (Server Action) ou loadingLegacy
   const disabledAll = loadingLegacy;
 
   return (
@@ -173,6 +169,8 @@ export default function ProductForm({
       className="space-y-6"
       aria-describedby={serverError || clientError ? 'form-error' : undefined}
       noValidate
+      // IMPORTANTE: para enviar arquivos com Server Action
+      encType="multipart/form-data"
     >
       {(serverError || clientError) && (
         <div
@@ -184,16 +182,13 @@ export default function ProductForm({
         </div>
       )}
 
-      {/* hidden id p/ updates */}
       {initial.id && <input type="hidden" name="id" defaultValue={initial.id} />}
 
       <fieldset disabled={disabledAll} className="space-y-6">
         {/* Nome / Categoria */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="name" className="block text-sm text-brand-gray mb-1">
-              Nome
-            </label>
+            <label htmlFor="name" className="block text-sm text-brand-gray mb-1">Nome</label>
             <input
               id="name"
               name="name"
@@ -206,9 +201,7 @@ export default function ProductForm({
             />
           </div>
           <div>
-            <label htmlFor="category" className="block text-sm text-brand-gray mb-1">
-              Categoria
-            </label>
+            <label htmlFor="category" className="block text-sm text-brand-gray mb-1">Categoria</label>
             <input
               id="category"
               name="category"
@@ -225,9 +218,7 @@ export default function ProductForm({
         {/* Preço / Estoque / Status */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="price" className="block text-sm text-brand-gray mb-1">
-              Preço (R$)
-            </label>
+            <label htmlFor="price" className="block text-sm text-brand-gray mb-1">Preço (R$)</label>
             <input
               id="price"
               name="price"
@@ -241,9 +232,7 @@ export default function ProductForm({
             />
           </div>
           <div>
-            <label htmlFor="stock" className="block text-sm text-brand-gray mb-1">
-              Estoque
-            </label>
+            <label htmlFor="stock" className="block text-sm text-brand-gray mb-1">Estoque</label>
             <input
               id="stock"
               name="stock"
@@ -256,9 +245,7 @@ export default function ProductForm({
             />
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm text-brand-gray mb-1">
-              Status
-            </label>
+            <label htmlFor="status" className="block text-sm text-brand-gray mb-1">Status</label>
             <select
               id="status"
               name="status"
@@ -273,9 +260,7 @@ export default function ProductForm({
 
         {/* Descrição */}
         <div>
-          <label htmlFor="description" className="block text-sm text-brand-gray mb-1">
-            Descrição
-          </label>
+          <label htmlFor="description" className="block text-sm text-brand-gray mb-1">Descrição</label>
           <textarea
             id="description"
             name="description"
@@ -286,25 +271,51 @@ export default function ProductForm({
           />
         </div>
 
-        {/* Imagens / Tags */}
-        <div>
-          <label htmlFor="images" className="block text-sm text-brand-gray mb-1">
-            Imagens (URLs, separadas por vírgula)
+        {/* Upload de imagens */}
+        <div className="space-y-2">
+          <label htmlFor="files" className="block text-sm text-brand-gray mb-1">
+            Imagens (upload)
           </label>
           <input
-            id="images"
-            name="images"
-            type="text"
-            defaultValue={initial.imagesText}
-            placeholder="https://... , https://..."
-            className="w-full bg-brand-gray-dark border border-brand-gray-border text-brand-gray-light py-2 px-3 rounded focus:outline-none focus:border-brand-blue"
+            id="files"
+            name="files"
+            type="file"
+            multiple
+            accept="image/*"
+            className="block w-full text-sm text-brand-gray-light
+                       file:mr-4 file:py-2 file:px-4
+                       file:rounded file:border-0
+                       file:text-sm file:font-semibold
+                       file:bg-brand-gray file:text-brand-gray-light
+                       hover:file:bg-brand-gray/70"
+            onChange={(e) => {
+              const files = Array.from(e.currentTarget.files ?? []);
+              const next = files.map((f) => URL.createObjectURL(f));
+              setPreviews(next);
+            }}
           />
+          {previews.length > 0 && (
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-2">
+              {previews.map((src, i) => (
+                <div key={i} className="aspect-square overflow-hidden rounded border border-brand-gray-border">
+                  <img
+                    src={src}
+                    alt={`preview-${i}`}
+                    className="w-full h-full object-cover"
+                    onLoad={() => URL.revokeObjectURL(src)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-brand-gray">
+            Você ainda pode informar URLs manualmente no campo abaixo (opcional).
+          </p>
         </div>
 
+        {/* Tags */}
         <div>
-          <label htmlFor="tags" className="block text-sm text-brand-gray mb-1">
-            Tags (separadas por vírgula)
-          </label>
+          <label htmlFor="tags" className="block text-sm text-brand-gray mb-1">Tags (separadas por vírgula)</label>
           <input
             id="tags"
             name="tags"

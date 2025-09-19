@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
-import { toggleProductStatusAction } from './actions';
+import { toggleProductStatusAction, deleteProductAction } from './actions'; // <- importa a nova action
 
 function formatBRL(n: number) {
   return new Intl.NumberFormat('pt-BR',{ style:'currency', currency:'BRL' }).format(n ?? 0);
@@ -15,7 +15,7 @@ type ProductRow = {
   id: string;
   name: string;
   category?: string | null;
-  price: number;      // já normalizado no server
+  price: number;
   stock?: number;
   status: 'active' | 'inactive';
   image?: string | null;
@@ -50,7 +50,22 @@ export default function ProductsTable({ data }: { data: TableData }) {
       try {
         await toggleProductStatusAction(p.id, p.status);
       } catch (e: any) {
-        alert(e?.message ?? 'Erro ao atualizar produto'); // se tiver toast, use-o aqui
+        alert(e?.message ?? 'Erro ao atualizar produto');
+      }
+    });
+  };
+
+  // NOVO: deletar
+  const onDelete = (p: ProductRow) => {
+    if (!confirm(`Tem certeza que deseja excluir "${p.name}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    start(async () => {
+      try {
+        await deleteProductAction(p.id);
+        // opcional: router.refresh() não é necessário porque a server action já revalida
+      } catch (e: any) {
+        alert(e?.message ?? 'Erro ao excluir produto');
       }
     });
   };
@@ -141,6 +156,8 @@ export default function ProductsTable({ data }: { data: TableData }) {
                   <Link href={`/product/${p.id}`} target="_blank" className="text-brand-gray hover:text-brand-gray-light px-3 py-1 rounded">
                     👁️ Ver
                   </Link>
+
+                  {/* Toggle status */}
                   <button
                     className="text-yellow-300 hover:text-yellow-200 px-3 py-1 rounded"
                     onClick={() => onToggle(p)}
@@ -148,6 +165,16 @@ export default function ProductsTable({ data }: { data: TableData }) {
                     title={p.status === 'active' ? 'Desativar' : 'Ativar'}
                   >
                     {p.status === 'active' ? '⏸️ Desativar' : '▶️ Ativar'}
+                  </button>
+
+                  {/* NOVO: Excluir */}
+                  <button
+                    className="text-red-400 hover:text-red-300 px-3 py-1 rounded"
+                    onClick={() => onDelete(p)}
+                    disabled={pending}
+                    title="Excluir produto"
+                  >
+                    🗑️ Excluir
                   </button>
                 </div>
               </div>
