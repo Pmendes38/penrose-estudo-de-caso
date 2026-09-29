@@ -210,17 +210,17 @@ export default function PenroseHome() {
         </div>
         <div className="penrose-why-grid">
           <article className="penrose-why-card why-blue">
-            <Image src="/assets/penrose/points.svg" alt="" width={150} height={150} />
+            <Image src="/assets/penrose/points.svg" alt="" width={150} height={150} unoptimized />
             <h3>Resgate pontos com a compra</h3>
             <p>Transforme suas compras em recompensas.</p>
           </article>
           <article className="penrose-why-card why-green">
-            <Image src="/assets/penrose/payment.svg" alt="" width={150} height={150} />
+            <Image src="/assets/penrose/payment.svg" alt="" width={150} height={150} unoptimized />
             <h3>Método de pagamento flexível</h3>
             <p>Você decide a forma de pagamento.</p>
           </article>
           <article className="penrose-why-card why-pink">
-            <Image src="/assets/penrose/quality.svg" alt="" width={150} height={150} />
+            <Image src="/assets/penrose/quality.svg" alt="" width={150} height={150} unoptimized />
             <h3>Qualidade excepcional nos produtos</h3>
             <p>Acabamento impecável em cada peça.</p>
           </article>
