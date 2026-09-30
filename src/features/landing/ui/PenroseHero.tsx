@@ -72,7 +72,7 @@ export default function PenroseHero() {
                 alt=""
                 fill
                 priority={index === 0}
-                sizes="(max-width: 700px) 82vw, 58vw"
+                sizes="(max-width: 700px) 82vw, 55vw"
                 className={slide.imageClassName ?? 'penrose-hero-image-square'}
               />
             </div>
