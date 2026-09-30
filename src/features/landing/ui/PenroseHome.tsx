@@ -130,13 +130,13 @@ function Footer() {
       <div>
         <h3>Institucional</h3>
         <a href="#sobre">Quem Somos</a>
-        <Link href="/terms">Política de Privacidade</Link>
+        <Link href="/privacy">Política de Privacidade</Link>
         <a href="mailto:contato@example.com">O Estúdio</a>
       </div>
       <div>
         <h3>Mais Informações</h3>
         <Link href="/shipping">Política de Entrega</Link>
-        <Link href="/terms">Trocas e Devoluções</Link>
+        <Link href="/returns">Trocas e Devoluções</Link>
         <Link href="/coupons">Política de Promoções</Link>
       </div>
       <div>

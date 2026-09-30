@@ -44,10 +44,8 @@ export default function CatalogGrid({ products }: { products: Product[] }) {
 
   if (!products?.length) {
     return (
-      <div className="rounded-lg border border-brand-gray-border bg-brand-gray-dark p-12 text-center">
-        <div className="text-6xl mb-4">📦</div>
-        <h3 className="text-xl font-semibold text-brand-gray-light mb-2">Nenhum produto disponível</h3>
-        <p className="text-brand-gray">Tente ajustar os filtros ou volte mais tarde.</p>
+      <div className="penrose-empty-state">
+        <h3>Nenhum produto disponível</h3><p>Tente ajustar os filtros ou volte mais tarde.</p>
       </div>
     );
   }
@@ -71,7 +69,7 @@ export default function CatalogGrid({ products }: { products: Product[] }) {
   }
 
   return (
-    <section aria-label="Lista de produtos" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <section aria-label="Lista de produtos" className="penrose-catalog-grid">
       {products.map((p) => {
         const cover = coverOf(p);
         const cents = priceCentsOf(p);
@@ -80,27 +78,27 @@ export default function CatalogGrid({ products }: { products: Product[] }) {
         return (
           <article
             key={p.id}
-            className="bg-brand-gray-dark rounded-lg border border-brand-gray-border overflow-hidden flex flex-col"
+            className="penrose-store-card"
           >
-            <Link href={linkTo(p)} className="block relative aspect-square bg-black/30">
+            <Link href={linkTo(p)} className="penrose-store-card-image">
               <Image
                 src={cover}
                 alt={p.name ?? 'Produto'}
                 fill
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                sizes="(min-width: 1200px) 18vw, (min-width: 640px) 32vw, 100vw"
                 className="object-cover"
                 priority={false}
               />
             </Link>
 
-            <div className="p-4 flex-1 flex flex-col">
-              <h3 className="text-white font-semibold line-clamp-2">{p.name}</h3>
+            <div className="penrose-store-card-copy">
+              <span className="penrose-card-kicker">COLECIONÁVEL</span><h3>{p.name}</h3>
               {p.tags?.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="penrose-card-tags">
                   {p.tags.slice(0, 3).map((t: string) => (
                     <span
                       key={t}
-                      className="text-xs px-2 py-1 rounded bg-brand-gray text-brand-gray-light border border-brand-gray-border"
+                      className="penrose-card-tag"
                     >
                       {t}
                     </span>
@@ -108,12 +106,12 @@ export default function CatalogGrid({ products }: { products: Product[] }) {
                 </div>
               )}
 
-              <div className="mt-4 text-brand-blue font-bold text-lg">{formatBRL(cents / 100)}</div>
+              <div className="penrose-card-price">{formatBRL(cents / 100)}</div>
 
-              <div className="mt-4 flex gap-3">
+              <div className="penrose-card-actions">
                 <button
                   type="button"
-                  className="flex-1 bg-brand-blue hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded disabled:opacity-60"
+                  className="penrose-card-cart"
                   onClick={() => handleAdd(p)}
                   disabled={disabled}
                 >
@@ -124,7 +122,7 @@ export default function CatalogGrid({ products }: { products: Product[] }) {
 
                 <Link
                   href={linkTo(p)}
-                  className="px-4 py-2 rounded border border-brand-gray-border text-brand-gray-light hover:text-white hover:border-brand-blue"
+                  className="penrose-card-details"
                 >
                   Ver Detalhes
                 </Link>

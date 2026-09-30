@@ -1,0 +1,13 @@
+export const metadata={title:'Política de Privacidade e Cookies'};
+
+export default function PrivacyPage(){
+  return <article className="penrose-policy-page"><header><span>POLÍTICA PENROSE</span><h1>Política de Privacidade<br/>e Cookies</h1><p>A sua privacidade é fundamental para nós. Esta política descreve como coletamos, usamos, armazenamos e protegemos suas informações.</p></header><div className="policy-copy">
+    <p>Ao navegar em nosso site e concordar com esta política, você aceita os termos vigentes para coleta de histórico de navegação, bem como o recebimento de comunicações da Penrose.</p>
+    <section><h2>1. O que é um cookie e para que serve?</h2><p>Cookies são pequenos arquivos criados por sites e salvos no computador, celular, tablet ou outro dispositivo com informações sobre a navegação.</p><h3>Segurança e Desempenho</h3><p>Os cookies não danificam o seu equipamento e nos ajudam a identificar e resolver possíveis erros de funcionalidades do site.</p><h3>Experiência e Personalização</h3><p>Eles são essenciais para melhorar a navegação e também ajudam a personalizar anúncios em plataformas próprias ou parceiras, com base nos interesses do usuário.</p></section>
+    <section><h2>2. Compromisso com seus Dados</h2><p>Não comercializamos dados dos clientes. Mantemos os dados sob sigilo dentro da organização e entre parceiros necessários ao processo de venda, como meios de pagamento e logística.</p><ul><li>Processamento de pedidos e emissão de notas fiscais.</li><li>Entrega de produtos.</li><li>Suporte ao cliente.</li><li>Análise e melhoria da experiência de compra.</li></ul></section>
+    <section><h2>3. Quais tipos de cookies são utilizados?</h2><p><strong>Próprios:</strong> fundamentais para o funcionamento do site, como manter itens no carrinho.</p><p><strong>De terceiros:</strong> geridos por parceiros, redes sociais e ferramentas de análise.</p></section>
+    <section><h2>4. Por quanto tempo as informações ficam guardadas?</h2><p>Manteremos as informações enquanto necessário ou até que seja manifestada oposição e retirada do consentimento. Cookies podem permanecer instalados até a expiração definida pelo próprio serviço.</p></section>
+    <section><h2>5. Como desativar os cookies?</h2><p>Você tem liberdade para gerenciar seus cookies nas configurações do navegador. Ao desativá-los, algumas funções podem deixar de operar e a experiência pode ser menos satisfatória.</p></section>
+    <section><h2>6. Seus Direitos</h2><p>Você pode solicitar acesso, correção ou exclusão dos seus dados pessoais, bem como retirar o consentimento para marketing. Dúvidas podem ser enviadas para <a href="mailto:contato@example.com">contato@example.com</a>.</p></section>
+  </div></article>;
+}

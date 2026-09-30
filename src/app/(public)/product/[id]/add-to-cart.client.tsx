@@ -54,9 +54,9 @@ export default function AddToCartClient({ product }: { product: Product }) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="penrose-buy-box">
       {Array.isArray(product.sizes) && product.sizes.length > 0 && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="penrose-size-grid">
           {product.sizes.map((s) => {
             const key = s.name ?? s.label ?? 'Único';
             const active = (selected?.name ?? selected?.label) === (s.name ?? s.label);
@@ -66,9 +66,7 @@ export default function AddToCartClient({ product }: { product: Product }) {
                 type="button"
                 onClick={() => setSelected(s)}
                 disabled={s.inStock === false}
-                className={`px-3 py-2 rounded border ${
-                  active ? 'border-brand-blue text-white bg-brand-blue/20' : 'border-brand-gray-border text-brand-gray-light'
-                } ${s.inStock === false ? 'opacity-50 cursor-not-allowed' : 'hover:border-brand-blue'}`}
+                className={`${active ? 'is-active' : ''} ${s.inStock === false ? 'is-disabled' : ''}`}
               >
                 {key}
               </button>
@@ -80,25 +78,25 @@ export default function AddToCartClient({ product }: { product: Product }) {
       <button
         onClick={handleAdd}
         disabled={disabled}
-        className="w-full bg-brand-blue hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all"
+        className="penrose-buy-primary"
       >
         {!selected
           ? 'Selecione um tamanho'
           : isAdding
           ? 'Adicionando…'
-          : '🛒 Adicionar ao Carrinho'}
+          : 'ADICIONAR AO CARRINHO'}
       </button>
 
       <button
         onClick={handleBuyNow}
         disabled={disabled}
-        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all"
+        className="penrose-buy-secondary"
       >
         {!selected
           ? 'Selecione um tamanho'
           : isAdding
           ? 'Processando…'
-          : '⚡ Comprar Agora'}
+          : 'COMPRAR AGORA'}
       </button>
     </div>
   );

@@ -2,50 +2,29 @@ import 'server-only';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { Logo } from '@/shared/ui/Logo';
-import { getUserRole } from '@/features/auth/server/cookies';
-import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
-const CartHeaderButton = dynamic(
-  () => import('@/features/cart/ui/CartHeaderButton'),
-  { ssr: false } // opcional; pode ser true também
-);
+function SearchIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>;
+}
+
+function BagIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l1 13H5L6 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>;
+}
 
 export default function AppHeader() {
-  const jar = cookies();
-  const hasToken = !!jar.get('accessToken')?.value;
-  const role = getUserRole(); // 'admin' | 'customer' | null
+  const hasToken = Boolean(cookies().get('accessToken')?.value);
 
   return (
-    <header className="sticky top-0 z-40 bg-brand-gray-dark border-b border-brand-gray-border">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Logo className="h-6 w-auto" />
-        </Link>
-
-        <nav className="flex items-center gap-4">
-          <Link href="/catalog" className="text-brand-gray-light hover:text-white">
-            Ver Catálogo
-          </Link>
-
-          {/* botão do carrinho aparece somente após login */}
-          {hasToken && <CartHeaderButton visible={true} />}
-
-          {hasToken && role === 'customer' && (
-            <Link href="/customer" className="text-brand-gray-light hover:text-white">
-              ⚙️ Configurações
-            </Link>
-          )}
-
-          {hasToken ? (
-            <Link href="/logout" className="text-red-400 hover:text-red-300">
-              Sair
-            </Link>
-          ) : (
-            <Link href="/login" className="text-brand-blue hover:text-blue-400">
-              Entrar
-            </Link>
-          )}
-        </nav>
+    <header className="penrose-header penrose-public-header">
+      <Link href="/" aria-label="Página inicial"><Logo className="h-7 w-auto md:h-9" /></Link>
+      <nav className="penrose-nav" aria-label="Navegação principal">
+        <Link href="/catalog">Catálogo</Link><Link href="/customer">Pedidos</Link><Link href="/#sobre">Sobre Nós</Link>
+      </nav>
+      <div className="penrose-header-actions">
+        <Link href="/catalog" aria-label="Pesquisar" className="penrose-header-icon"><SearchIcon /></Link>
+        <Link href="/cart" aria-label="Carrinho" className="penrose-header-icon"><BagIcon /></Link>
+        <Link href={hasToken ? '/customer' : '/login'} className="penrose-avatar" aria-label="Minha conta"><Image src="/assets/penrose/product-5.png" alt="" fill sizes="44px" /></Link>
       </div>
     </header>
   );

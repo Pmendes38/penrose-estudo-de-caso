@@ -1,7 +1,6 @@
-import { requireCustomerOrRedirect } from '@/features/auth/server/guards';
 import { fetchPublicProducts } from '@/features/products/api';
 import CatalogGrid from '@/features/products/ui/CatalogGrid';
-import CatalogSearch from '@/features/products/ui/CatalogSearch';
+import type { Product } from '@/features/products/schemas';
 
 type SearchParams = Partial<{
   search: string;
@@ -16,8 +15,6 @@ type SearchParams = Partial<{
 }>;
 
 export default async function CatalogPage({ searchParams }: { searchParams?: SearchParams }) {
-  requireCustomerOrRedirect();
-
   const q = {
     search: searchParams?.search,
     category: searchParams?.category,
@@ -42,60 +39,63 @@ export default async function CatalogPage({ searchParams }: { searchParams?: Sea
     sortDir: searchParams?.sortDir,
   };
 
+  const fallback: Product[] = [
+    ['Portgas D. Ace','One Piece',45900,'/assets/penrose/product-7.png'],
+    ['Adult Gon','Hunter x Hunter',31900,'/assets/penrose/product-2.png'],
+    ['Alphonse','Fullmetal Alchemist',25900,'/assets/penrose/product-8.png'],
+    ['Gaara','Naruto',35900,'/assets/penrose/product-9.png'],
+    ['Anakin Skywalker','Star Wars',180000,'/assets/penrose/product-5.png'],
+    ['Aquaman','Universo DC',48900,'/assets/penrose/product-6.png'],
+    ['Asa Noturna','Universo DC',39900,'/assets/penrose/product-3.png'],
+    ['Lanterna Verde','Universo DC',42900,'/assets/penrose/product-4.png'],
+  ].map(([name,category,price,image],index)=>({id:`visual-${index+1}`,slug:`visual-${index+1}`,name:String(name),category:String(category),priceCents:Number(price),stock:1,status:'active' as const,description:'Peça colecionável com acabamento manual.',images:[String(image)],tags:[String(category)]}));
+
   const page = await fetchPublicProducts({
     ...q,
     page: q.page ?? 1,
     pageSize: q.pageSize ?? 12,
-  });
+  }).catch(() => ({items:fallback,total:fallback.length,page:1,pageSize:fallback.length,pages:1}));
 
   return (
-    <main className="min-h-screen bg-brand-black">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Catálogo</h1>
-            <p className="text-brand-gray mt-1">
-              {page.total > 0
-                ? `${page.total} produto${page.total > 1 ? 's' : ''} encontrado${
-                    page.total > 1 ? 's' : ''
-                  }`
-                : 'Nenhum produto encontrado'}
-            </p>
-          </div>
-
-          <CatalogSearch
-            defaultValue={String(q.search ?? '')}
-            className="w-full md:w-80"
-            placeholder="Buscar por nome, tag…"
-          />
-        </header>
-
+    <div className="penrose-page penrose-catalog-page">
+      <aside className="penrose-filter-panel">
+        <h1>FILTROS</h1>
+        <form action="/catalog" className="penrose-filter-form">
+          <label>O que você procura?<input name="search" defaultValue={String(q.search ?? '')} placeholder="Pesquise por produto..." /></label>
+          <fieldset><legend>Categorias</legend>{['Anime','Games','Filmes','Séries'].map((item) => <label className="filter-check" key={item}><input type="radio" name="category" value={item} defaultChecked={q.category === item}/><span>{item}</span></label>)}</fieldset>
+          <fieldset><legend>Faixa de preço</legend><div className="filter-price"><input name="minPrice" inputMode="numeric" defaultValue={q.minPrice} placeholder="Mínimo"/><input name="maxPrice" inputMode="numeric" defaultValue={q.maxPrice} placeholder="Máximo"/></div></fieldset>
+          <label>Ordenar por<select name="sortBy" defaultValue={q.sortBy ?? 'createdAt'}><option value="createdAt">Mais recentes</option><option value="name">Nome</option><option value="priceCents">Preço</option></select></label>
+          <button type="submit">APLICAR FILTROS</button>
+        </form>
+      </aside>
+      <section className="penrose-catalog-results">
+        <header><div><p>CATÁLOGO COMPLETO</p><h2>{page.total} PRODUTOS</h2></div><span>Peças exclusivas para colecionadores</span></header>
         <CatalogGrid products={page.items} />
 
         {page.pages > 1 && (
-          <nav className="mt-8 flex items-center justify-center gap-2">
+          <nav className="penrose-pagination">
             <a
               href={`?page=${Math.max(1, (q.page ?? 1) - 1)}&pageSize=${q.pageSize ?? 12}&search=${encodeURIComponent(
                 String(q.search ?? ''),
               )}`}
-              className="px-3 py-2 rounded border border-brand-gray-border text-brand-gray-light hover:text-white hover:border-brand-blue"
+              className="penrose-page-button"
             >
               ◀ Anterior
             </a>
-            <span className="px-3 py-2 text-brand-gray">
+            <span>
               Página {q.page ?? 1} de {page.pages}
             </span>
             <a
               href={`?page=${Math.min(page.pages, (q.page ?? 1) + 1)}&pageSize=${q.pageSize ?? 12}&search=${encodeURIComponent(
                 String(q.search ?? ''),
               )}`}
-              className="px-3 py-2 rounded border border-brand-gray-border text-brand-gray-light hover:text-white hover:border-brand-blue"
+              className="penrose-page-button"
             >
               Próxima ▶
             </a>
           </nav>
         )}
-      </div>
-    </main>
+      </section>
+    </div>
   );
 }

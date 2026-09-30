@@ -14,9 +14,9 @@ export default function Gallery({ images, alt }: Props) {
   const [active, setActive] = useState(0);
 
   return (
-    <div className="space-y-3">
+    <div className="penrose-gallery">
       {/* Imagem principal */}
-      <div className="relative w-full aspect-square overflow-hidden rounded-xl border border-brand-gray-border bg-brand-gray-dark">
+      <div className="penrose-gallery-main">
         <Image
           src={safe[active]}
           alt={alt}
@@ -28,16 +28,15 @@ export default function Gallery({ images, alt }: Props) {
       </div>
 
       {/* Thumbs */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="penrose-gallery-thumbs">
         {safe.map((src, i) => (
           <button
             key={`${src}-${i}`}
             onClick={() => setActive(i)}
             className={[
-              'relative aspect-square overflow-hidden rounded-lg border transition-colors',
+              'penrose-gallery-thumb',
               i === active
-                ? 'border-brand-blue ring-2 ring-brand-blue/40'
-                : 'border-brand-gray-border hover:border-brand-blue/50',
+                ? 'is-active' : '',
             ].join(' ')}
             aria-label={`Imagem ${i + 1}`}
           >

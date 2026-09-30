@@ -84,121 +84,25 @@ export default async function ProductPage({ params }: PageParams) {
   const images = product.images?.length ? product.images : ['/assets/wide-logo.svg'];
   const inStock = (product.stock ?? 0) > 0 && product.status === 'active';
 
-  return (
-    <>
-      <ProductJsonLd product={product as Product} />
-
-      <main className="min-h-screen bg-brand-black">
-        <div className="container mx-auto px-4 py-8">
-          {/* Breadcrumb */}
-          <nav className="mb-6 text-sm text-brand-gray">
-            <ol className="flex items-center gap-2">
-              <li>
-                <Link href="/" className="hover:text-brand-gray-light transition-colors">Início</Link>
-              </li>
-              <li>›</li>
-              <li>
-                <Link href="/#loja" className="hover:text-brand-gray-light transition-colors">Loja</Link>
-              </li>
-              <li>›</li>
-              <li className="text-brand-gray-light truncate max-w-[60ch]">{product.name}</li>
-            </ol>
-          </nav>
-
-          <div className="grid lg:grid-cols-2 gap-10">
-            {/* GALERIA */}
-            <section>
-              <Gallery images={images} alt={product.name} />
-            </section>
-
-            {/* PAINEL DIREITO */}
-            <section className="space-y-6">
-              {/* Título + preço */}
-              <header className="space-y-2">
-                <h1 className="text-3xl font-bold text-white">{product.name}</h1>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl font-semibold text-brand-gray-light">
-                    {formatBRL((product.priceCents ?? 0) / 100)}
-                  </span>
-
-                  {inStock ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-700/40 text-emerald-100 text-xs font-medium px-2 py-1">
-                      ● Em estoque
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-red-700/40 text-red-100 text-xs font-medium px-2 py-1">
-                      ● Esgotado
-                    </span>
-                  )}
-                </div>
-
-                <div className="text-xs text-brand-gray">
-                  {product.sku && <span>SKU: <span className="text-brand-gray-light">{product.sku}</span></span>}
-                  {typeof product.stock === 'number' && (
-                    <span className="ml-3">Estoque: <span className="text-brand-gray-light">{product.stock}</span></span>
-                  )}
-                </div>
-              </header>
-
-              {/* Selector de tamanho (se houver) */}
-              {Array.isArray((product as any).sizes) && (product as any).sizes.length > 0 && (
-                <div className="pt-2">
-                  {/* @ts-ignore — sizes é opcional no nosso schema */}
-                  <SizeSelectorClient sizes={(product as any).sizes} />
-                </div>
-              )}
-
-              {/* Ações */}
-              <div className="pt-2">
-                <AddToCartClient
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    images: product.images,
-                    mainImage: product.images?.[0],
-                    // @ts-ignore — sizes opcional
-                    sizes: (product as any).sizes ?? [{ name: 'Único', price: (product.priceCents ?? 0) / 100, inStock }],
-                  }}
-                />
-              </div>
-
-              {/* Benefícios / badges */}
-              <ul className="grid sm:grid-cols-3 gap-3 pt-2 text-sm text-brand-gray">
-                <li className="rounded-lg border border-brand-gray-border bg-brand-gray-dark px-3 py-2">🚚 Envio para todo Brasil</li>
-                <li className="rounded-lg border border-brand-gray-border bg-brand-gray-dark px-3 py-2">💳 4x sem juros</li>
-                <li className="rounded-lg border border-brand-gray-border bg-brand-gray-dark px-3 py-2">🛡️ Garantia de qualidade</li>
-              </ul>
-
-              {/* Descrição */}
-              {product.description && (
-                <section className="pt-4">
-                  <h2 className="text-lg font-semibold text-brand-gray-light mb-2">Descrição</h2>
-                  <div className="leading-relaxed text-brand-gray whitespace-pre-line">
-                    {product.description}
-                  </div>
-                </section>
-              )}
-            </section>
-          </div>
-
-          {/* Sessão: informações adicionais (mock / opcional) */}
-          <div className="mt-12 grid md:grid-cols-3 gap-6">
-            <div className="rounded-lg border border-brand-gray-border bg-brand-gray-dark p-5">
-              <h3 className="font-semibold text-brand-gray-light mb-2">Material & Acabamento</h3>
-              <p className="text-brand-gray text-sm">Impressão 3D + acabamento manual, pintura premium e base estável.</p>
-            </div>
-            <div className="rounded-lg border border-brand-gray-border bg-brand-gray-dark p-5">
-              <h3 className="font-semibold text-brand-gray-light mb-2">Envio & Prazo</h3>
-              <p className="text-brand-gray text-sm">Produção sob demanda. Prazo médio 10–20 dias úteis + frete.</p>
-            </div>
-            <div className="rounded-lg border border-brand-gray-border bg-brand-gray-dark p-5">
-              <h3 className="font-semibold text-brand-gray-light mb-2">Trocas & Suporte</h3>
-              <p className="text-brand-gray text-sm">Atendimento humanizado. Troca em até 7 dias para defeitos.</p>
-            </div>
-          </div>
-        </div>
-      </main>
-    </>
-  );
+  return <>
+    <ProductJsonLd product={product as Product} />
+    <div className="penrose-page penrose-product-page">
+      <nav className="penrose-breadcrumb"><Link href="/">Início</Link><span>›</span><Link href="/catalog">Catálogo</Link><span>›</span><strong>{product.name}</strong></nav>
+      <div className="penrose-product-layout">
+        <section className="penrose-product-gallery"><Gallery images={images} alt={product.name} /></section>
+        <section className="penrose-product-info">
+          <p className="penrose-product-kicker">ACTION FIGURE COLECIONÁVEL</p>
+          <h1>{product.name}</h1>
+          <div className="penrose-product-rating">★★★★★ <span>Peça produzida para colecionadores exigentes</span></div>
+          <strong className="penrose-product-price">{formatBRL((product.priceCents ?? 0) / 100)}</strong>
+          <span className={inStock ? 'penrose-stock is-stock' : 'penrose-stock'}>{inStock ? '● EM ESTOQUE' : '● ESGOTADO'}</span>
+          {product.description && <div className="penrose-product-description">{product.description}</div>}
+          {Array.isArray((product as any).sizes) && (product as any).sizes.length > 0 && <SizeSelectorClient sizes={(product as any).sizes} />}
+          <AddToCartClient product={{ id: product.id, sku: product.sku, name: product.name, images: product.images, mainImage: product.images?.[0], sizes: (product as any).sizes ?? [{ name: 'Único', price: (product.priceCents ?? 0) / 100, inStock }] }} />
+          <div className="penrose-product-benefits"><span>Envio para todo Brasil</span><span>Pagamento seguro</span><span>Acabamento manual</span></div>
+        </section>
+      </div>
+      <section className="penrose-product-details"><article><h2>MATERIAL & ACABAMENTO</h2><p>Impressão 3D de alta precisão, pintura premium e acabamento manual.</p></article><article><h2>ENVIO & PRAZO</h2><p>Produção sob demanda e embalagem segura para sua coleção.</p></article><article><h2>TROCAS & SUPORTE</h2><p>Atendimento humanizado durante toda a experiência de compra.</p></article></section>
+    </div>
+  </>;
 }

@@ -1,10 +1,12 @@
 import AppHeader from '@/shared/ui/AppHeader';
+import StorefrontFooter from '@/shared/ui/StorefrontFooter';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AppHeader />
-      <main>{children}</main>
+      <main className="penrose-public-main">{children}</main>
+      <StorefrontFooter />
     </>
   );
 }
