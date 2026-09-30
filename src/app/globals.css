@@ -93,8 +93,24 @@ body {
   align-items: center;
   min-height: 104px;
   padding: 0 clamp(24px, 3vw, 48px);
-  border-bottom: 1px solid rgba(0, 171, 255, .72);
-  background: linear-gradient(90deg, #050709, #090b0f 65%, #03081a);
+  background: var(--penrose-bg);
+}
+
+.penrose-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: .16;
+  background: url('/assets/penrose/noise-texture.svg') 0 0 / 180px 180px repeat;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.penrose-header > * { position: relative; z-index: 1; }
+
+.penrose-home-header {
+  grid-template-columns: 1fr auto;
 }
 
 .penrose-nav {
@@ -145,59 +161,134 @@ body {
   stroke-linejoin: round;
 }
 
+.penrose-account-link { display: block; }
+
 .penrose-avatar {
-  position: relative;
-  display: block;
-  width: 56px;
-  height: 56px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, .62);
+  border: 1px solid rgba(255, 255, 255, .62);
   border-radius: 999px;
-  background: #111827;
+  color: #fff;
+  background-color: #10213a;
+  background-position: center;
+  background-size: cover;
+  font-size: .8rem;
+  font-weight: 800;
 }
 
-.penrose-avatar img { object-fit: cover; }
+.penrose-auth-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, .82);
+  font-size: .64rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.penrose-auth-links a { transition: color .2s ease; }
+.penrose-auth-links a:hover,
+.penrose-auth-links a:focus-visible { color: var(--penrose-blue); }
 
 .penrose-hero {
   position: relative;
   min-height: 580px;
   overflow: hidden;
   isolation: isolate;
-  background-color: #000721;
+  background-color: var(--penrose-bg);
   background-image:
-    linear-gradient(90deg, rgba(0, 7, 33, .06) 0%, rgba(0, 7, 33, .18) 46%, rgba(0, 7, 33, .68) 100%),
-    url('/assets/penrose/noise.png'),
-    linear-gradient(112deg, #00152f 0%, #000e29 48%, #000721 76%, #02030b 100%);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.penrose-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: url('/assets/penrose/hero.png') left 42% / min(68vw, 1300px) auto no-repeat;
-  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 38%, rgba(0, 0, 0, .96) 49%, rgba(0, 0, 0, .56) 64%, transparent 84%);
-  mask-image: linear-gradient(90deg, #000 0%, #000 38%, rgba(0, 0, 0, .96) 49%, rgba(0, 0, 0, .56) 64%, transparent 84%);
-  pointer-events: none;
+    linear-gradient(180deg, var(--penrose-bg) 0%, rgba(3, 8, 26, .72) 9%, transparent 20%),
+    radial-gradient(circle at 26% 42%, rgba(0, 44, 79, .46), transparent 38%),
+    linear-gradient(90deg, #021026 0%, var(--penrose-bg) 67%);
 }
 
 .penrose-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;
-  opacity: .26;
-  background: url('/assets/penrose/noise-texture.svg') 0 0 / 180px 180px repeat;
-  mix-blend-mode: overlay;
+  z-index: 4;
+  opacity: .34;
+  background-image:
+    linear-gradient(180deg, var(--penrose-bg) 0%, transparent 13%, transparent 72%, var(--penrose-bg) 100%),
+    url('/assets/penrose/noise-texture.svg');
+  background-size: auto, 180px 180px;
+  mix-blend-mode: soft-light;
   pointer-events: none;
+}
+
+.penrose-hero-slides,
+.penrose-hero-slide {
+  position: absolute;
+  inset: 0;
+}
+
+.penrose-hero-slide {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .8s ease, visibility .8s ease;
+}
+
+.penrose-hero-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.penrose-hero-media {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 0;
+  width: min(58vw, 1110px);
+  overflow: hidden;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 5%, #000 68%, rgba(0, 0, 0, .72) 80%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 9%, #000 72%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 5%, #000 68%, rgba(0, 0, 0, .72) 80%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 9%, #000 72%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.penrose-hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(90deg, transparent 0%, transparent 48%, rgba(3, 8, 26, .28) 67%, var(--penrose-bg) 100%),
+    linear-gradient(180deg, var(--penrose-bg) 0%, transparent 12%, transparent 70%, var(--penrose-bg) 100%),
+    url('/assets/penrose/noise-texture.svg') 0 0 / 160px 160px repeat;
+  background-blend-mode: normal, normal, soft-light;
+  opacity: .76;
+  pointer-events: none;
+}
+
+.penrose-hero-media img {
+  z-index: 1;
+  transition: transform 6.5s ease;
+}
+
+.penrose-hero-slide.is-active .penrose-hero-media img {
+  transform: scale(1.018);
+}
+
+.penrose-hero-image-portrait {
+  object-fit: cover;
+  object-position: 50% 42%;
+}
+
+.penrose-hero-image-square {
+  object-fit: contain;
+  object-position: center;
 }
 
 .penrose-hero-copy {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   top: 70px;
   right: clamp(48px, 5vw, 96px);
   width: min(51vw, 980px);
@@ -219,13 +310,34 @@ body {
   line-height: 1.65;
 }
 
+.penrose-hero-indicators {
+  position: absolute;
+  right: clamp(48px, 5vw, 96px);
+  bottom: 24px;
+  z-index: 6;
+  display: flex;
+  gap: 7px;
+}
+
+.penrose-hero-indicators button {
+  width: 9px;
+  height: 9px;
+  border: 1px solid rgba(255, 255, 255, .88);
+  border-radius: 999px;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.penrose-hero-indicators button:hover,
+.penrose-hero-indicators button:focus-visible { transform: scale(1.3); }
+.penrose-hero-indicators .is-active { background: #fff; }
+
 .penrose-feature-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(28px, 5vw, 104px);
   padding: 56px clamp(32px, 4.2vw, 82px) 72px;
   background:
-    linear-gradient(180deg, rgba(0, 28, 61, .8), rgba(3, 8, 26, 1)),
+    linear-gradient(180deg, var(--penrose-bg) 0%, rgba(0, 28, 61, .58) 34%, var(--penrose-bg) 100%),
     url('/assets/penrose/noise.png') center / cover;
 }
 
@@ -315,12 +427,7 @@ body {
   .penrose-nav { display: none; }
   .penrose-avatar { width: 42px; height: 42px; }
   .penrose-hero { min-height: 500px; }
-  .penrose-hero::before {
-    background-position: left center;
-    background-size: 95vw auto;
-    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 34%, rgba(0, 0, 0, .9) 52%, rgba(0, 0, 0, .38) 76%, transparent 100%);
-    mask-image: linear-gradient(90deg, #000 0%, #000 34%, rgba(0, 0, 0, .9) 52%, rgba(0, 0, 0, .38) 76%, transparent 100%);
-  }
+  .penrose-hero-media { width: 68vw; }
   .penrose-hero-copy { top: 52px; right: 28px; width: 62vw; }
   .penrose-feature-grid { grid-template-columns: 1fr; gap: 26px; }
   .penrose-collection-grid { grid-template-columns: repeat(2, 1fr); }
@@ -335,18 +442,24 @@ body {
   .penrose-header { min-height: 56px; padding-inline: 10px; }
   .penrose-header-actions { gap: 7px; }
   .penrose-header-icon { width: 24px; height: 24px; }
-  .penrose-avatar { width: 30px; height: 30px; }
-  .penrose-hero { min-height: 260px; }
-  .penrose-hero::before {
-    background-position: left center;
-    background-size: 78vw auto;
-    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 28%, rgba(0, 0, 0, .88) 48%, rgba(0, 0, 0, .32) 78%, transparent 100%);
-    mask-image: linear-gradient(90deg, #000 0%, #000 28%, rgba(0, 0, 0, .88) 48%, rgba(0, 0, 0, .32) 78%, transparent 100%);
+  .penrose-avatar { width: 30px; height: 30px; font-size: .62rem; }
+  .penrose-auth-links { gap: 2px; font-size: .48rem; }
+  .penrose-hero { min-height: 360px; }
+  .penrose-hero-media {
+    width: 82vw;
+    -webkit-mask-image:
+      linear-gradient(90deg, #000 0%, #000 45%, rgba(0, 0, 0, .68) 70%, transparent 100%),
+      linear-gradient(180deg, transparent 0%, #000 7%, #000 67%, transparent 100%);
+    mask-image:
+      linear-gradient(90deg, #000 0%, #000 45%, rgba(0, 0, 0, .68) 70%, transparent 100%),
+      linear-gradient(180deg, transparent 0%, #000 7%, #000 67%, transparent 100%);
   }
-  .penrose-hero::after { opacity: .18; }
-  .penrose-hero-copy { top: 42px; right: 12px; width: 62vw; }
-  .penrose-hero-copy h1 { font-size: clamp(1.45rem, 7vw, 2rem); }
+  .penrose-hero-image-portrait { object-position: 50% 39%; }
+  .penrose-hero-copy { top: 42px; right: 12px; width: 63vw; }
+  .penrose-hero-copy h1 { font-size: clamp(1.35rem, 6.5vw, 1.95rem); }
   .penrose-hero-copy p { margin-top: 10px; font-size: .52rem; line-height: 1.45; }
+  .penrose-hero-indicators { right: 14px; bottom: 18px; gap: 5px; }
+  .penrose-hero-indicators button { width: 7px; height: 7px; }
   .penrose-feature-grid { padding: 26px 14px 44px; }
   .penrose-feature-card { min-height: 135px; padding: 18px; }
   .penrose-feature-card h3 { font-size: 1.25rem; }

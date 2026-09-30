@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Logo } from '@/shared/ui/Logo';
+import AppHeader from '@/shared/ui/AppHeader';
+import PenroseHero from './PenroseHero';
 
 const collections = [
   { title: 'Universo DC', image: '/assets/penrose/collection-dc.png', accent: '#d15dff' },
@@ -23,54 +25,6 @@ const offers = [
   { name: 'Asa Noturna', image: '/assets/penrose/product-3.png' },
   { name: 'Lanterna Verde', image: '/assets/penrose/product-4.png' },
 ];
-
-function Icon({ children }: { children: React.ReactNode }) {
-  return <span className="penrose-header-icon">{children}</span>;
-}
-
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path d="m16.5 16.5 4 4" />
-    </svg>
-  );
-}
-
-function BagIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 8h12l1 13H5L6 8Z" />
-      <path d="M9 9V6a3 3 0 0 1 6 0v3" />
-    </svg>
-  );
-}
-
-function PenroseHeader() {
-  return (
-    <header className="penrose-header">
-      <Link href="/" aria-label="Página inicial">
-        <Logo className="h-7 w-auto md:h-9" />
-      </Link>
-      <nav className="penrose-nav" aria-label="Navegação principal">
-        <Link href="/catalog">Catálogo</Link>
-        <Link href="/customer">Pedidos</Link>
-        <a href="#sobre">Sobre Nós</a>
-      </nav>
-      <div className="penrose-header-actions">
-        <Link href="/catalog" aria-label="Pesquisar">
-          <Icon><SearchIcon /></Icon>
-        </Link>
-        <Link href="/cart" aria-label="Carrinho">
-          <Icon><BagIcon /></Icon>
-        </Link>
-        <Link href="/login" className="penrose-avatar" aria-label="Minha conta">
-          <Image src="/assets/penrose/product-5.png" alt="" fill sizes="40px" />
-        </Link>
-      </div>
-    </header>
-  );
-}
 
 function FeatureCard({ accent, title, children }: { accent: 'violet' | 'cyan' | 'orange'; title: string; children: React.ReactNode }) {
   return (
@@ -153,14 +107,8 @@ function Footer() {
 export default function PenroseHome() {
   return (
     <main className="penrose-site">
-      <PenroseHeader />
-
-      <section className="penrose-hero">
-        <div className="penrose-hero-copy">
-          <h1>Onde seu hobby se torna<br />arte colecionável.</h1>
-          <p>Materializamos paixões e memórias em action figures e itens personalizados de alta qualidade, fundindo tecnologia 3D e arte manual.</p>
-        </div>
-      </section>
+      <AppHeader home />
+      <PenroseHero />
 
       <section className="penrose-feature-grid" aria-label="Diferenciais Penrose">
         <FeatureCard accent="violet" title="Tecnologia e Arte">Impressão 3D de alta precisão e acabamento manual para transformar cada peça em uma obra única.</FeatureCard>
