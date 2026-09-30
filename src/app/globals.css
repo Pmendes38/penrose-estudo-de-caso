@@ -206,18 +206,32 @@ body {
     linear-gradient(90deg, #021026 0%, var(--penrose-bg) 67%);
 }
 
+.penrose-hero::before,
 .penrose-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 4;
-  opacity: .34;
-  background-image:
-    linear-gradient(180deg, var(--penrose-bg) 0%, transparent 13%, transparent 72%, var(--penrose-bg) 100%),
-    url('/assets/penrose/noise-texture.svg');
-  background-size: auto, 180px 180px;
-  mix-blend-mode: soft-light;
   pointer-events: none;
+}
+
+.penrose-hero::before {
+  z-index: 4;
+  background: linear-gradient(
+    180deg,
+    var(--penrose-bg) 0%,
+    transparent 12%,
+    transparent 60%,
+    rgba(3, 8, 26, .82) 82%,
+    var(--penrose-bg) 96%,
+    var(--penrose-bg) 100%
+  );
+}
+
+.penrose-hero::after {
+  z-index: 5;
+  opacity: .07;
+  background: url('/assets/penrose/noise-texture.svg') 0 0 / 180px 180px repeat;
+  mix-blend-mode: soft-light;
 }
 
 .penrose-hero-slides,
@@ -259,11 +273,8 @@ body {
   inset: 0;
   z-index: 2;
   background:
-    linear-gradient(90deg, transparent 0%, transparent 48%, rgba(3, 8, 26, .28) 67%, var(--penrose-bg) 100%),
-    linear-gradient(180deg, var(--penrose-bg) 0%, transparent 12%, transparent 70%, var(--penrose-bg) 100%),
-    url('/assets/penrose/noise-texture.svg') 0 0 / 160px 160px repeat;
-  background-blend-mode: normal, normal, soft-light;
-  opacity: .76;
+    linear-gradient(90deg, transparent 0%, transparent 44%, rgba(3, 8, 26, .18) 60%, rgba(3, 8, 26, .82) 82%, var(--penrose-bg) 100%),
+    linear-gradient(180deg, var(--penrose-bg) 0%, transparent 11%, transparent 58%, rgba(3, 8, 26, .78) 82%, var(--penrose-bg) 100%);
   pointer-events: none;
 }
 
@@ -291,14 +302,15 @@ body {
   z-index: 3;
   top: 70px;
   right: clamp(48px, 5vw, 96px);
-  width: min(51vw, 980px);
+  width: min(55vw, 1100px);
   text-align: right;
   text-transform: uppercase;
 }
 
 .penrose-hero-copy h1 {
-  font-size: clamp(2.8rem, 4.25vw, 4.25rem);
+  font-size: clamp(1rem, 3.55vw, 4.25rem);
   line-height: .98;
+  white-space: nowrap;
   text-shadow: 0 4px 4px rgba(0, 0, 0, .25);
 }
 
@@ -455,8 +467,8 @@ body {
       linear-gradient(180deg, transparent 0%, #000 7%, #000 67%, transparent 100%);
   }
   .penrose-hero-image-portrait { object-position: 50% 39%; }
-  .penrose-hero-copy { top: 42px; right: 12px; width: 63vw; }
-  .penrose-hero-copy h1 { font-size: clamp(1.35rem, 6.5vw, 1.95rem); }
+  .penrose-hero-copy { top: 42px; right: 12px; width: 66vw; }
+  .penrose-hero-copy h1 { font-size: clamp(.95rem, 4vw, 1.2rem); }
   .penrose-hero-copy p { margin-top: 10px; font-size: .52rem; line-height: 1.45; }
   .penrose-hero-indicators { right: 14px; bottom: 18px; gap: 5px; }
   .penrose-hero-indicators button { width: 7px; height: 7px; }
