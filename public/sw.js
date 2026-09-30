@@ -1,10 +1,9 @@
-const CACHE_NAME = 'penrose-v1.0.0';
-const STATIC_CACHE_NAME = 'penrose-static-v1.0.0';
-const DYNAMIC_CACHE_NAME = 'penrose-dynamic-v1.0.0';
+const CACHE_NAME = 'penrose-v1.1.0';
+const STATIC_CACHE_NAME = 'penrose-static-v1.1.0';
+const DYNAMIC_CACHE_NAME = 'penrose-dynamic-v1.1.0';
 
 // Assets que devem ser cached imediatamente
 const STATIC_ASSETS = [
-  '/',
   '/assets/wide-logo.svg',
   '/favicon.ico',
   '/favicon.svg',
@@ -80,6 +79,15 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== location.origin) {
     return;
   }
+
+  // Documents must be network-first so a new deployment is never hidden by
+  // stale application HTML. The cached offline page remains the fallback.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' }).catch(() => caches.match('/offline.html'))
+    );
+    return;
+  }
   
   event.respondWith(
     caches.match(request)
@@ -102,7 +110,7 @@ self.addEventListener('fetch', (event) => {
             const responseToCache = response.clone();
             
             // Determine which cache to use
-            const cacheName = STATIC_ASSETS.includes(url.pathname) 
+            const cacheName = STATIC_ASSETS.includes(url.pathname)
               ? STATIC_CACHE_NAME 
               : DYNAMIC_CACHE_NAME;
             

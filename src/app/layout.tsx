@@ -51,16 +51,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script id="sw-register" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
-              navigator.serviceWorker.register('/sw.js').then((reg) => {
-                reg.addEventListener('updatefound', () => {
-                  const nw = reg.installing;
-                  if (!nw) return;
-                  nw.addEventListener('statechange', () => {
-                    if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                      if (confirm('Nova versão disponível! Recarregar página?')) location.reload();
-                    }
-                  });
-                });
+              let reloading = false;
+              navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (reloading) return;
+                reloading = true;
+                window.location.reload();
+              });
+
+              navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then((reg) => {
+                reg.update();
               }).catch((err) => console.error('SW registration failed:', err));
             }
           `}
