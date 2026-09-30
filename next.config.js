@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('node:path');
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -57,6 +59,8 @@ const nextConfig = {
   },
 
   webpack: (config, { isServer }) => {
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+
     if (!isServer) {
       config.optimization.splitChunks.cacheGroups = {
         ...config.optimization.splitChunks.cacheGroups,
