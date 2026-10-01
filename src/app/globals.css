@@ -520,14 +520,19 @@ h3 {
 .penrose-collection-gallery {
   display: flex;
   width: 100%;
-  max-width: 1825px;
+  max-width: 1500px;
   gap: 47px;
   margin: 0 auto;
   padding: 4px 0 24px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
+  cursor: grab;
+  overscroll-behavior-inline: contain;
 }
+.penrose-collection-gallery:focus-visible { outline: 2px solid #006cff; outline-offset: 4px; }
+.penrose-collection-gallery.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+.penrose-collection-gallery.is-dragging .penrose-collection-card { pointer-events: none; }
 .penrose-collection-gallery::-webkit-scrollbar { display: none; }
 .penrose-collection-card { --card-accent: #00abff; position: relative; flex: 0 0 421px; height: 611px; overflow: hidden; border: 1px solid var(--card-accent); border-radius: 10px; box-shadow: 0 0 4px color-mix(in srgb, var(--card-accent) 40%, transparent); scroll-snap-align: start; transition: box-shadow .25s ease, transform .25s ease; }
 .penrose-collection-card::after { content: ""; position: absolute; inset: 35% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.92)); }

@@ -3,14 +3,8 @@ import Link from 'next/link';
 import { Logo } from '@/shared/ui/Logo';
 import AppHeader from '@/shared/ui/AppHeader';
 import PenroseHero from './PenroseHero';
+import CollectionCarousel from './CollectionCarousel';
 import StorefrontFooter from '@/shared/ui/StorefrontFooter';
-
-const collections = [
-  { title: 'Universo DC', image: '/assets/penrose/collection-dc.png', accent: '#d15dff' },
-  { title: 'Universo Marvel', image: '/assets/penrose/collection-marvel.png', accent: '#ff0946' },
-  { title: 'Dragon Ball', image: '/assets/penrose/collection-dragonball.png', accent: '#fbbc04' },
-  { title: 'Naruto', image: '/assets/penrose/collection-naruto.png', accent: '#ff5e00' },
-];
 
 const products = [
   {
@@ -107,14 +101,7 @@ export default function PenroseHome() {
         <div className="penrose-collections-actions">
           <Link href="/catalog" className="penrose-collections-more">Ver mais coleções</Link>
         </div>
-        <div className="penrose-collection-gallery" aria-label="Galeria de coleções">
-          {collections.map((collection) => (
-            <Link href="/catalog" key={collection.title} className="penrose-collection-card" style={{ '--card-accent': collection.accent } as React.CSSProperties}>
-              <Image src={collection.image} alt={collection.title} fill sizes="(max-width: 768px) 47vw, 420px" />
-              <span>{collection.title}</span>
-            </Link>
-          ))}
-        </div>
+        <CollectionCarousel />
       </section>
 
       <section className="penrose-section penrose-offers">
