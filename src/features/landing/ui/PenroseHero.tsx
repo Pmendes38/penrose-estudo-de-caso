@@ -8,31 +8,32 @@ const slides = [
     image: '/assets/penrose/hero.png',
     imageAlt: 'Action figure do Aquaman em cenário submarino',
     imageClassName: 'penrose-hero-image-portrait',
-    title: <>Onde seu hobby se torna<br />arte colecionável.</>,
+    title: ['Onde seu hobby se torna', 'arte colecionável.'],
     description: 'Materializamos paixões e memórias em action figures e itens personalizados de alta qualidade, fundindo tecnologia 3D e arte manual.',
   },
   {
     image: '/assets/penrose/product-2.png',
     imageAlt: 'Action figure de Gon em pose de combate',
-    title: <>Personagens que atravessam<br />histórias.</>,
+    titleClassName: 'penrose-hero-title-long',
+    title: ['Personagens que atravessam', 'histórias.'],
     description: 'Peças expressivas, produzidas para preservar cada detalhe dos universos que fazem parte da sua história.',
   },
   {
     image: '/assets/penrose/product-3.png',
     imageAlt: 'Action figure de Alphonse Elric',
-    title: <>Detalhes que transformam<br />impressão em arte.</>,
+    title: ['Detalhes que transformam', 'impressão em arte.'],
     description: 'Modelagem, acabamento e pintura se encontram em uma produção cuidadosa, pensada para colecionadores exigentes.',
   },
   {
     image: '/assets/penrose/product-4.png',
     imageAlt: 'Action figure de Gaara',
-    title: <>Sua coleção, feita<br />para ser única.</>,
+    title: ['Sua coleção, feita', 'para ser única.'],
     description: 'Projetos personalizados dão forma a personagens, memórias e ideias que não existem nas prateleiras comuns.',
   },
   {
     image: '/assets/penrose/product-6.png',
     imageAlt: 'Action figure do Aquaman',
-    title: <>Do imaginário direto<br />para a sua estante.</>,
+    title: ['Do imaginário direto', 'para a sua estante.'],
     description: 'Tecnologia 3D e trabalho manual reunidos para criar peças com presença, personalidade e acabamento premium.',
   },
 ];
@@ -77,7 +78,9 @@ export default function PenroseHero() {
               />
             </div>
             <div className="penrose-hero-copy">
-              <h1>{slide.title}</h1>
+              <h1 className={slide.titleClassName}>
+                {slide.title.map((line) => <span key={line}>{line}</span>)}
+              </h1>
               <p>{slide.description}</p>
             </div>
           </article>

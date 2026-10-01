@@ -378,11 +378,28 @@ body {
 }
 
 .penrose-hero-copy h1 {
+  display: block;
+  width: 100%;
+  min-width: 0;
   font-size: clamp(1rem, 3.55vw, 4.25rem);
   font-weight: 700;
   line-height: .98;
-  white-space: nowrap;
+  text-align: right;
   text-shadow: 0 4px 4px rgba(0, 0, 0, .25);
+}
+
+.penrose-hero-copy h1 span {
+  display: block;
+  width: 100%;
+  margin-left: auto;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (min-width: 641px) {
+  .penrose-hero-copy h1.penrose-hero-title-long {
+    font-size: clamp(1rem, 2.9vw, 3.55rem);
+  }
 }
 
 .penrose-hero-copy p {
@@ -391,6 +408,7 @@ body {
   color: rgba(255, 255, 255, .84);
   font-size: .94rem;
   line-height: 1.65;
+  text-align: right;
 }
 
 .penrose-hero-indicators {
