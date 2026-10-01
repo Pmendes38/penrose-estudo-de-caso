@@ -143,6 +143,9 @@ export default function PenroseHome() {
 
       <section className="penrose-section penrose-collections">
         <SectionTitle>Coleções</SectionTitle>
+        <div className="penrose-collections-actions">
+          <Link href="/catalog" className="penrose-collections-more">Ver mais coleções</Link>
+        </div>
         <div className="penrose-collection-gallery" aria-label="Galeria de coleções">
           {collections.map((collection) => (
             <Link href="/catalog" key={collection.title} className="penrose-collection-card" style={{ '--card-accent': collection.accent } as React.CSSProperties}>
@@ -151,7 +154,6 @@ export default function PenroseHome() {
             </Link>
           ))}
         </div>
-        <Link href="/catalog" className="penrose-collections-more">Ver mais coleções</Link>
       </section>
 
       <section className="penrose-section penrose-offers">

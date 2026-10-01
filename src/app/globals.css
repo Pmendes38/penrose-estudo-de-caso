@@ -512,18 +512,28 @@ body {
 .penrose-collection-card::after { content: ""; position: absolute; inset: 35% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.92)); }
 .penrose-collection-card img { object-fit: cover; }
 .penrose-collection-card span { position: absolute; z-index: 2; left: 0; right: 0; bottom: 20px; text-align: center; text-transform: uppercase; font-family: "Clash Display", Arial, sans-serif; font-size: 36px; font-weight: 200; line-height: 40px; }
+.penrose-collections .penrose-section-title { margin-bottom: 24px; }
+.penrose-collections-actions {
+  display: flex;
+  width: 100%;
+  max-width: 1825px;
+  margin: 0 auto 18px;
+  justify-content: flex-end;
+}
 .penrose-collections-more {
-  display: grid;
-  width: 176px;
-  height: 64px;
-  margin: 38px auto 0;
-  place-items: center;
+  display: inline-flex;
+  min-width: 218px;
+  height: 52px;
+  padding: 0 24px;
+  align-items: center;
+  justify-content: center;
   border-radius: 16px;
   background: linear-gradient(120deg, #ffca65, #ff8d62 57%, #fd7faf);
   box-shadow: 0 0 20px rgba(255, 177, 91, .7);
   font-family: "Instrument Sans", Arial, sans-serif;
   font-size: 22px;
   font-weight: 600;
+  white-space: nowrap;
   text-transform: uppercase;
   transition: transform .2s ease, box-shadow .2s ease;
 }
@@ -655,7 +665,8 @@ body {
   .penrose-collection-gallery { gap: 14px; padding-inline: 2px; }
   .penrose-collection-card { flex-basis: min(78vw, 421px); height: min(113vw, 611px); }
   .penrose-collection-card span { bottom: 14px; font-size: 28px; }
-  .penrose-collections-more { width: 158px; height: 54px; font-size: 16px; }
+  .penrose-collections-actions { margin-bottom: 14px; }
+  .penrose-collections-more { min-width: 178px; height: 46px; padding-inline: 18px; font-size: 14px; }
   .penrose-offer-gallery { gap: 14px; }
   .penrose-offer-card { flex-basis: min(78vw, 399px); height: min(78vw, 399px); }
   .penrose-offer-info { opacity: 1; transform: none; }
