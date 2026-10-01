@@ -12,18 +12,43 @@ const collections = [
 ];
 
 const products = [
-  { name: 'Portgas D. Ace', universe: 'One Piece', image: '/assets/penrose/product-7.png', price: 'R$ 459,00' },
-  { name: 'Adult Gon', universe: 'Hunter x Hunter', image: '/assets/penrose/product-2.png', price: 'R$ 319,00' },
-  { name: 'Alphonse', universe: 'Fullmetal Alchemist', image: '/assets/penrose/product-8.png', price: 'R$ 259,00' },
-  { name: 'Gaara', universe: 'Naruto', image: '/assets/penrose/product-9.png', price: 'R$ 359,00' },
-  { name: 'Anakin Skywalker', universe: 'Star Wars', image: '/assets/penrose/product-5.png', price: 'R$ 1.800,00' },
+  {
+    name: 'Portgas D. Ace',
+    universe: 'One Piece',
+    image: '/assets/penrose/product-1.png',
+    description: 'Reviva toda a intensidade de One Piece com esta estátua de Portgas D. Ace. A pintura, os detalhes e os efeitos translúcidos recriam suas chamas icônicas.',
+  },
+  {
+    name: 'Adult Gon',
+    universe: 'Hunter x Hunter',
+    image: '/assets/penrose/product-2.png',
+    description: 'A transformação lendária de Gon ganha forma nesta peça expressiva, com toda a força e emoção de seu momento mais marcante.',
+  },
+  {
+    name: 'Alphonse',
+    universe: 'Fullmetal Alchemist',
+    image: '/assets/penrose/product-3.png',
+    description: 'Uma peça imponente de Alphonse Elric, criada para traduzir a presença, a força e a lealdade do personagem em cada detalhe.',
+  },
+  {
+    name: 'Gaara',
+    universe: 'Naruto',
+    image: '/assets/penrose/product-4.png',
+    description: 'Gaara em sua juventude, com a icônica cabaça e o controle da areia, em uma peça que transmite intensidade e mistério.',
+  },
+  {
+    name: 'Goku e Gohan',
+    universe: 'Dragon Ball Z',
+    image: '/assets/penrose/product-5.png',
+    description: 'Pai e filho reunidos em uma cena carregada de energia, movimento e emoção para colecionadores de Dragon Ball Z.',
+  },
 ];
 
 const offers = [
-  { name: 'Aquaman', image: '/assets/penrose/product-6.png' },
-  { name: 'Vampira', image: '/assets/penrose/product-2.png' },
-  { name: 'Asa Noturna', image: '/assets/penrose/product-3.png' },
-  { name: 'Lanterna Verde', image: '/assets/penrose/product-4.png' },
+  { name: 'Adult Gon', image: '/assets/penrose/product-9.png', oldPrice: 'R$ 399', price: 'R$ 319', discount: '20% OFF', accent: '#00abff' },
+  { name: 'Vampira', image: '/assets/penrose/product-6.png', oldPrice: 'R$ 599', price: 'R$ 459', discount: '23% OFF', accent: '#d15dff' },
+  { name: 'Asa Noturna', image: '/assets/penrose/product-8.png', oldPrice: 'R$ 1.190', price: 'R$ 890', discount: '26% OFF', accent: '#00ff73' },
+  { name: 'Wolverine', image: '/assets/penrose/product-7.png', oldPrice: 'R$ 699', price: 'R$ 549', discount: '21% OFF', accent: '#ffb800' },
 ];
 
 function FeatureCard({ accent, title, children }: { accent: 'violet' | 'cyan' | 'orange'; title: string; children: React.ReactNode }) {
@@ -55,7 +80,7 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
         <span>ANIME</span>
         <h3>{product.name}</h3>
         <p>{product.universe}</p>
-        <strong>{product.price}</strong>
+        <p className="penrose-product-description-preview">{product.description}</p>
         <Link href="/catalog">Detalhes</Link>
       </div>
     </article>
@@ -118,7 +143,7 @@ export default function PenroseHome() {
 
       <section className="penrose-section penrose-collections">
         <SectionTitle>Coleções</SectionTitle>
-        <div className="penrose-collection-grid">
+        <div className="penrose-collection-gallery" aria-label="Galeria de coleções">
           {collections.map((collection) => (
             <Link href="/catalog" key={collection.title} className="penrose-collection-card" style={{ '--card-accent': collection.accent } as React.CSSProperties}>
               <Image src={collection.image} alt={collection.title} fill sizes="(max-width: 768px) 47vw, 420px" />
@@ -126,15 +151,20 @@ export default function PenroseHome() {
             </Link>
           ))}
         </div>
+        <Link href="/catalog" className="penrose-collections-more">Ver mais coleções</Link>
       </section>
 
       <section className="penrose-section penrose-offers">
-        <h2>Black Friday</h2>
-        <div className="penrose-offer-grid">
+        <h2>Ofertas em destaque</h2>
+        <div className="penrose-offer-gallery" aria-label="Produtos em promoção">
           {offers.map((offer) => (
-            <Link href="/catalog" key={offer.name} className="penrose-offer-card">
+            <Link href="/catalog" key={offer.name} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as React.CSSProperties}>
               <Image src={offer.image} alt={offer.name} fill sizes="(max-width: 768px) 44vw, 360px" />
-              <span>{offer.name}</span>
+              <span className="penrose-offer-badge">{offer.discount}</span>
+              <span className="penrose-offer-info">
+                <strong>{offer.name}</strong>
+                <span><s>{offer.oldPrice}</s> <b>por {offer.price}</b></span>
+              </span>
             </Link>
           ))}
         </div>
@@ -144,9 +174,9 @@ export default function PenroseHome() {
         <h2>Catálogo Completo</h2>
         <Link href="/catalog" className="penrose-search-field">Pesquisar por nome ou tag...</Link>
         <div className="penrose-filter-row">
-          {['Todos', 'Anime', 'Games', 'Filmes', 'Séries'].map((filter, index) => <span className={index === 0 ? 'active' : ''} key={filter}>{filter}</span>)}
+          {['Todos', 'Anime', 'Filme', 'Games', 'Universo DC', 'Universo Marvel'].map((filter) => <span className={filter === 'Anime' ? 'active' : ''} key={filter}>{filter}</span>)}
         </div>
-        <div className="penrose-product-grid">
+        <div className="penrose-product-gallery" aria-label="Prévia do catálogo">
           {products.map((product) => <ProductCard product={product} key={product.name} />)}
         </div>
       </section>
