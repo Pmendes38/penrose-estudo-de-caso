@@ -701,6 +701,86 @@ h3 {
 .penrose-footer-column a:hover { text-decoration: underline; }
 .penrose-footer small { position: absolute; bottom: 35px; left: 0; right: 0; text-align: center; color: #444; font-size: 12px; font-weight: 400; }
 
+/* Figma: two lightened background layers, one across the header/hero and one at collections. */
+.penrose-top-shell { position: relative; isolation: isolate; }
+.penrose-top-shell::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  inset: 0 0 auto;
+  height: min(1050px, 100%);
+  pointer-events: none;
+  opacity: .35;
+  mix-blend-mode: lighten;
+  background: linear-gradient(180deg, transparent 31%, #03081a 91%), linear-gradient(90deg, rgba(0,7,33,.4), rgba(0,7,33,.4)), url('/assets/penrose/figma-noise.png') center top / cover no-repeat;
+}
+.penrose-top-shell .penrose-header { z-index: 20; }
+.penrose-top-shell .penrose-feature-grid { position: relative; z-index: 6; }
+.penrose-collections { position: relative; isolation: isolate; }
+.penrose-collections::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: lighten;
+  background: linear-gradient(180deg, #03081a, transparent 20%, transparent 55%, #03081a 91%), linear-gradient(90deg, rgba(0,7,33,.25), rgba(0,7,33,.25)), url('/assets/penrose/figma-noise.png') center / cover no-repeat;
+}
+.penrose-hero { background: #03081a; }
+.penrose-hero::after { display: none; }
+.penrose-hero-media { inset: 0; width: 100%; -webkit-mask-image: none; mask-image: none; }
+.penrose-hero-media::after {
+  background: linear-gradient(180deg, #03081a 0%, transparent 14%, transparent 72%, #03081a 97%), linear-gradient(90deg, transparent 28%, #03081a 73%);
+}
+.penrose-hero-media img, .penrose-hero-slide.is-active .penrose-hero-media img {
+  position: absolute;
+  max-width: none;
+  object-fit: fill;
+  transform: none;
+  transition: none;
+}
+.penrose-hero-media img.penrose-hero-image-aquaman { width: 50.87%; height: 216.89%; left: -3.45%; top: -41.18%; }
+.penrose-hero-media img.penrose-hero-image-gaara { width: 44.12%; height: 146.06%; left: -.83%; top: -22.95%; }
+.penrose-hero-media img.penrose-hero-image-superman { width: 57.97%; height: 191.9%; left: -4.38%; top: -7.26%; }
+.penrose-hero-media img.penrose-hero-image-alphonse { width: 65.41%; height: 216.55%; left: -9.25%; top: -19.62%; }
+.penrose-hero-media img.penrose-hero-image-batman { width: 56.74%; height: 187.83%; left: -7.2%; top: -3.07%; }
+.penrose-hero-media img.penrose-hero-image-luffy { width: 48.02%; height: 158.95%; left: -.26%; top: -16.23%; }
+.penrose-hero-media img.penrose-hero-figma-overlay { z-index: 2; width: 100%; height: 100%; inset: 0; opacity: .5; }
+.penrose-hero-copy { right: clamp(24px, 3.8vw, 70px); width: min(53vw, 969px); }
+.penrose-hero-copy h1 { font-size: clamp(1rem, 3.34vw, 64px); line-height: .985; }
+.penrose-hero-copy p { max-width: 745px; font-family: "Clash Display", Arial, sans-serif; font-size: 15px; line-height: 25px; }
+.penrose-hero-slide:nth-child(3) .penrose-hero-copy { width: min(61vw, 1160px); }
+
+@media (min-width: 1001px) {
+  .penrose-collection-gallery { max-width: 1825px; gap: clamp(18px, 2.45vw, 47px); overflow: visible; cursor: default; }
+  .penrose-collection-card { flex: 1 1 0; min-width: 0; height: auto; aspect-ratio: 421 / 611; }
+}
+
+.penrose-offer-carousel { display: flex; align-items: center; gap: 14px; max-width: 1450px; margin: 0 auto; }
+.penrose-offer-arrow { flex: 0 0 38px; width: 38px; height: 44px; color: #fff; font-size: 32px; line-height: 1; transition: opacity .2s ease, transform .2s ease; }
+.penrose-offer-arrow:disabled { opacity: .25; cursor: default; }
+.penrose-offer-arrow:not(:disabled):hover { transform: scale(1.12); }
+.penrose-offer-viewport, .penrose-product-viewport { position: relative; min-width: 0; overflow: hidden; }
+.penrose-offer-viewport { flex: 1; }
+.penrose-offer-viewport.is-clipped-right::after, .penrose-product-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; bottom: 10px; width: clamp(30px, 6vw, 105px); background: linear-gradient(90deg, transparent, rgba(0, 80, 150, .58) 48%, #03081a 96%); filter: drop-shadow(-16px 0 16px rgba(0, 108, 255, .42)); pointer-events: none; }
+.penrose-offer-viewport.is-clipped-right::after { bottom: auto; height: min(28vw, 399px); background: linear-gradient(90deg, transparent, rgba(0, 46, 92, .42) 54%, #03081a 97%); filter: none; }
+.penrose-offer-gallery { max-width: none; gap: 32px; scrollbar-width: none; cursor: grab; overscroll-behavior-inline: contain; }
+.penrose-offer-gallery::-webkit-scrollbar { display: none; }
+.penrose-offer-gallery.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+.penrose-offer-gallery.is-dragging .penrose-offer-card { pointer-events: none; }
+@media (min-width: 1001px) { .penrose-offer-card { flex-basis: calc((100% - 64px) / 3); } }
+.penrose-product-gallery { padding-right: 90px; }
+.penrose-footer-brand { align-items: center; text-align: center; }
+.penrose-footer-social { justify-content: center; margin-left: 0; }
+.penrose-footer-brand .penrose-payments { justify-content: center; }
+
+@media (max-width: 640px) {
+  .penrose-hero-media { width: 100%; -webkit-mask-image: none; mask-image: none; }
+  .penrose-hero-media img[class^="penrose-hero-image-"] { width: 74%; height: 105%; left: -18%; top: 0; object-fit: cover; object-position: center 32%; }
+  .penrose-offer-carousel { gap: 4px; }
+  .penrose-offer-arrow { flex-basis: 25px; width: 25px; font-size: 24px; }
+}
+
 @media (max-width: 1000px) {
   .penrose-header { grid-template-columns: 1fr auto; min-height: 74px; }
   .penrose-nav { display: none; }
@@ -896,4 +976,8 @@ h3 {
 }
 @media(max-width:560px){
   .penrose-catalog-results>header{align-items:start;flex-direction:column;gap:8px}.penrose-filter-form{grid-template-columns:1fr}.penrose-catalog-grid{gap:10px}.penrose-store-card-copy{min-height:205px;padding:10px}.penrose-card-actions{grid-template-columns:1fr}.penrose-card-details{display:none}.penrose-product-info h1{font-size:2.35rem}.penrose-cart-item{grid-template-columns:88px 1fr}.penrose-cart-item>img,.penrose-cart-image-placeholder{width:88px;height:88px}.penrose-quantity{grid-column:2}.penrose-cart-item-total{position:absolute;right:18px;bottom:26px}.penrose-cart-tools{grid-template-columns:1fr}.checkout-grid.two,.checkout-grid.three{grid-template-columns:1fr}.penrose-checkout-form{padding:22px 16px}.checkout-items article{grid-template-columns:50px 1fr auto}.checkout-items article img,.checkout-items article>span{width:50px;height:50px}.confirmed-actions{width:100%;flex-direction:column}.confirmed-newsletter div{flex-direction:column}.penrose-order-card>header{grid-template-columns:1fr 1fr}.penrose-order-card>header div:last-child{grid-column:1/-1}.order-track small{font-size:.48rem}.penrose-order-card>footer{align-items:stretch;flex-direction:column}.penrose-order-card>footer>*{text-align:center}.penrose-footer{grid-template-columns:1fr}.penrose-policy-page{padding:60px 20px}.penrose-policy-page h1{font-size:2.8rem}
+}
+
+@media (max-width: 640px) {
+  .penrose-hero .penrose-hero-media { width: 100%; -webkit-mask-image: none; mask-image: none; }
 }

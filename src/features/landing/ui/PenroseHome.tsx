@@ -4,6 +4,7 @@ import { Logo } from '@/shared/ui/Logo';
 import AppHeader from '@/shared/ui/AppHeader';
 import PenroseHero from './PenroseHero';
 import CollectionCarousel from './CollectionCarousel';
+import OfferCarousel from './OfferCarousel';
 import StorefrontFooter from '@/shared/ui/StorefrontFooter';
 
 const products = [
@@ -40,13 +41,6 @@ const products = [
 ];
 
 const catalogFilters = ['Todos', 'Anime', 'Filme', 'Games', 'Universo DC', 'Universo Marvel'] as const;
-
-const offers = [
-  { name: 'Adult Gon', image: '/assets/penrose/product-9.png', oldPrice: 'R$ 399', price: 'R$ 319', discount: '20% OFF', accent: '#00abff' },
-  { name: 'Vampira', image: '/assets/penrose/product-6.png', oldPrice: 'R$ 599', price: 'R$ 459', discount: '23% OFF', accent: '#d15dff' },
-  { name: 'Asa Noturna', image: '/assets/penrose/product-8.png', oldPrice: 'R$ 1.190', price: 'R$ 890', discount: '26% OFF', accent: '#00ff73' },
-  { name: 'Wolverine', image: '/assets/penrose/product-7.png', oldPrice: 'R$ 699', price: 'R$ 549', discount: '21% OFF', accent: '#ffb800' },
-];
 
 function FeatureCard({ accent, title, children }: { accent: 'violet' | 'cyan' | 'orange'; title: string; children: React.ReactNode }) {
   return (
@@ -87,14 +81,15 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
 export default function PenroseHome() {
   return (
     <main className="penrose-site">
-      <AppHeader home />
-      <PenroseHero />
-
-      <section className="penrose-feature-grid" aria-label="Diferenciais Penrose">
+      <div className="penrose-top-shell">
+        <AppHeader home />
+        <PenroseHero />
+        <section className="penrose-feature-grid" aria-label="Diferenciais Penrose">
         <FeatureCard accent="violet" title="Tecnologia e Arte">Impressão 3D de alta precisão e acabamento manual para transformar cada peça em uma obra única.</FeatureCard>
         <FeatureCard accent="cyan" title="Qualidade Excepcional">Materiais premium, pintura impecável e atenção aos detalhes para colecionadores exigentes.</FeatureCard>
         <FeatureCard accent="orange" title="Personalização">Criamos o que o mercado de massa não oferece: personagens de nicho e projetos feitos para você.</FeatureCard>
-      </section>
+        </section>
+      </div>
 
       <section className="penrose-section penrose-collections">
         <SectionTitle>Coleções</SectionTitle>
@@ -105,21 +100,8 @@ export default function PenroseHome() {
       </section>
 
       <section className="penrose-section penrose-offers">
-        <h2>Ofertas em destaque</h2>
-        <div className="penrose-offer-gallery" aria-label="Produtos em promoção">
-          {offers.map((offer) => (
-            <Link href="/catalog" key={offer.name} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as React.CSSProperties}>
-              <span className="penrose-offer-visual">
-                <Image src={offer.image} alt={offer.name} fill sizes="(max-width: 768px) 44vw, 360px" />
-                <span className="penrose-offer-badge">{offer.discount}</span>
-              </span>
-              <span className="penrose-offer-info">
-                <strong>{offer.name}</strong>
-                <span><s>{offer.oldPrice}</s> <b>por {offer.price}</b></span>
-              </span>
-            </Link>
-          ))}
-        </div>
+        <h2>Ofertas</h2>
+        <OfferCarousel />
       </section>
 
       <section className="penrose-section penrose-catalog-preview">
@@ -138,8 +120,10 @@ export default function PenroseHome() {
             </button>
           ))}
         </form>
-        <div className="penrose-product-gallery" aria-label="Prévia do catálogo">
-          {products.map((product) => <ProductCard product={product} key={product.name} />)}
+        <div className="penrose-product-viewport">
+          <div className="penrose-product-gallery" aria-label="Prévia do catálogo">
+            {products.map((product) => <ProductCard product={product} key={product.name} />)}
+          </div>
         </div>
       </section>
 
