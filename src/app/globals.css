@@ -625,7 +625,12 @@ h3 {
 .penrose-product-description-preview { max-width: 329px; padding-top: 8px; color: #fff; font-size: 15px; line-height: 17px; }
 .penrose-product-copy a { align-self: end; border: 0; text-align: center; font-size: 24px; line-height: 32px; }
 
-.penrose-why { padding: 120px clamp(24px, 7vw, 140px); background: linear-gradient(180deg, rgba(0,0,0,0), #03081a 85%), url('/assets/penrose/noise.png') center / cover; }
+.penrose-why {
+  padding: 120px clamp(24px, 7vw, 140px);
+  background:
+    linear-gradient(180deg, var(--penrose-bg) 0%, rgba(3, 8, 26, .9) 9%, transparent 32%, transparent 65%, var(--penrose-bg) 100%),
+    url('/assets/penrose/noise.png') center / cover;
+}
 .penrose-why-heading { display: flex; flex-direction: column; align-items: center; margin-bottom: 88px; text-transform: uppercase; }
 .penrose-why-heading p { font-size: clamp(1.4rem, 2vw, 2.4rem); }
 .penrose-why-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(50px, 8vw, 150px); }
