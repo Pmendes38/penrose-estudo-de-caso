@@ -15,7 +15,7 @@ const slides = [
     image: '/assets/penrose/product-2.png',
     imageAlt: 'Action figure de Gon em pose de combate',
     titleClassName: 'penrose-hero-title-long',
-    title: ['Personagens que atravessam', 'histórias.'],
+    title: ['Personagens que', 'atravessam histórias.'],
     description: 'Peças expressivas, produzidas para preservar cada detalhe dos universos que fazem parte da sua história.',
   },
   {
