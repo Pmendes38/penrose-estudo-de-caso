@@ -44,6 +44,8 @@ const products = [
   },
 ];
 
+const catalogFilters = ['Todos', 'Anime', 'Filme', 'Games', 'Universo DC', 'Universo Marvel'] as const;
+
 const offers = [
   { name: 'Adult Gon', image: '/assets/penrose/product-9.png', oldPrice: 'R$ 399', price: 'R$ 319', discount: '20% OFF', accent: '#00abff' },
   { name: 'Vampira', image: '/assets/penrose/product-6.png', oldPrice: 'R$ 599', price: 'R$ 459', discount: '23% OFF', accent: '#d15dff' },
@@ -161,8 +163,10 @@ export default function PenroseHome() {
         <div className="penrose-offer-gallery" aria-label="Produtos em promoção">
           {offers.map((offer) => (
             <Link href="/catalog" key={offer.name} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as React.CSSProperties}>
-              <Image src={offer.image} alt={offer.name} fill sizes="(max-width: 768px) 44vw, 360px" />
-              <span className="penrose-offer-badge">{offer.discount}</span>
+              <span className="penrose-offer-visual">
+                <Image src={offer.image} alt={offer.name} fill sizes="(max-width: 768px) 44vw, 360px" />
+                <span className="penrose-offer-badge">{offer.discount}</span>
+              </span>
               <span className="penrose-offer-info">
                 <strong>{offer.name}</strong>
                 <span><s>{offer.oldPrice}</s> <b>por {offer.price}</b></span>
@@ -175,9 +179,19 @@ export default function PenroseHome() {
       <section className="penrose-section penrose-catalog-preview">
         <h2>Catálogo Completo</h2>
         <Link href="/catalog" className="penrose-search-field">Pesquisar por nome ou tag...</Link>
-        <div className="penrose-filter-row">
-          {['Todos', 'Anime', 'Filme', 'Games', 'Universo DC', 'Universo Marvel'].map((filter) => <span className={filter === 'Anime' ? 'active' : ''} key={filter}>{filter}</span>)}
-        </div>
+        <form action="/catalog" method="get" className="penrose-filter-row" aria-label="Filtrar catálogo por categoria">
+          {catalogFilters.map((filter) => (
+            <button
+              type="submit"
+              className={filter === 'Anime' ? 'is-active' : ''}
+              name={filter === 'Todos' ? undefined : 'category'}
+              value={filter === 'Filme' ? 'Filmes' : filter}
+              key={filter}
+            >
+              {filter}
+            </button>
+          ))}
+        </form>
         <div className="penrose-product-gallery" aria-label="Prévia do catálogo">
           {products.map((product) => <ProductCard product={product} key={product.name} />)}
         </div>
