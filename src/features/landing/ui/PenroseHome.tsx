@@ -226,8 +226,9 @@ export default function PenroseHome() {
           </article>
         </div>
         <div className="penrose-cta">
-          <strong>Transforme sua ideia em realidade</strong>
-          <a href="https://wa.me/5500000000000" target="_blank" rel="noreferrer">Fale conosco no WhatsApp</a>
+          <h2>Transforme sua ideia em realidade</h2>
+          <p>Pronto para encomendar uma peça personalizada ou tirar uma dúvida?</p>
+          <a href="https://wa.me/5500000000000" target="_blank" rel="noreferrer">Fale Conosco Pelo Whatsapp</a>
         </div>
       </section>
 
