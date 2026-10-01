@@ -652,12 +652,20 @@ h3 {
 .penrose-why-heading::after { grid-column: 3; }
 .penrose-why-heading p { grid-column: 2; grid-row: 1; text-align: center; white-space: nowrap; font-size: clamp(1.4rem, 2vw, 2.4rem); }
 .penrose-why-heading img { grid-column: 2; grid-row: 2; justify-self: center; }
-.penrose-why-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(50px, 8vw, 150px); }
-.penrose-why-card { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
-.penrose-why-card-panel { display: flex; width: min(100%, 320px); height: 400px; flex-direction: column; align-items: center; justify-content: space-between; padding: 42px 24px 28px; border: 1px solid var(--why-accent); border-radius: 12px; background: var(--why-surface); box-shadow: 0 0 20px var(--why-glow); }
-.penrose-why-card-panel img { width: 150px; height: 150px; object-fit: contain; }
-.penrose-why-card-panel h3 { max-width: 260px; color: #fff; font-family: "Instrument Sans", Arial, sans-serif; font-size: 23px; font-weight: 700; line-height: 1.15; text-transform: uppercase; }
-.penrose-why-card p { max-width: 270px; color: #d1d5db; font-size: 18px; line-height: 1.25; }
+.penrose-why-grid { display: grid; width: min(100%, 1320px); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 3vw, 48px); margin-inline: auto; }
+.penrose-why-card { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.penrose-why-card-panel { display: flex; width: 100%; height: 470px; flex-direction: column; align-items: center; justify-content: space-between; padding: 50px 26px 36px; border: 1px solid var(--why-accent); border-radius: 12px; background: var(--why-surface); box-shadow: 0 0 20px var(--why-glow); transition: transform .35s ease, box-shadow .35s ease, background-color .35s ease; will-change: transform; }
+.penrose-why-card-panel img { width: 168px; height: 168px; object-fit: contain; transition: transform .45s ease; }
+.penrose-why-card-panel h3 { max-width: 320px; color: #fff; font-family: "Instrument Sans", Arial, sans-serif; font-size: 26px; font-weight: 700; line-height: 1.15; text-transform: uppercase; }
+.penrose-why-card p { max-width: 380px; color: #d1d5db; font-size: 22px; line-height: 1.3; }
+@media (hover: hover) and (pointer: fine) {
+  .penrose-why-card:hover .penrose-why-card-panel { transform: translateY(-12px) scale(1.025); box-shadow: 0 0 36px var(--why-glow), 0 18px 34px rgba(0, 0, 0, .22); }
+  .penrose-why-card:hover .penrose-why-card-panel img { transform: translateY(-8px) rotate(-4deg) scale(1.07); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .penrose-why-card-panel, .penrose-why-card-panel img { transition: none; }
+  .penrose-why-card:hover .penrose-why-card-panel, .penrose-why-card:hover .penrose-why-card-panel img { transform: none; }
+}
 .why-blue { --why-accent: #0066ff; --why-surface: #001a58; --why-glow: rgba(0, 102, 255, .8); }
 .why-green { --why-accent: #00dc69; --why-surface: #00432f; --why-glow: rgba(0, 220, 105, .8); }
 .why-pink { --why-accent: #ff0946; --why-surface: #520021; --why-glow: rgba(255, 9, 70, .8); }
@@ -700,7 +708,7 @@ h3 {
   .penrose-collection-gallery { gap: 24px; }
   .penrose-offer-gallery { gap: 24px; }
   .penrose-why-grid { grid-template-columns: 1fr; gap: 34px; }
-  .penrose-why-card-panel { width: min(100%, 320px); }
+  .penrose-why-grid { max-width: 440px; }
   .penrose-footer { grid-template-columns: 1fr 1fr; }
 }
 
@@ -754,9 +762,10 @@ h3 {
   .penrose-why-heading { column-gap: 12px; }
   .penrose-why-heading::before, .penrose-why-heading::after { margin-top: 6px; }
   .penrose-why-heading { margin-bottom: 48px; }
-  .penrose-why-card-panel { width: min(100%, 290px); height: 370px; padding: 36px 20px 26px; }
-  .penrose-why-card-panel img { width: 140px; height: 140px; }
-  .penrose-why-card-panel h3 { font-size: 20px; }
+  .penrose-why-card-panel { height: 420px; padding: 40px 20px 30px; }
+  .penrose-why-card-panel img { width: 150px; height: 150px; }
+  .penrose-why-card-panel h3 { font-size: 23px; }
+  .penrose-why-card p { font-size: 19px; }
   .penrose-cta h2 { font-size: clamp(24px, 6vw, 36px); line-height: 1.1; }
   .penrose-cta p { max-width: 34ch; font-size: 14px; line-height: 20px; }
   .penrose-cta a { min-height: 54px; padding: 12px 22px; font-size: 16px; line-height: 24px; }
