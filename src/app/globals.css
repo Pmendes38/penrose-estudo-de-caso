@@ -666,13 +666,27 @@ h3 {
 .penrose-cta p { margin-top: 8px; color: #d1d5db; font-family: "Clash Display", Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
 .penrose-cta a { display: inline-flex; min-height: 68px; align-items: center; justify-content: center; margin-top: 24px; padding: 16px 28px; border-radius: 999px; color: #fff; background: #00c86d; box-shadow: 0 0 28px rgba(0,255,140,.65); font-family: "Instrument Sans", Arial, sans-serif; font-size: 24px; font-weight: 600; line-height: 29px; }
 
-.penrose-footer { position: relative; display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 60px; padding: 86px clamp(32px, 5vw, 100px) 120px; color: #0c0c0e; background: #fff; }
-.penrose-footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
-.penrose-footer-brand .penrose-payments { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
-.penrose-footer h3 { margin-bottom: 20px; font-family: "Clash Display", Arial, sans-serif; font-size: 1.1rem; letter-spacing: 0; }
-.penrose-footer > div:not(:first-child) { display: flex; flex-direction: column; gap: 12px; }
-.penrose-footer a { color: #242429; font-size: .9rem; }
-.penrose-footer small { position: absolute; bottom: 42px; left: 0; right: 0; text-align: center; color: #444; }
+.penrose-footer { position: relative; display: grid; grid-template-columns: minmax(280px, 1.4fr) repeat(3, minmax(145px, 1fr)); gap: clamp(28px, 4vw, 72px); padding: 58px clamp(28px, 5vw, 96px) 95px; color: #0c0c0e; background: #fff; font-family: "Instrument Sans", Arial, sans-serif; font-weight: 400; }
+.penrose-footer-brand { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 14px; }
+.penrose-footer-logo { display: inline-block; }
+.penrose-footer-logo img { display: block; width: 210px; height: auto; filter: brightness(0); }
+.penrose-footer-social { display: flex; align-items: center; gap: 9px; margin-left: 30px; }
+.penrose-footer-social button { display: grid; width: 25px; height: 25px; place-items: center; border: 0; border-radius: 50%; color: #111; background: transparent; font-size: 19px; font-weight: 700; line-height: 1; cursor: not-allowed; opacity: 1; }
+.penrose-footer-newsletter { width: min(100%, 390px); margin-top: 9px; }
+.penrose-footer-newsletter-bar { display: flex; height: 33px; border: 1px solid #d8d8d8; border-radius: 4px; overflow: hidden; }
+.penrose-footer-newsletter input { min-width: 0; flex: 1; padding: 0 9px; color: #222; background: #eee; font: 400 12px "Instrument Sans", Arial, sans-serif; opacity: 1; }
+.penrose-footer-newsletter input::placeholder { color: #505050; opacity: 1; }
+.penrose-footer-newsletter button { min-width: 80px; padding: 0 12px; color: #fff; background: #0074ff; font: 400 13px "Instrument Sans", Arial, sans-serif; cursor: not-allowed; opacity: 1; }
+.penrose-footer-newsletter p { margin-top: 5px; color: #555; font-size: 11px; line-height: 1.35; }
+.penrose-footer-brand .penrose-payments { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.penrose-payment { display: flex; height: 26px; align-items: center; justify-content: center; }
+.penrose-payment img { display: block; width: auto; height: 24px; }
+.penrose-payment:last-child img { height: 18px; }
+.penrose-footer-column { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.penrose-footer h3 { margin: 0 0 15px; font-family: "Instrument Sans", Arial, sans-serif; font-size: clamp(17px, 1.25vw, 24px); font-weight: 400; line-height: 1.25; }
+.penrose-footer-column a { color: #242429; font-size: clamp(12px, .95vw, 15px); font-weight: 400; line-height: 1.35; text-decoration: none; }
+.penrose-footer-column a:hover { text-decoration: underline; }
+.penrose-footer small { position: absolute; bottom: 35px; left: 0; right: 0; text-align: center; color: #444; font-size: 12px; font-weight: 400; }
 
 @media (max-width: 1000px) {
   .penrose-header { grid-template-columns: 1fr auto; min-height: 74px; }
@@ -748,6 +762,7 @@ h3 {
   .penrose-cta a { min-height: 54px; padding: 12px 22px; font-size: 16px; line-height: 24px; }
   .penrose-footer { grid-template-columns: 1fr 1fr; gap: 40px 24px; padding: 58px 24px 100px; }
   .penrose-footer-brand { grid-column: 1 / -1; }
+  .penrose-footer-column { align-items: flex-start; text-align: left; }
 }
 
 /* Public storefront screens */
