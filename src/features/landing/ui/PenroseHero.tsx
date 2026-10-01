@@ -21,6 +21,7 @@ const slides = [
   {
     image: '/assets/penrose/product-3.png',
     imageAlt: 'Action figure de Alphonse Elric',
+    titleClassName: 'penrose-hero-title-long',
     title: ['Detalhes que transformam', 'impressão em arte.'],
     description: 'Modelagem, acabamento e pintura se encontram em uma produção cuidadosa, pensada para colecionadores exigentes.',
   },
