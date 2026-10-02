@@ -559,8 +559,8 @@ h3 {
   background: linear-gradient(120deg, #ffca65, #ff8d62 57%, #fd7faf);
   box-shadow: 0 0 20px rgba(255, 177, 91, .7);
   font-family: "Instrument Sans", Arial, sans-serif;
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 400;
   white-space: nowrap;
   text-transform: uppercase;
   transition: transform .2s ease, box-shadow .2s ease;
@@ -756,19 +756,16 @@ h3 {
   .penrose-collection-card { flex: 1 1 0; min-width: 0; height: auto; aspect-ratio: 421 / 611; }
 }
 
-.penrose-offer-carousel { display: flex; align-items: center; gap: 14px; max-width: 1450px; margin: 0 auto; }
+.penrose-offer-carousel { display: flex; align-items: center; gap: 14px; max-width: 1780px; margin: 0 auto; }
 .penrose-offer-arrow { flex: 0 0 38px; width: 38px; height: 44px; color: #fff; font-size: 32px; line-height: 1; transition: opacity .2s ease, transform .2s ease; }
-.penrose-offer-arrow:disabled { opacity: .25; cursor: default; }
-.penrose-offer-arrow:not(:disabled):hover { transform: scale(1.12); }
+.penrose-offer-arrow:hover { transform: scale(1.12); }
 .penrose-offer-viewport, .penrose-product-viewport { position: relative; min-width: 0; overflow: hidden; }
-.penrose-offer-viewport { flex: 1; }
-.penrose-offer-viewport.is-clipped-right::after, .penrose-product-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; bottom: 10px; width: clamp(30px, 6vw, 105px); background: linear-gradient(90deg, rgba(3, 8, 26, 0), rgba(3, 8, 26, .8) 55%, var(--penrose-bg) 96%); pointer-events: none; }
-.penrose-offer-viewport.is-clipped-right::after { bottom: auto; height: min(28vw, 399px); }
-.penrose-offer-gallery { max-width: none; gap: 32px; scrollbar-width: none; cursor: grab; overscroll-behavior-inline: contain; }
-.penrose-offer-gallery::-webkit-scrollbar { display: none; }
-.penrose-offer-gallery.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
-.penrose-offer-gallery.is-dragging .penrose-offer-card { pointer-events: none; }
-@media (min-width: 1001px) { .penrose-offer-card { flex-basis: calc((100% - 64px) / 3); } }
+.penrose-offer-viewport { flex: 1; touch-action: pan-y; }
+.penrose-product-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; bottom: 10px; width: clamp(30px, 6vw, 105px); background: linear-gradient(90deg, rgba(3, 8, 26, 0), rgba(3, 8, 26, .8) 55%, var(--penrose-bg) 96%); pointer-events: none; }
+.penrose-offer-gallery { max-width: none; gap: 32px; overflow: visible; scroll-snap-type: none; scrollbar-width: none; cursor: grab; user-select: none; }
+.penrose-offer-gallery.is-moving { transform: translateX(calc(-25% - 8px)); transition: transform .4s ease; }
+.penrose-offer-card { flex-basis: calc((100% - 96px) / 4); }
+@media (prefers-reduced-motion: reduce) { .penrose-offer-gallery.is-moving { transition-duration: 1ms; } }
 .penrose-product-gallery { padding-right: 90px; }
 .penrose-footer-brand { align-items: center; text-align: center; }
 .penrose-footer-social { justify-content: center; margin-left: 0; }
@@ -792,6 +789,8 @@ h3 {
   .penrose-feature-card { width: min(100%, 516px); margin-inline: auto; }
   .penrose-collection-gallery { gap: 24px; }
   .penrose-offer-gallery { gap: 24px; }
+  .penrose-offer-card { flex-basis: calc((100% - 24px) / 2); }
+  .penrose-offer-gallery.is-moving { transform: translateX(calc(-50% - 12px)); }
   .penrose-why-grid { grid-template-columns: 1fr; gap: 34px; }
   .penrose-why-grid { max-width: 440px; }
   .penrose-footer { grid-template-columns: 1fr 1fr; }
@@ -830,9 +829,11 @@ h3 {
   .penrose-collection-card { flex-basis: min(78vw, 421px); height: min(113vw, 611px); }
   .penrose-collection-card span { bottom: 14px; font-size: 28px; }
   .penrose-collections-actions { margin-bottom: 14px; }
-  .penrose-collections-more { min-width: 178px; height: 46px; padding-inline: 18px; font-size: 14px; }
+  .penrose-collections-more { min-width: 178px; height: 46px; padding-inline: 18px; font-size: 13px; }
   .penrose-offer-gallery { gap: 14px; }
   .penrose-offer-card { flex-basis: min(78vw, 399px); }
+  .penrose-offer-gallery.is-moving { transform: translateX(calc(0px - min(78vw, 399px) - 14px)); }
+  .penrose-offer-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; width: 48px; height: min(78vw, 399px); background: linear-gradient(90deg, transparent, var(--penrose-bg)); pointer-events: none; }
   .penrose-offer-visual { width: 100%; }
   .penrose-offer-info { opacity: 1; transform: none; }
   .penrose-offer-info strong { font-size: 24px; line-height: 30px; }

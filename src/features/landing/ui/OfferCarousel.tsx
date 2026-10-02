@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, PointerEvent } from 'react';
+import { useRef, useState } from 'react';
+import type { CSSProperties, PointerEvent, TransitionEvent } from 'react';
 
 const offers = [
   { name: 'Adult Gon', image: '/assets/penrose/product-9.png', oldPrice: 'R$ 399', price: 'R$ 319', discount: '20% OFF', accent: '#00abff' },
@@ -13,90 +13,57 @@ const offers = [
 ];
 
 export default function OfferCarousel() {
-  const galleryRef = useRef<HTMLDivElement>(null);
-  const drag = useRef({ x: 0, scroll: 0, active: false, moved: false });
-  const [canGoBack, setCanGoBack] = useState(false);
-  const [canGoForward, setCanGoForward] = useState(false);
+  const [firstOffer, setFirstOffer] = useState(0);
+  const [isMoving, setIsMoving] = useState(false);
+  const pointer = useRef({ x: 0, active: false, suppressClickUntil: 0 });
+  const visibleOffers = Array.from({ length: offers.length + 1 }, (_, index) => offers[(firstOffer + index) % offers.length]);
 
-  function updateControls() {
-    const gallery = galleryRef.current;
-    if (!gallery) return;
-    setCanGoBack(gallery.scrollLeft > 2);
-    setCanGoForward(gallery.scrollLeft < gallery.scrollWidth - gallery.clientWidth - 2);
+  function advance() {
+    if (!isMoving) setIsMoving(true);
   }
 
-  useEffect(() => {
-    const gallery = galleryRef.current;
-    if (!gallery) return;
-    const observer = new ResizeObserver(updateControls);
-    observer.observe(gallery);
-    gallery.scrollLeft = gallery.scrollWidth - gallery.clientWidth;
-    updateControls();
-    return () => observer.disconnect();
-  }, []);
-
-  function move(direction: -1 | 1) {
-    const gallery = galleryRef.current;
-    if (!gallery) return;
-    const card = gallery.querySelector<HTMLElement>('.penrose-offer-card');
-    gallery.scrollBy({ left: direction * ((card?.offsetWidth ?? 399) + 32), behavior: 'smooth' });
+  function finishMove(event: TransitionEvent<HTMLDivElement>) {
+    if (event.target !== event.currentTarget || event.propertyName !== 'transform') return;
+    setFirstOffer((current) => (current + 1) % offers.length);
+    setIsMoving(false);
   }
 
   function onPointerDown(event: PointerEvent<HTMLDivElement>) {
-    if (event.pointerType !== 'mouse' || event.button !== 0) return;
-    const gallery = galleryRef.current;
-    if (!gallery) return;
-    drag.current = { x: event.clientX, scroll: gallery.scrollLeft, active: true, moved: false };
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    pointer.current = { x: event.clientX, active: true, suppressClickUntil: 0 };
   }
 
-  function onPointerMove(event: PointerEvent<HTMLDivElement>) {
-    const gallery = galleryRef.current;
-    const current = drag.current;
-    if (!gallery || !current.active) return;
-    const delta = event.clientX - current.x;
-    if (!current.moved && Math.abs(delta) < 6) return;
-    if (!current.moved) {
-      current.moved = true;
-      gallery.setPointerCapture(event.pointerId);
-      gallery.classList.add('is-dragging');
+  function onPointerUp(event: PointerEvent<HTMLDivElement>) {
+    if (!pointer.current.active) return;
+    pointer.current.active = false;
+    if (pointer.current.x - event.clientX > 50) {
+      pointer.current.suppressClickUntil = Date.now() + 500;
+      advance();
     }
-    gallery.scrollLeft = current.scroll - delta;
-  }
-
-  function onPointerEnd(event: PointerEvent<HTMLDivElement>) {
-    const gallery = galleryRef.current;
-    drag.current.active = false;
-    if (gallery?.hasPointerCapture(event.pointerId)) gallery.releasePointerCapture(event.pointerId);
-    gallery?.classList.remove('is-dragging');
   }
 
   return (
     <div className="penrose-offer-carousel">
-      <button className="penrose-offer-arrow" type="button" aria-label="Ver ofertas anteriores" disabled={!canGoBack} onClick={() => move(-1)}>←</button>
-      <div className={`penrose-offer-viewport${canGoForward ? ' is-clipped-right' : ''}`}>
-        <div
-          ref={galleryRef}
-          className="penrose-offer-gallery"
-          role="region"
-          aria-label="Produtos em promoção — deslize para ver mais"
-          tabIndex={0}
-          onScroll={updateControls}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerEnd}
-          onPointerCancel={onPointerEnd}
-          onClickCapture={(event) => {
-            if (drag.current.moved) {
-              event.preventDefault();
-              event.stopPropagation();
-              drag.current.moved = false;
-            }
-          }}
-        >
-          {offers.map((offer) => (
-            <Link href="/catalog" key={offer.name} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as CSSProperties} draggable={false}>
+      <button className="penrose-offer-arrow" type="button" aria-label="Deslizar ofertas para a esquerda" onClick={advance}>←</button>
+      <div
+        className="penrose-offer-viewport"
+        role="region"
+        aria-label="Ofertas. Arraste para a esquerda para continuar do início."
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => { pointer.current.active = false; }}
+        onClickCapture={(event) => {
+          if (Date.now() < pointer.current.suppressClickUntil) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }}
+      >
+        <div className={`penrose-offer-gallery${isMoving ? ' is-moving' : ''}`} onTransitionEnd={finishMove}>
+          {visibleOffers.map((offer, index) => (
+            <Link href="/catalog" key={`${offer.name}-${index}`} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as CSSProperties} draggable={false} aria-hidden={index === offers.length} tabIndex={index === offers.length ? -1 : 0}>
               <span className="penrose-offer-visual">
-                <Image src={offer.image} alt={offer.name} fill sizes="(max-width: 768px) 78vw, 360px" draggable={false} />
+                <Image src={offer.image} alt={index === offers.length ? '' : offer.name} fill sizes="(max-width: 640px) 78vw, (max-width: 1000px) 42vw, 25vw" draggable={false} />
                 <span className="penrose-offer-badge">{offer.discount}</span>
               </span>
               <span className="penrose-offer-info">
@@ -107,7 +74,6 @@ export default function OfferCarousel() {
           ))}
         </div>
       </div>
-      <button className="penrose-offer-arrow" type="button" aria-label="Ver próximas ofertas" disabled={!canGoForward} onClick={() => move(1)}>→</button>
     </div>
   );
 }
