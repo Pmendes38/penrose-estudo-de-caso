@@ -89,9 +89,6 @@ export default function PenroseHero() {
                 sizes="(max-width: 700px) 82vw, 55vw"
                 className={slide.imageClassName}
               />
-              {slide.imageClassName === 'penrose-hero-image-gaara' && (
-                <Image src="/assets/penrose/figma-hero-noise-overlay.png" alt="" fill sizes="100vw" className="penrose-hero-figma-overlay" />
-              )}
             </div>
             <div className="penrose-hero-copy">
               <h1 className={slide.titleClassName}>
