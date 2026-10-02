@@ -762,8 +762,8 @@ h3 {
 .penrose-offer-arrow:not(:disabled):hover { transform: scale(1.12); }
 .penrose-offer-viewport, .penrose-product-viewport { position: relative; min-width: 0; overflow: hidden; }
 .penrose-offer-viewport { flex: 1; }
-.penrose-offer-viewport.is-clipped-right::after, .penrose-product-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; bottom: 10px; width: clamp(30px, 6vw, 105px); background: linear-gradient(90deg, transparent, rgba(0, 80, 150, .58) 48%, #03081a 96%); filter: drop-shadow(-16px 0 16px rgba(0, 108, 255, .42)); pointer-events: none; }
-.penrose-offer-viewport.is-clipped-right::after { bottom: auto; height: min(28vw, 399px); background: linear-gradient(90deg, transparent, rgba(0, 46, 92, .42) 54%, #03081a 97%); filter: none; }
+.penrose-offer-viewport.is-clipped-right::after, .penrose-product-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; bottom: 10px; width: clamp(30px, 6vw, 105px); background: linear-gradient(90deg, rgba(3, 8, 26, 0), rgba(3, 8, 26, .8) 55%, var(--penrose-bg) 96%); pointer-events: none; }
+.penrose-offer-viewport.is-clipped-right::after { bottom: auto; height: min(28vw, 399px); }
 .penrose-offer-gallery { max-width: none; gap: 32px; scrollbar-width: none; cursor: grab; overscroll-behavior-inline: contain; }
 .penrose-offer-gallery::-webkit-scrollbar { display: none; }
 .penrose-offer-gallery.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
