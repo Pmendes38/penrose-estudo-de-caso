@@ -738,7 +738,7 @@ h3 {
 .penrose-hero-media img, .penrose-hero-slide.is-active .penrose-hero-media img {
   position: absolute;
   max-width: none;
-  object-fit: fill;
+  object-fit: cover;
   transform: none;
   transition: none;
 }
