@@ -746,7 +746,7 @@ h3 {
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 68%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 68%, transparent 100%);
 }
-.penrose-hero-media img[class^="penrose-hero-image-"] { width: min(50vw, 900px); height: 125%; left: 0; top: -12%; object-fit: cover; object-position: 50% 35%; }
+.penrose-hero-media img[class^="penrose-hero-image-"] { width: min(50vw, 900px); height: 112%; left: 0; top: 8%; object-fit: cover; object-position: center top; }
 .penrose-hero-copy { right: clamp(24px, 3.8vw, 70px); width: min(53vw, 969px); }
 .penrose-hero-copy h1 { font-size: clamp(1rem, 3.34vw, 64px); line-height: .985; }
 .penrose-hero-copy p { max-width: 745px; font-family: "Clash Display", Arial, sans-serif; font-size: 15px; line-height: 25px; }
@@ -775,7 +775,7 @@ h3 {
 
 @media (max-width: 640px) {
   .penrose-hero-media { width: 100%; -webkit-mask-image: none; mask-image: none; }
-  .penrose-hero-media img[class^="penrose-hero-image-"] { width: 74%; height: 105%; left: -18%; top: 0; object-fit: cover; object-position: center 32%; }
+  .penrose-hero-media img[class^="penrose-hero-image-"] { width: 74%; height: 100%; left: -18%; top: 5%; object-fit: cover; object-position: center top; }
   .penrose-offer-carousel { gap: 4px; }
   .penrose-offer-arrow { flex-basis: 25px; width: 25px; font-size: 24px; }
 }
