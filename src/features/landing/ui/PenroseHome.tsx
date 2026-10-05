@@ -6,34 +6,35 @@ import PenroseHero from './PenroseHero';
 import CollectionCarousel from './CollectionCarousel';
 import OfferCarousel from './OfferCarousel';
 import StorefrontFooter from '@/shared/ui/StorefrontFooter';
+import { useMemo, useState } from 'react';
 
 const products = [
   {
-    name: 'Portgas D. Ace',
+    id: 'pnr-013', name: 'Portgas D. Ace',
     universe: 'One Piece',
     image: '/assets/penrose/product-1.png',
     description: 'Reviva toda a intensidade de One Piece com esta estátua de Portgas D. Ace. A pintura, os detalhes e os efeitos translúcidos recriam suas chamas icônicas.',
   },
   {
-    name: 'Adult Gon',
+    id: 'pnr-073', name: 'Adult Gon',
     universe: 'Hunter x Hunter',
     image: '/assets/penrose/product-2.png',
     description: 'A transformação lendária de Gon ganha forma nesta peça expressiva, com toda a força e emoção de seu momento mais marcante.',
   },
   {
-    name: 'Alphonse',
+    id: 'pnr-071', name: 'Alphonse',
     universe: 'Fullmetal Alchemist',
     image: '/assets/penrose/product-3.png',
     description: 'Uma peça imponente de Alphonse Elric, criada para traduzir a presença, a força e a lealdade do personagem em cada detalhe.',
   },
   {
-    name: 'Gaara',
+    id: 'pnr-001', name: 'Gaara',
     universe: 'Naruto',
     image: '/assets/penrose/product-4.png',
     description: 'Gaara em sua juventude, com a icônica cabaça e o controle da areia, em uma peça que transmite intensidade e mistério.',
   },
   {
-    name: 'Goku e Gohan',
+    id: 'pnr-018', name: 'Goku e Gohan',
     universe: 'Dragon Ball Z',
     image: '/assets/penrose/product-5.png',
     description: 'Pai e filho reunidos em uma cena carregada de energia, movimento e emoção para colecionadores de Dragon Ball Z.',
@@ -64,7 +65,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function ProductCard({ product }: { product: (typeof products)[number] }) {
   return (
     <article className="penrose-product-card">
-      <Link href="/catalog" className="penrose-product-image">
+      <Link href={`/product/${product.id}`} className="penrose-product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 46vw, 340px" />
       </Link>
       <div className="penrose-product-copy">
@@ -72,13 +73,21 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
         <h3>{product.name}</h3>
         <p>{product.universe}</p>
         <p className="penrose-product-description-preview">{product.description}</p>
-        <Link href="/catalog">Detalhes</Link>
+        <Link href={`/product/${product.id}`}>Detalhes</Link>
       </div>
     </article>
   );
 }
 
 export default function PenroseHome() {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('Todos');
+  const visibleProducts = useMemo(() => products.filter((product) => {
+    const matchesFilter = filter === 'Todos' || (filter === 'Anime' && product.universe !== '');
+    const text = `${product.name} ${product.universe} ${product.description}`.toLowerCase();
+    return matchesFilter && text.includes(query.trim().toLowerCase());
+  }), [filter, query]);
+
   return (
     <main className="penrose-site">
       <div className="penrose-top-shell">
@@ -106,25 +115,25 @@ export default function PenroseHome() {
 
       <section className="penrose-section penrose-catalog-preview">
         <h2>Catálogo Completo</h2>
-        <Link href="/catalog" className="penrose-search-field">Pesquisar por nome ou tag...</Link>
-        <form action="/catalog" method="get" className="penrose-filter-row" aria-label="Filtrar catálogo por categoria">
-          {catalogFilters.map((filter) => (
+        <input value={query} onChange={(event) => setQuery(event.target.value)} className="penrose-search-field" placeholder="Pesquisar por nome ou tag..." aria-label="Pesquisar produtos" />
+        <div className="penrose-filter-row" aria-label="Filtrar catálogo por categoria">
+          {catalogFilters.map((option) => (
             <button
-              type="submit"
-              className={filter === 'Anime' ? 'is-active' : ''}
-              name={filter === 'Todos' ? undefined : 'category'}
-              value={filter === 'Filme' ? 'Filmes' : filter}
-              key={filter}
+              type="button"
+              className={filter === option ? 'is-active' : ''}
+              onClick={() => setFilter(option)}
+              key={option}
             >
-              {filter}
+              {option}
             </button>
           ))}
-        </form>
+        </div>
         <div className="penrose-product-viewport">
           <div className="penrose-product-gallery" aria-label="Prévia do catálogo">
-            {products.map((product) => <ProductCard product={product} key={product.name} />)}
+            {visibleProducts.map((product) => <ProductCard product={product} key={product.name} />)}
           </div>
         </div>
+        <Link href="/catalog" className="penrose-collections-more penrose-catalog-see-all">Ver tudo</Link>
       </section>
 
       <section className="penrose-why">
