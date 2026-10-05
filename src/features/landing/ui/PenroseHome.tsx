@@ -4,7 +4,7 @@ import { Logo } from '@/shared/ui/Logo';
 import AppHeader from '@/shared/ui/AppHeader';
 import PenroseHero from './PenroseHero';
 import CollectionCarousel from './CollectionCarousel';
-import OfferCarousel from './OfferCarousel';
+import OfferCarousel, { offers } from './OfferCarousel';
 import StorefrontFooter from '@/shared/ui/StorefrontFooter';
 import LandingCatalogPreview from './LandingCatalogPreview';
 
@@ -83,10 +83,9 @@ export default function PenroseHome() {
         <CollectionCarousel />
       </section>
 
-      <section className="penrose-section penrose-offers">
-        <h2>Ofertas</h2>
-        <OfferCarousel />
-      </section>
+      {offers.length > 0 && <section className="penrose-section penrose-offers">
+        <h2>Ofertas</h2><OfferCarousel />
+      </section>}
 
       <section className="penrose-section penrose-catalog-preview">
         <h2>Catálogo Completo</h2>
