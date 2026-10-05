@@ -279,25 +279,6 @@
     "variants": []
   },
   {
-    "id": "pnr-038",
-    "sku": "PNR-038",
-    "name": "Kakashi Hatake",
-    "category": "Anime",
-    "sourceCategory": "Anime",
-    "description": "Action figure colecionável do Copy Ninja. Impressão 3D e pintura manual ressaltam a bandana no olho e pose clássica com o livro.",
-    "tags": [
-      "anime",
-      "naruto"
-    ],
-    "images": [
-      "/assets/catalog/pnr-038/01.webp"
-    ],
-    "regularPriceCents": null,
-    "salePriceCents": null,
-    "stockStatus": null,
-    "variants": []
-  },
-  {
     "id": "pnr-039",
     "sku": "PNR-039",
     "name": "Jiraiya",

@@ -1,6 +1,6 @@
-const CACHE_NAME = 'penrose-v1.1.0';
-const STATIC_CACHE_NAME = 'penrose-static-v1.1.0';
-const DYNAMIC_CACHE_NAME = 'penrose-dynamic-v1.1.0';
+const CACHE_NAME = 'penrose-v1.2.0';
+const STATIC_CACHE_NAME = 'penrose-static-v1.2.0';
+const DYNAMIC_CACHE_NAME = 'penrose-dynamic-v1.2.0';
 
 // Assets que devem ser cached imediatamente
 const STATIC_ASSETS = [
@@ -16,7 +16,9 @@ const STATIC_ASSETS = [
 const NEVER_CACHE = [
   '/api/',
   '/admin/',
-  '/_next/webpack-hmr'
+  '/_next/webpack-hmr',
+  '/_next/image',
+  '/assets/catalog/'
 ];
 
 // Install event - cache static assets
