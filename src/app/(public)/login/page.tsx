@@ -21,13 +21,18 @@ export default function LoginPage() {
   const [state, formAction] = useFormState<LoginState, FormData>(loginAction, { ok: true });
 
   return (
-    <div className="min-h-screen bg-brand-black flex items-center justify-center py-12 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <Logo className="h-12 w-auto mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-brand-gray-light">Faça seu login</h2>
-          <p className="mt-2 text-brand-gray">Conecte-se à sua conta Penrose</p>
-        </div>
+    <div className="penrose-login-page">
+      <div className="penrose-login-layout">
+        <section className="penrose-login-brand" aria-label="Penrose">
+          <div><h1>ONDE SEU HOBBY SE TORNA<br />ARTE COLECIONÁVEL.</h1></div>
+          <Logo className="penrose-login-brand-logo" />
+        </section>
+        <section className="penrose-login-card">
+          <Logo className="penrose-login-logo" />
+          <h2>LOGIN</h2>
+          <p className="penrose-login-welcome">Boas-vindas de volta, colecionador</p>
+          <div className="penrose-login-social"><button type="button" disabled><b>G</b> Google</button><button type="button" disabled><b>f</b> Facebook</button></div>
+          <div className="penrose-login-divider" />
 
         {/* IMPORTANTE: nada de onSubmit/catch — usamos action={formAction} */}
         <form className="space-y-6" action={formAction} noValidate>
@@ -39,7 +44,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 autoComplete="email"
-                className="w-full bg-brand-gray-dark border border-brand-gray-border text-brand-gray-light py-3 px-4 rounded-lg focus:outline-none focus:border-brand-blue"
+              className="penrose-login-input"
                 placeholder="contato@example.com"
               />
             </div>
@@ -51,7 +56,7 @@ export default function LoginPage() {
                 type="password"
                 required
                 autoComplete="current-password"
-                className="w-full bg-brand-gray-dark border border-brand-gray-border text-brand-gray-light py-3 px-4 rounded-lg focus:outline-none focus:border-brand-blue"
+                className="penrose-login-input"
                 placeholder="••••••••••"
               />
             </div>
@@ -85,6 +90,7 @@ export default function LoginPage() {
             </div>
           </div>
         </form>
+        </section>
       </div>
     </div>
   );

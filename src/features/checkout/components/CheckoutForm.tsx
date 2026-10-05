@@ -8,6 +8,7 @@ import type { CalculateShippingInput, ShippingQuote } from '@/features/shipping/
 import { useCart } from '@/features/cart/hooks/useCart';
 import { setCheckoutSessionAction } from '@/app/(public)/checkout/actions';
 import CouponField from '@/features/checkout/components/CouponField';
+import EmptyStoreState from '@/shared/ui/EmptyStoreState';
 
 type FormState = { nome:string; email:string; telefone:string; cpf:string; cep:string; endereco:string; numero:string; complemento:string; bairro:string; cidade:string; estado:string };
 const ESTADOS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
@@ -16,7 +17,7 @@ const digits=(value:string)=>String(value||'').replace(/\D/g,'');
 
 export default function CheckoutForm() {
   const router=useRouter();
-  const {cart,isLoading}=useCart();
+  const {cart,isLoading,error:cartError}=useCart();
   const items=cart?.items??[];
   const subtotal=useMemo(()=>(cart?.itemsSubtotal??0)/100,[cart?.itemsSubtotal]);
   const cartDiscount=useMemo(()=>(cart?.discountTotal??0)/100,[cart?.discountTotal]);
@@ -47,6 +48,9 @@ export default function CheckoutForm() {
   }
 
   const field=(name:keyof FormState,label:string,props:React.InputHTMLAttributes<HTMLInputElement>={})=><label><span>{label}</span><input id={name} name={name} value={data[name]} onChange={onChange} required={props.required!==false} {...props}/></label>;
+  if (isLoading && !cart) return <div className="penrose-page penrose-loading">Carregando checkout…</div>;
+  if (cartError && !cart) return <div className="penrose-page penrose-empty-state" role="alert">Não foi possível carregar o carrinho. Tente atualizar a página.</div>;
+  if (!items.length) return <EmptyStoreState kind="checkout" />;
   return <div className="penrose-page penrose-checkout-page">
     <form onSubmit={submit} className="penrose-checkout-layout" noValidate>
       <section className="penrose-checkout-form">

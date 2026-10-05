@@ -16,14 +16,15 @@ function statusIndex(status:Order['status']|string){return({pending:0,processing
 
 export default function CustomerClient({me,ordersPage}:{me:Me|null;ordersPage:PagedOrders}) {
   const [state,action]=useFormState<State,FormData>(reducer,null);
-  return <div className="penrose-page penrose-orders-page">
-    <h1>MEUS PEDIDOS</h1>
+  return <div className="penrose-page penrose-orders-page penrose-account-page">
+    <header className="penrose-account-hero"><h1>MINHA CONTA</h1><p>Gerencie seus dados e acompanhe seus pedidos Penrose.</p></header>
     <div className="penrose-account-layout">
       <aside className="penrose-profile-card">
         <div className="profile-avatar">{(me?.name?.[0]??'P').toUpperCase()}</div><h2>{me?.name??'Colecionador'}</h2><p>{me?.email??'—'}</p>
-        <nav><a href="#pedidos" className="is-active">MEUS PEDIDOS</a><a href="#perfil">DADOS PESSOAIS</a><Link href="/logout">SAIR</Link></nav>
-        <form id="perfil" action={action}><label>Nome<input name="name" defaultValue={me?.name??''}/></label><label>Telefone<input name="phone" defaultValue={me?.phone??''}/></label>{state?.ok===false&&<p className="profile-error">{state.message}</p>}{state?.ok===true&&<p className="profile-success">Perfil atualizado!</p>}<Submit/></form>
+        <a className="penrose-account-edit" href="#perfil">EDITAR PERFIL</a>
+        <nav><a href="#perfil">DADOS PESSOAIS</a><a href="#pedidos">MEUS PEDIDOS</a><Link href="/logout">SAIR</Link></nav>
       </aside>
+      <div className="penrose-account-content"><section id="perfil" className="penrose-account-info"><h2>Informações pessoais</h2><form action={action}><div className="penrose-account-fields"><label>Nome<input name="name" defaultValue={me?.name??''} required /></label><label>E-mail<input value={me?.email??''} readOnly /></label><label>Telefone<input name="phone" defaultValue={me?.phone??''} /></label></div>{state?.ok===false&&<p className="profile-error">{state.message}</p>}{state?.ok===true&&<p className="profile-success">Perfil atualizado!</p>}<Submit/></form></section>
       <section id="pedidos" className="penrose-orders-list">
         <header><div><span>HISTÓRICO</span><h2>{ordersPage.total} PEDIDO{ordersPage.total===1?'':'S'}</h2></div><Link href="/catalog">NOVO PEDIDO</Link></header>
         {ordersPage.items.map((order:any)=>{const idx=statusIndex(order.status);return <article className="penrose-order-card" key={order.id}>
@@ -33,7 +34,7 @@ export default function CustomerClient({me,ordersPage}:{me:Me|null;ordersPage:Pa
           <footer><button>REPETIR PEDIDO</button><Link href={`/orders/${order.id}`}>VER DETALHES</Link>{idx<2&&<button className="cancel">CANCELAR PEDIDO</button>}</footer>
         </article>})}
         {!ordersPage.items.length&&<div className="penrose-empty-state"><h2>Você ainda não fez nenhum pedido.</h2><Link href="/catalog">EXPLORAR CATÁLOGO</Link></div>}
-      </section>
+      </section></div>
     </div>
   </div>;
 }

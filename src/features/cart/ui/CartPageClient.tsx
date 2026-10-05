@@ -5,12 +5,13 @@ import type { Cart, ShippingSelectInput } from '@/features/cart/schema';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import EmptyStoreState from '@/shared/ui/EmptyStoreState';
 
 const money = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export default function CartPageClient({ initialCart }: { initialCart?: Cart }) {
   const router = useRouter();
-  const { cart, isLoading, update, remove, apply, unapply, requestQuotes, quotes, selectShip, prepare } = useCart({ fallbackData: initialCart });
+  const { cart, isLoading, error, update, remove, apply, unapply, requestQuotes, quotes, selectShip, prepare } = useCart({ fallbackData: initialCart });
   const [coupon, setCoupon] = useState('');
   const [postal, setPostal] = useState('');
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -25,7 +26,8 @@ export default function CartPageClient({ initialCart }: { initialCart?: Cart }) 
   const requiresAgency = Boolean(selectedQuote?.me?.requiresAgency);
 
   if (isLoading && !cart) return <div className="penrose-page penrose-loading">Carregando carrinho…</div>;
-  if (!cart) return <div className="penrose-page penrose-empty-state"><h1>Seu carrinho está vazio</h1><Link href="/catalog">VOLTAR AO CATÁLOGO</Link></div>;
+  if (error && !cart) return <div className="penrose-page penrose-empty-state" role="alert">Não foi possível carregar o carrinho. Tente atualizar a página.</div>;
+  if (!cart || cart.items.length === 0) return <EmptyStoreState kind="cart" />;
 
   async function selectShipping() {
     if (!selectedService || !quotes) return;
@@ -39,7 +41,6 @@ export default function CartPageClient({ initialCart }: { initialCart?: Cart }) 
       <h1>PEDIDOS</h1>
       <div className="penrose-cart-layout">
         <section className="penrose-cart-items">
-          {cart.items.length === 0 && <div className="penrose-empty-state"><h2>Nenhum item adicionado.</h2><Link href="/catalog">EXPLORAR CATÁLOGO</Link></div>}
           {cart.items.map((item) => (
             <article key={item.id} className="penrose-cart-item">
               {item.image ? <img src={item.image} alt={item.name ?? item.sku} /> : <div className="penrose-cart-image-placeholder" />}
