@@ -6,10 +6,10 @@ import { useRef } from 'react';
 import type { PointerEvent } from 'react';
 
 const collections = [
-  { title: 'Universo DC', image: '/assets/penrose/collection-dc.png', accent: '#d15dff' },
-  { title: 'Universo Marvel', image: '/assets/penrose/collection-marvel.png', accent: '#ff0946' },
-  { title: 'Dragon Ball', image: '/assets/penrose/collection-dragonball.png', accent: '#fbbc04' },
-  { title: 'Naruto', image: '/assets/penrose/collection-naruto.png', accent: '#ff5e00' },
+  { title: 'Universo DC', href: '/catalog?category=Universo+DC', image: '/assets/penrose/collection-dc.png', accent: '#d15dff' },
+  { title: 'Universo Marvel', href: '/catalog?category=Marvel', image: '/assets/penrose/collection-marvel.png', accent: '#ff0946' },
+  { title: 'Dragon Ball', href: '/catalog?search=Goku', image: '/assets/penrose/collection-dragonball.png', accent: '#fbbc04' },
+  { title: 'Naruto', href: '/catalog?search=Naruto', image: '/assets/penrose/collection-naruto.png', accent: '#ff5e00' },
 ];
 
 type DragState = { startX: number; startScrollLeft: number; active: boolean; moved: boolean };
@@ -66,7 +66,7 @@ export default function CollectionCarousel() {
       }}
     >
       {collections.map((collection) => (
-        <Link href="/catalog" key={collection.title} className="penrose-collection-card" style={{ '--card-accent': collection.accent } as React.CSSProperties} draggable={false}>
+        <Link href={collection.href} key={collection.title} className="penrose-collection-card" style={{ '--card-accent': collection.accent } as React.CSSProperties} draggable={false}>
           <Image src={collection.image} alt={collection.title} fill sizes="(max-width: 768px) 78vw, 420px" draggable={false} />
           <span>{collection.title}</span>
         </Link>

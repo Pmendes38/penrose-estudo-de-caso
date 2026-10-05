@@ -6,10 +6,10 @@ import { useRef, useState } from 'react';
 import type { CSSProperties, PointerEvent, TransitionEvent } from 'react';
 
 const offers = [
-  { name: 'Adult Gon', image: '/assets/penrose/product-9.png', oldPrice: 'R$ 399', price: 'R$ 319', discount: '20% OFF', accent: '#00abff' },
-  { name: 'Vampira', image: '/assets/penrose/product-6.png', oldPrice: 'R$ 599', price: 'R$ 459', discount: '23% OFF', accent: '#d15dff' },
-  { name: 'Asa Noturna', image: '/assets/penrose/product-8.png', oldPrice: 'R$ 1.190', price: 'R$ 890', discount: '26% OFF', accent: '#00ff73' },
-  { name: 'Wolverine', image: '/assets/penrose/product-7.png', oldPrice: 'R$ 699', price: 'R$ 549', discount: '21% OFF', accent: '#ffb800' },
+  { name: 'Adult Gon', href: '/product/pnr-073', image: '/assets/catalog/pnr-073/01.webp', price: 'R$ 549,90', discount: '', accent: '#00abff' },
+  { name: 'Gaara', href: '/product/pnr-001', image: '/assets/catalog/pnr-001/01.webp', oldPrice: 'R$ 599,90', price: 'R$ 259,90', discount: '57% OFF', accent: '#d15dff' },
+  { name: 'Asa Noturna', href: '/product/pnr-003', image: '/assets/catalog/pnr-003/01.webp', oldPrice: 'R$ 549,90', price: 'R$ 259,90', discount: '53% OFF', accent: '#00ff73' },
+  { name: 'Wolverine', href: '/product/pnr-096', image: '/assets/catalog/pnr-096/01.webp', price: 'R$ 549,90', discount: '', accent: '#ffb800' },
 ];
 
 export default function OfferCarousel() {
@@ -61,14 +61,14 @@ export default function OfferCarousel() {
       >
         <div className={`penrose-offer-gallery${isMoving ? ' is-moving' : ''}`} onTransitionEnd={finishMove}>
           {visibleOffers.map((offer, index) => (
-            <Link href="/catalog" key={`${offer.name}-${index}`} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as CSSProperties} draggable={false} aria-hidden={index === offers.length} tabIndex={index === offers.length ? -1 : 0}>
+            <Link href={offer.href} key={`${offer.name}-${index}`} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as CSSProperties} draggable={false} aria-hidden={index === offers.length} tabIndex={index === offers.length ? -1 : 0}>
               <span className="penrose-offer-visual">
                 <Image src={offer.image} alt={index === offers.length ? '' : offer.name} fill sizes="(max-width: 640px) 78vw, (max-width: 1000px) 42vw, 25vw" draggable={false} />
-                <span className="penrose-offer-badge">{offer.discount}</span>
+                {offer.discount && <span className="penrose-offer-badge">{offer.discount}</span>}
               </span>
               <span className="penrose-offer-info">
                 <strong>{offer.name}</strong>
-                <span><s>{offer.oldPrice}</s> <b>por {offer.price}</b></span>
+                <span>{offer.oldPrice && <s>{offer.oldPrice}</s>} <b>{offer.oldPrice ? 'por ' : ''}{offer.price}</b></span>
               </span>
             </Link>
           ))}
