@@ -985,3 +985,72 @@ h3 {
 @media (max-width: 640px) {
   .penrose-hero .penrose-hero-media { width: 100%; -webkit-mask-image: none; mask-image: none; }
 }
+
+/* Catalog and product layouts from the current storefront design. */
+.penrose-catalog-page { grid-template-columns: minmax(190px, 250px) minmax(0, 1fr); gap: clamp(25px, 3vw, 56px); padding-block: 32px 100px; }
+.penrose-filter-panel { margin: 0; padding: 26px 22px; border: 1px solid #123457; border-radius: 5px; background: #00102b; }
+.penrose-filter-form { gap: 24px; }
+.penrose-filter-form h2 { font-size: 1.25rem; }
+.penrose-filter-form fieldset { padding-top: 18px; border-top: 1px solid #18456c; }
+.penrose-filter-form legend { padding-top: 16px; }
+.penrose-filter-form .filter-check { color: #bfcbd7; font-size: .8rem; }
+.penrose-clear-filters { color: #8fb1cf; font-size: .75rem; text-align: center; text-decoration: underline; }
+.penrose-catalog-results > header { align-items: center; margin-bottom: 30px; border: 0; padding: 0; }
+.penrose-catalog-results > header nav { margin-bottom: 20px; color: #8ba7c1; font-size: .72rem; }
+.penrose-catalog-results > header h1 { font-size: clamp(2.3rem, 4vw, 4.2rem); font-weight: 400; }
+.penrose-store-card { border-width: 1px; background: #00102d; }
+.penrose-store-card-image { aspect-ratio: 1; }
+.penrose-store-card-image.is-placeholder img { object-fit: contain; padding: 22%; opacity: .45; }
+.penrose-store-card-copy { min-height: 128px; padding: 12px 13px; }
+.penrose-store-card-copy h3 { margin: 0; font-size: .9rem; line-height: 1.2; }
+.penrose-card-series { margin-top: 4px; color: #a5b7c8; font-size: .7rem; }
+.penrose-card-bottom { display: grid; gap: 2px; margin-top: auto; padding-top: 12px; font-size: .75rem; }
+.penrose-card-bottom del { color: #8498ac; font-size: .64rem; }
+.penrose-card-bottom span { color: #00e18c; font-weight: 700; }
+.penrose-store-card .penrose-card-details { margin-top: 10px; border-color: #1e4d7e; font-weight: 500; }
+.penrose-pagination a { min-width: 24px; text-align: center; }
+.penrose-pagination [aria-current='page'] { color: #00a8ff; text-decoration: underline; }
+
+.penrose-product-page { padding-top: 28px; padding-bottom: 100px; }
+.penrose-product-layout { grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr); gap: clamp(34px, 5vw, 88px); align-items: start; }
+.penrose-gallery { display: flex; flex-direction: column; }
+.penrose-gallery-main { width: 100%; aspect-ratio: 1; }
+.penrose-gallery-thumbs { order: 0; display: flex; flex-direction: row; gap: 10px; overflow-x: auto; }
+.penrose-gallery-thumb { flex: 0 0 clamp(65px, 7vw, 94px); }
+.penrose-product-specs { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 24px; color: #aabaca; font-size: .75rem; }
+.penrose-product-specs div { display: flex; gap: 7px; }
+.penrose-product-specs dt { color: #6b92b4; }
+.penrose-product-info { align-self: start; display: block; }
+.penrose-product-info h1 { margin: 0 0 10px; font-size: clamp(2rem, 3.2vw, 4.2rem); line-height: 1.02; }
+.penrose-product-subtitle { margin-bottom: 25px; color: #a8bdd0; font-size: .9rem; }
+.penrose-purchase-panel { display: grid; gap: 12px; padding: clamp(20px, 2.5vw, 34px); border: 1px solid #1c5381; border-radius: 5px; background: #001935; }
+.penrose-purchase-panel .penrose-stock { margin: 0; }
+.penrose-purchase-panel del { color: #8fa3b6; font-size: .8rem; }
+.penrose-purchase-panel .penrose-product-price { margin: 0; font-size: clamp(1.7rem, 2.5vw, 2.6rem); }
+.penrose-price-note,.penrose-purchase-panel small { color: #aebfd0; font-size: .75rem; line-height: 1.5; }
+.penrose-variant-list { display: grid; gap: 7px; margin-block: 8px; color: #c6d3df; font-size: .77rem; }
+.penrose-variant-list > span:first-child { color: #80a1be; font-weight: 700; }
+.penrose-inquiry-button { display: grid; min-height: 48px; place-items: center; border-radius: 4px; color: #001e14; background: #00d17d; font-weight: 700; }
+.penrose-product-about { margin-top: 38px; }
+.penrose-product-about h2 { margin-bottom: 14px; font-size: 1.3rem; }
+.penrose-product-about p { color: #c2ceda; font-size: .88rem; line-height: 1.7; white-space: pre-line; }
+.penrose-product-accordion { padding-block: 17px; border-bottom: 1px solid #1f4b70; color: #d8e5ef; font-size: .85rem; }
+.penrose-product-accordion summary { cursor: pointer; }
+.penrose-product-accordion p { margin-top: 12px; color: #9eb2c5; }
+
+@media(max-width: 900px) {
+  .penrose-catalog-page { grid-template-columns: 1fr; }
+  .penrose-filter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .penrose-filter-form > button,.penrose-clear-filters { align-self: end; }
+  .penrose-product-layout { grid-template-columns: 1fr; }
+}
+@media(max-width: 600px) {
+  .penrose-catalog-page { padding: 24px 16px 72px; }
+  .penrose-filter-form { grid-template-columns: 1fr; }
+  .penrose-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .penrose-store-card-copy { min-height: 148px; padding: 9px; }
+  .penrose-store-card-copy h3 { font-size: .75rem; }
+  .penrose-card-series,.penrose-card-bottom { font-size: .65rem; }
+  .penrose-store-card .penrose-card-details { display: grid; }
+  .penrose-product-page { padding: 24px 16px 70px; }
+}

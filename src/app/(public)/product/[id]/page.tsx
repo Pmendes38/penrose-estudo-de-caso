@@ -1,108 +1,66 @@
-// src/app/(public)/product/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import Link from 'next/link';
 import { getProduct } from '@/features/products/api';
+import { findCatalogProduct, productPrice } from '@/features/products/catalog';
 import { formatBRL } from '@/shared/lib/format';
-import type { Product } from '@/features/products/schemas';
 import Gallery from './gallery.client';
-import SizeSelectorClient from './size-selector.client';
 import AddToCartClient from './add-to-cart.client';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://exemplo.invalid';
-
 type PageParams = { params: { id: string } };
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.penrose.example';
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
-  const product = await getProduct(params.id).catch(() => null);
+  const source = findCatalogProduct(params.id);
+  const product = source ?? await getProduct(params.id).catch(() => null);
   if (!product) return { title: 'Produto não encontrado | Penrøse' };
-
-  const title = `${product.name} | Penrøse`;
-  const description = product.description ?? 'Action figure Penrøse';
-  const images = (product.images?.length ? product.images : ['/assets/wide-logo.svg'])
-    .map((src) => (src.startsWith('http') ? src : `${SITE_URL}${src}`));
-  const canonical = `${SITE_URL}/product/${product.slug ?? params.id}`;
-
   return {
-    title,
-    description,
-    alternates: { canonical },
-    openGraph: {
-      url: canonical,
-      title,
-      description,
-      siteName: 'Penrøse',
-      locale: 'pt_BR',
-      images: images.map((url) => ({ url })),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images,
-    },
+    title: `${product.name} | Penrøse`,
+    description: product.description || `Conheça ${product.name} no catálogo Penrøse.`,
+    alternates: { canonical: `${SITE_URL}/product/${source?.id ?? product.slug}` },
+    openGraph: { images: product.images[0] ? [product.images[0]] : [] },
   };
-}
-
-function ProductJsonLd({ product }: { product: Product }) {
-  const availability =
-    product.status === 'active' && (product.stock ?? 0) > 0
-      ? 'https://schema.org/InStock'
-      : 'https://schema.org/OutOfStock';
-
-  const data = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: product.name,
-    description: product.description,
-    sku: product.sku ?? product.id,
-    brand: { '@type': 'Brand', name: 'Penrøse' },
-    image: product.images ?? [],
-    offers: {
-      '@type': 'Offer',
-      priceCurrency: 'BRL',
-      price: String((product.priceCents ?? 0) / 100),
-      availability,
-      url: `${SITE_URL}/product/${product.slug ?? product.id}`,
-    },
-  };
-
-  return (
-    <Script
-      id="product-jsonld"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  );
 }
 
 export default async function ProductPage({ params }: PageParams) {
-  const product = await getProduct(params.id).catch(() => null);
-  if (!product) notFound();
+  const source = findCatalogProduct(params.id);
+  const api = source ? null : await getProduct(params.id).catch(() => null);
+  if (!source && !api) notFound();
 
+  const product = source ?? api!;
   const images = product.images?.length ? product.images : ['/assets/wide-logo.svg'];
-  const inStock = (product.stock ?? 0) > 0 && product.status === 'active';
+  const price = source ? productPrice(source) : { cents: api!.priceCents, estimated: false };
+  const oldPrice = source?.regularPriceCents && source.salePriceCents ? source.regularPriceCents : null;
+  const canBuy = !source && api!.status === 'active' && api!.stock > 0;
+  const inquiry = `https://wa.me/5500000000000?text=${encodeURIComponent(`Olá! Gostaria de consultar ${product.name} (${source?.sku ?? api?.sku ?? product.id}).`)}`;
 
-  return <>
-    <ProductJsonLd product={product as Product} />
-    <div className="penrose-page penrose-product-page">
-      <nav className="penrose-breadcrumb"><Link href="/">Início</Link><span>›</span><Link href="/catalog">Catálogo</Link><span>›</span><strong>{product.name}</strong></nav>
-      <div className="penrose-product-layout">
-        <section className="penrose-product-gallery"><Gallery images={images} alt={product.name} /></section>
-        <section className="penrose-product-info">
-          <p className="penrose-product-kicker">ACTION FIGURE COLECIONÁVEL</p>
-          <h1>{product.name}</h1>
-          <div className="penrose-product-rating">★★★★★ <span>Peça produzida para colecionadores exigentes</span></div>
-          <strong className="penrose-product-price">{formatBRL((product.priceCents ?? 0) / 100)}</strong>
-          <span className={inStock ? 'penrose-stock is-stock' : 'penrose-stock'}>{inStock ? '● EM ESTOQUE' : '● ESGOTADO'}</span>
-          {product.description && <div className="penrose-product-description">{product.description}</div>}
-          {Array.isArray((product as any).sizes) && (product as any).sizes.length > 0 && <SizeSelectorClient sizes={(product as any).sizes} />}
-          <AddToCartClient product={{ id: product.id, sku: product.sku, name: product.name, images: product.images, mainImage: product.images?.[0], sizes: (product as any).sizes ?? [{ name: 'Único', price: (product.priceCents ?? 0) / 100, inStock }] }} />
-          <div className="penrose-product-benefits"><span>Envio para todo Brasil</span><span>Pagamento seguro</span><span>Acabamento manual</span></div>
-        </section>
+  return <div className="penrose-page penrose-product-page">
+    <nav className="penrose-breadcrumb" aria-label="Caminho"><Link href="/">Home</Link><span>/</span><Link href="/catalog">Coleção</Link><span>/</span><strong>{product.name}</strong></nav>
+    <div className="penrose-product-layout">
+      <div className="penrose-product-media">
+        <Gallery images={images} alt={product.name} />
+        <dl className="penrose-product-specs">
+          <div><dt>Categoria</dt><dd>{product.category || 'Colecionável'}</dd></div>
+          <div><dt>Referência</dt><dd>{source?.sku ?? api?.sku ?? product.id}</dd></div>
+        </dl>
       </div>
-      <section className="penrose-product-details"><article><h2>MATERIAL & ACABAMENTO</h2><p>Impressão 3D de alta precisão, pintura premium e acabamento manual.</p></article><article><h2>ENVIO & PRAZO</h2><p>Produção sob demanda e embalagem segura para sua coleção.</p></article><article><h2>TROCAS & SUPORTE</h2><p>Atendimento humanizado durante toda a experiência de compra.</p></article></section>
+      <section className="penrose-product-info">
+        <h1>{product.name}</h1>
+        <p className="penrose-product-subtitle">{source?.sourceCategory || product.category || 'Action figure'} by Penrøse</p>
+        <div className="penrose-purchase-panel">
+          <p className="penrose-stock">{canBuy ? 'Em estoque' : 'Disponibilidade sob consulta'}</p>
+          {oldPrice && <del>DE: {formatBRL(oldPrice / 100)}</del>}
+          <strong className="penrose-product-price">{formatBRL(price.cents / 100)}</strong>
+          {price.estimated && <p className="penrose-price-note">Valor estimado com base na planilha. Confirme o preço final antes de encomendar.</p>}
+          {source?.variants.length ? <div className="penrose-variant-list"><span>Tamanhos informados na planilha</span>{source.variants.map((variant) => <span key={variant.sku}>{variant.name}: {variant.priceCents ? formatBRL(variant.priceCents / 100) : 'sob consulta'}</span>)}</div> : null}
+          {canBuy ? <AddToCartClient product={{ id: api!.id, sku: api!.sku ?? undefined, name: api!.name, images: api!.images, mainImage: api!.images[0], sizes: [{ name: 'Único', price: api!.priceCents / 100, inStock: true }] }} />
+            : <a className="penrose-inquiry-button" href={inquiry} target="_blank" rel="noopener noreferrer">Consultar disponibilidade</a>}
+          <small>Preços e disponibilidade sujeitos à confirmação pela Penrøse.</small>
+        </div>
+        <section className="penrose-product-about"><h2>Sobre o produto</h2><p>{product.description || 'Detalhes deste produto sob consulta.'}</p></section>
+        <details className="penrose-product-accordion"><summary>Detalhes</summary><p>Referência: {source?.sku ?? api?.sku ?? product.id}</p></details>
+        <details className="penrose-product-accordion"><summary>Fotos do produto</summary><p>{images.length} {images.length === 1 ? 'imagem disponível' : 'imagens disponíveis'} na galeria.</p></details>
+      </section>
     </div>
-  </>;
+  </div>;
 }
