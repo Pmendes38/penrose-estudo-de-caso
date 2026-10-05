@@ -767,6 +767,7 @@ h3 {
 .penrose-offer-viewport { flex: 1; touch-action: pan-y; }
 .penrose-product-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; bottom: 10px; width: clamp(30px, 6vw, 105px); background: linear-gradient(90deg, rgba(3, 8, 26, 0), rgba(3, 8, 26, .8) 55%, var(--penrose-bg) 96%); pointer-events: none; }
 .penrose-offer-gallery { max-width: none; gap: 32px; overflow: visible; scroll-snap-type: none; scrollbar-width: none; cursor: grab; user-select: none; }
+.penrose-offer-gallery.is-static { justify-content: center; cursor: auto; }
 .penrose-offer-gallery.is-moving { transform: translateX(calc(-25% - 8px)); transition: transform .4s ease; }
 .penrose-offer-card { flex-basis: calc((100% - 96px) / 4); }
 @media (prefers-reduced-motion: reduce) { .penrose-offer-gallery.is-moving { transition-duration: 1ms; } }
@@ -793,6 +794,7 @@ h3 {
   .penrose-feature-card { width: min(100%, 516px); margin-inline: auto; }
   .penrose-collection-gallery { gap: 24px; }
   .penrose-offer-gallery { gap: 24px; }
+  .penrose-offer-gallery.is-static { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; }
   .penrose-offer-card { flex-basis: calc((100% - 24px) / 2); }
   .penrose-offer-gallery.is-moving { transform: translateX(calc(-50% - 12px)); }
   .penrose-why-grid { grid-template-columns: 1fr; gap: 34px; }
@@ -836,6 +838,7 @@ h3 {
   .penrose-collections-more { min-width: 178px; height: 46px; padding-inline: 18px; font-size: 13px; }
   .penrose-offer-gallery { gap: 14px; }
   .penrose-offer-card { flex-basis: min(78vw, 399px); }
+  .penrose-offer-gallery.is-static { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; }
   .penrose-offer-gallery.is-moving { transform: translateX(calc(0px - min(78vw, 399px) - 14px)); }
   .penrose-offer-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; right: 0; width: 48px; height: min(78vw, 399px); background: linear-gradient(90deg, transparent, var(--penrose-bg)); pointer-events: none; }
   .penrose-offer-visual { width: 100%; }

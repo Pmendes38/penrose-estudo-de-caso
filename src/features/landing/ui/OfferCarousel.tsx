@@ -11,10 +11,11 @@ export default function OfferCarousel({ offers }: { offers: Offer[] }) {
   const [firstOffer, setFirstOffer] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
   const pointer = useRef({ x: 0, active: false, suppressClickUntil: 0 });
-  const visibleOffers = Array.from({ length: offers.length + 1 }, (_, index) => offers[(firstOffer + index) % offers.length]);
+  const canCycle = offers.length > 4;
+  const visibleOffers = canCycle ? Array.from({ length: offers.length + 1 }, (_, index) => offers[(firstOffer + index) % offers.length]) : offers;
 
   function advance() {
-    if (!isMoving) setIsMoving(true);
+    if (canCycle && !isMoving) setIsMoving(true);
   }
 
   function finishMove(event: TransitionEvent<HTMLDivElement>) {
@@ -39,7 +40,7 @@ export default function OfferCarousel({ offers }: { offers: Offer[] }) {
 
   return (
     <div className="penrose-offer-carousel">
-      <button className="penrose-offer-arrow" type="button" aria-label="Deslizar ofertas para a esquerda" onClick={advance}>←</button>
+      {canCycle && <button className="penrose-offer-arrow" type="button" aria-label="Deslizar ofertas para a esquerda" onClick={advance}>←</button>}
       <div
         className="penrose-offer-viewport"
         role="region"
@@ -54,11 +55,11 @@ export default function OfferCarousel({ offers }: { offers: Offer[] }) {
           }
         }}
       >
-        <div className={`penrose-offer-gallery${isMoving ? ' is-moving' : ''}`} onTransitionEnd={finishMove}>
+        <div className={`penrose-offer-gallery${canCycle ? '' : ' is-static'}${isMoving ? ' is-moving' : ''}`} onTransitionEnd={finishMove}>
           {visibleOffers.map((offer, index) => (
-            <Link href={offer.href} key={`${offer.name}-${index}`} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as CSSProperties} draggable={false} aria-hidden={index === offers.length} tabIndex={index === offers.length ? -1 : 0}>
+            <Link href={offer.href} key={`${offer.name}-${index}`} className="penrose-offer-card" style={{ '--offer-accent': offer.accent } as CSSProperties} draggable={false} aria-hidden={canCycle && index === offers.length} tabIndex={canCycle && index === offers.length ? -1 : 0}>
               <span className="penrose-offer-visual">
-                <Image src={offer.image} alt={index === offers.length ? '' : offer.name} fill sizes="(max-width: 640px) 78vw, (max-width: 1000px) 42vw, 25vw" draggable={false} />
+                <Image src={offer.image} alt={canCycle && index === offers.length ? '' : offer.name} fill sizes="(max-width: 640px) 78vw, (max-width: 1000px) 42vw, 25vw" draggable={false} />
                 {offer.discount && <span className="penrose-offer-badge">{offer.discount}</span>}
               </span>
               <span className={`penrose-offer-info${offer.discount ? '' : ' no-discount'}`}>
