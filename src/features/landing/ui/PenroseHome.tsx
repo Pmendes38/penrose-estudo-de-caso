@@ -1,5 +1,3 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { Logo } from '@/shared/ui/Logo';
@@ -8,7 +6,7 @@ import PenroseHero from './PenroseHero';
 import CollectionCarousel from './CollectionCarousel';
 import OfferCarousel from './OfferCarousel';
 import StorefrontFooter from '@/shared/ui/StorefrontFooter';
-import { useMemo, useState } from 'react';
+import LandingCatalogPreview from './LandingCatalogPreview';
 
 const products = [
   {
@@ -64,32 +62,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ProductCard({ product }: { product: (typeof products)[number] }) {
-  return (
-    <article className="penrose-product-card">
-      <Link href={`/product/${product.id}`} className="penrose-product-image">
-        <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 46vw, 340px" />
-      </Link>
-      <div className="penrose-product-copy">
-        <span>ANIME</span>
-        <h3>{product.name}</h3>
-        <p>{product.universe}</p>
-        <p className="penrose-product-description-preview">{product.description}</p>
-        <Link href={`/product/${product.id}`}>Detalhes</Link>
-      </div>
-    </article>
-  );
-}
-
 export default function PenroseHome() {
-  const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('Todos');
-  const visibleProducts = useMemo(() => products.filter((product) => {
-    const matchesFilter = filter === 'Todos' || (filter === 'Anime' && product.universe !== '');
-    const text = `${product.name} ${product.universe} ${product.description}`.toLowerCase();
-    return matchesFilter && text.includes(query.trim().toLowerCase());
-  }), [filter, query]);
-
   return (
     <main className="penrose-site">
       <div className="penrose-top-shell">
@@ -117,25 +90,7 @@ export default function PenroseHome() {
 
       <section className="penrose-section penrose-catalog-preview">
         <h2>Catálogo Completo</h2>
-        <input value={query} onChange={(event) => setQuery(event.target.value)} className="penrose-search-field" placeholder="Pesquisar por nome ou tag..." aria-label="Pesquisar produtos" />
-        <div className="penrose-filter-row" aria-label="Filtrar catálogo por categoria">
-          {catalogFilters.map((option) => (
-            <button
-              type="button"
-              className={filter === option ? 'is-active' : ''}
-              onClick={() => setFilter(option)}
-              key={option}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-        <div className="penrose-product-viewport">
-          <div className="penrose-product-gallery" aria-label="Prévia do catálogo">
-            {visibleProducts.map((product) => <ProductCard product={product} key={product.name} />)}
-          </div>
-        </div>
-        <Link href="/catalog" className="penrose-collections-more penrose-catalog-see-all">Ver tudo</Link>
+        <LandingCatalogPreview products={products} filters={catalogFilters} />
       </section>
 
       <section className="penrose-why">
