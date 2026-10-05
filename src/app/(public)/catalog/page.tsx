@@ -40,14 +40,14 @@ export default async function CatalogPage({ searchParams }: { searchParams?: Sea
   };
 
   const fallback: Product[] = [
-    ['Portgas D. Ace','One Piece',45900,'/assets/penrose/product-7.png'],
+    ['Portgas D. Ace','One Piece',45900,'/assets/penrose/product-1.png'],
     ['Adult Gon','Hunter x Hunter',31900,'/assets/penrose/product-2.png'],
-    ['Alphonse','Fullmetal Alchemist',25900,'/assets/penrose/product-8.png'],
-    ['Gaara','Naruto',35900,'/assets/penrose/product-9.png'],
-    ['Anakin Skywalker','Star Wars',180000,'/assets/penrose/product-5.png'],
-    ['Aquaman','Universo DC',48900,'/assets/penrose/product-6.png'],
-    ['Asa Noturna','Universo DC',39900,'/assets/penrose/product-3.png'],
-    ['Lanterna Verde','Universo DC',42900,'/assets/penrose/product-4.png'],
+    ['Alphonse','Fullmetal Alchemist',25900,'/assets/penrose/product-3.png'],
+    ['Gaara','Naruto',35900,'/assets/penrose/product-4.png'],
+    ['Wolverine','Universo Marvel',54900,'/assets/penrose/product-7.png'],
+    ['Aquaman','Universo DC',48900,'/assets/penrose/product-aquaman.jpg'],
+    ['Asa Noturna','Universo DC',89000,'/assets/penrose/product-8.png'],
+    ['Vampira','Universo Marvel',45900,'/assets/penrose/product-6.png'],
   ].map(([name,category,price,image],index)=>({id:`visual-${index+1}`,slug:`visual-${index+1}`,name:String(name),category:String(category),priceCents:Number(price),stock:1,status:'active' as const,description:'Peça colecionável com acabamento manual.',images:[String(image)],tags:[String(category)]}));
 
   const page = await fetchPublicProducts({
