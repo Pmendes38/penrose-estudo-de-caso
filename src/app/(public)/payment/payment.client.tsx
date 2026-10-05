@@ -6,6 +6,8 @@ import { useFormState, useFormStatus } from 'react-dom';
 import { createPaymentAction } from './actions';
 import PaymentAwait from './PaymentAwait';
 import type { CheckoutSession } from './session';
+import Link from 'next/link';
+import EmptyStoreState from '@/shared/ui/EmptyStoreState';
 
 type CheckoutData = {
   nome: string; email: string; telefone: string; cpf: string;
@@ -22,8 +24,8 @@ function hashString(input: string) {
 function SubmitBtn() {
   const { pending } = useFormStatus();
   return (
-    <button className="px-8 py-3 bg-brand-blue text-white rounded-md disabled:opacity-50" disabled={pending}>
-      {pending ? 'Gerando pagamento…' : 'Pagar'}
+    <button type="submit" className="penrose-payment-submit" disabled={pending}>
+      {pending ? 'GERANDO PAGAMENTO…' : 'FINALIZAR COMPRA'}
     </button>
   );
 }
@@ -154,42 +156,41 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
   }
 
   if (!cart || !(cart.items ?? []).length) {
-    return (
-      <div className="max-w-3xl mx-auto p-6">
-        <p className="text-brand-gray">Seu carrinho está vazio.</p>
-      </div>
-    );
+    return <EmptyStoreState kind="checkout" />;
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Pagamento</h1>
-
-      {/* método de pagamento */}
-      <div className="space-y-3">
-        <label className="flex items-center gap-2">
-          <input type="radio" name="m" checked={method === 'PIX'} onChange={() => setMethod('PIX')} /> PIX
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="radio" name="m" checked={method === 'BOLETO'} onChange={() => setMethod('BOLETO')} /> Boleto
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="radio" name="m" checked={method === 'CREDIT_CARD'} onChange={() => setMethod('CREDIT_CARD')} /> Cartão de crédito
-        </label>
-      </div>
-
-      {state.error && <p className="text-red-400">{state.error}</p>}
-
-      {/* form que posta para a Server Action */}
-      <form action={formAction} className="space-y-4">
+    <div className="penrose-payment-page">
+      <header><h1>MAIS OPÇÕES DE PAGAMENTO</h1><p>Escolha a forma que combina com sua coleção.</p></header>
+      <form action={formAction} className="penrose-payment-layout">
+        <section className="penrose-payment-methods" aria-label="Formas de pagamento">
+          {([
+            { value: 'PIX', label: 'PIX', detail: 'Confirmação após o pagamento', icon: 'pix' },
+            { value: 'CREDIT_CARD', label: 'Cartão de crédito', detail: 'Pagamento por cartão', icon: 'card' },
+            { value: 'BOLETO', label: 'Boleto bancário', detail: 'Pagamento por boleto', icon: 'boleto' },
+          ] as const).map((option) => <label key={option.value} className={`penrose-payment-method${method === option.value ? ' is-selected' : ''}`}>
+            <input type="radio" name="paymentMethod" value={option.value} checked={method === option.value} onChange={() => setMethod(option.value)} />
+            <img src={`/assets/penrose/payment-method-${option.icon}.svg`} alt="" width="28" height="28" />
+            <span><strong>{option.label}</strong><small>{option.detail}</small></span>
+          </label>)}
+          <div className="penrose-payment-method is-unavailable" aria-disabled="true"><span className="penrose-payment-radio" /><img src="/assets/penrose/payment-method-transfer.svg" alt="" width="28" height="28" /><span><strong>Transferência</strong><small>Indisponível no momento</small></span></div>
+          <div className="penrose-payment-cards"><h2>Bandeiras de cartão</h2><div>{(['mastercard', 'visa', 'amex', 'elo'] as const).map((name) => <img key={name} src={`/assets/penrose/payment-${name}.svg`} alt={name} />)}</div></div>
+        </section>
+        <aside className="penrose-payment-summary"><h2 className="sr-only">Resumo do pedido</h2>
+          <dl><div><dt>Subtotal</dt><dd>{money(cart.itemsSubtotal)}</dd></div><div><dt>Desconto</dt><dd className="discount">− {money(cart.discountTotal)}</dd></div><div><dt>Entrega</dt><dd>{cart.shippingTotal === 0 ? 'GRÁTIS' : money(cart.shippingTotal)}</dd></div><div className="total"><dt>TOTAL</dt><dd>{money(totalCents)}</dd></div></dl>
+          <SubmitBtn />
+          <label className="penrose-payment-terms"><input type="checkbox" required /> Aceito os <Link href="/terms">termos de uso do site</Link></label>
+          {state.error && <p role="alert" className="penrose-payment-error">{state.error}</p>}
+        </aside>
         <input type="hidden" name="billingType" value={method} />
         <input type="hidden" name="cartItems" value={cartItemsJson} />
         <input type="hidden" name="totalAmount" value={String(totalAmount)} />
         <input type="hidden" name="customerData" value={customerDataJson} />
         <input type="hidden" name="selectedShipping" value={selectedShippingJson} />
         <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
-        <SubmitBtn />
       </form>
     </div>
   );
 }
+
+const money = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

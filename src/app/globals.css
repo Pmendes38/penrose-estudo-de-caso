@@ -1159,3 +1159,37 @@ h3 {
 .penrose-policy-page h1 { color: #fff; font-size: clamp(2.5rem, 4.2vw, 4.5rem); line-height: 1.07; text-transform: none; }
 .penrose-policy-page .policy-copy { max-width: 1240px; margin: 0 auto; color: #fff; font-size: clamp(1rem, 1.8vw, 1.55rem); }
 @media (max-width: 760px) { .penrose-store-empty { min-height: 590px; padding-top: 48px; } .penrose-store-empty-icon { width: 96px; height: 96px; } .penrose-store-empty-actions { width: 100%; flex-direction: column; } .penrose-store-empty-actions a { width: 100%; } .penrose-account-page .penrose-account-layout { grid-template-columns: 1fr; } .penrose-account-fields { grid-template-columns: 1fr; } }
+
+.penrose-payment-page { min-height: 740px; padding: 64px clamp(20px, 4.5vw, 64px); background: #03081a; color: #fff; }
+.penrose-payment-page > header { margin-bottom: 24px; text-align: center; }
+.penrose-payment-page > header h1 { font: 700 clamp(1.8rem, 3vw, 2.65rem)/1.15 Inter, Arial, sans-serif; }
+.penrose-payment-page > header p { margin-top: 8px; color: #a9b4c7; font-size: 1.1rem; }
+.penrose-payment-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; max-width: 1312px; margin: 0 auto; align-items: start; }
+.penrose-payment-methods { display: grid; gap: 12px; }
+.penrose-payment-method { display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 17px 18px; border: 1px solid #0b2e69; border-radius: 12px; background: #0a1833; cursor: pointer; }
+.penrose-payment-method.is-selected { border: 2px solid #00f078; padding: 16px 17px; }
+.penrose-payment-method.is-unavailable { opacity: .55; cursor: not-allowed; }
+.penrose-payment-method input,.penrose-payment-radio { appearance: none; display: block; flex: 0 0 18px; width: 18px; height: 18px; margin: 0; border: 2px solid #a9b4c7; border-radius: 50%; }
+.penrose-payment-method input:checked { border-color: #00f078; background: #00f078; }
+.penrose-payment-method:focus-within { outline: 2px solid #fff; outline-offset: 2px; }
+.penrose-payment-method img { flex: 0 0 28px; width: 28px; height: 28px; object-fit: contain; }
+.penrose-payment-method span:last-child { display: grid; gap: 4px; min-width: 0; }
+.penrose-payment-method strong { font: 700 1.05rem Inter, Arial, sans-serif; }
+.penrose-payment-method small { color: #a9b4c7; font-size: .75rem; }
+.penrose-payment-cards { margin-top: 0; padding: 18px; border-radius: 12px; background: #fff; color: #101114; }
+.penrose-payment-cards h2 { margin: 0 0 10px; font: 700 .9rem Inter, Arial, sans-serif; }
+.penrose-payment-cards > div { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.penrose-payment-cards img { width: auto; max-width: 65px; height: 30px; object-fit: contain; }
+.penrose-payment-summary { padding: 24px; border: 2px solid #06f; border-radius: 12px; background: #fff; color: #101114; }
+.penrose-payment-summary dl { display: grid; gap: 16px; }
+.penrose-payment-summary dl > div { display: flex; justify-content: space-between; gap: 12px; font: 600 .92rem Inter, Arial, sans-serif; }
+.penrose-payment-summary dd { margin: 0; font-weight: 700; }
+.penrose-payment-summary .discount { color: #bf6a02; }
+.penrose-payment-summary .total { padding-top: 16px; border-top: 1px solid #aaa; font-size: 1.05rem; font-weight: 800; }
+.penrose-payment-submit { width: 100%; min-height: 48px; margin-top: 18px; border-radius: 8px; background: #00f078; color: #101114; font: 700 .87rem Inter, Arial, sans-serif; }
+.penrose-payment-submit:disabled { opacity: .6; }
+.penrose-payment-terms { display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 16px; color: #101114; font-size: .78rem; font-weight: 600; }
+.penrose-payment-terms input { accent-color: #06f; }
+.penrose-payment-terms a { color: #101114; text-decoration: underline; }
+.penrose-payment-error { margin-top: 12px; color: #aa2020; font-size: .8rem; }
+@media (max-width: 830px) { .penrose-payment-layout { grid-template-columns: 1fr; } .penrose-payment-summary { order: -1; } }
