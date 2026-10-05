@@ -90,7 +90,7 @@ export default function PenroseHome() {
 
       <section className="penrose-section penrose-catalog-preview">
         <h2>Catálogo Completo</h2>
-        <LandingCatalogPreview products={products} filters={catalogFilters} />
+        <LandingCatalogPreview filters={catalogFilters} />
       </section>
 
       <section className="penrose-why">
