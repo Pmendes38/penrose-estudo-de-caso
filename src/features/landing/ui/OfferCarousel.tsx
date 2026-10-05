@@ -66,7 +66,7 @@ export default function OfferCarousel() {
                 <Image src={offer.image} alt={index === offers.length ? '' : offer.name} fill sizes="(max-width: 640px) 78vw, (max-width: 1000px) 42vw, 25vw" draggable={false} />
                 {offer.discount && <span className="penrose-offer-badge">{offer.discount}</span>}
               </span>
-              <span className="penrose-offer-info">
+              <span className={`penrose-offer-info${offer.discount ? '' : ' no-discount'}`}>
                 <strong>{offer.name}</strong>
                 <span>{offer.oldPrice && <s>{offer.oldPrice}</s>} <b>{offer.oldPrice ? 'por ' : ''}{offer.price}</b></span>
               </span>
