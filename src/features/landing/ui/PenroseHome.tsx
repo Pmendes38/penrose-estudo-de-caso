@@ -4,7 +4,9 @@ import { Logo } from '@/shared/ui/Logo';
 import AppHeader from '@/shared/ui/AppHeader';
 import PenroseHero from './PenroseHero';
 import CollectionCarousel from './CollectionCarousel';
-import OfferCarousel, { offers } from './OfferCarousel';
+import OfferCarousel from './OfferCarousel';
+import type { Offer } from './OfferCarousel';
+import { catalogProducts } from '@/features/products/catalog';
 import StorefrontFooter from '@/shared/ui/StorefrontFooter';
 import LandingCatalogPreview from './LandingCatalogPreview';
 
@@ -42,6 +44,21 @@ const products = [
 ];
 
 const catalogFilters = ['Todos', 'Anime', 'Filme', 'Games', 'Universo DC', 'Universo Marvel'] as const;
+
+const currency = (cents: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
+const offers: Offer[] = catalogProducts.flatMap((product) => {
+  const { regularPriceCents: regular, salePriceCents: sale } = product;
+  if (regular === null || sale === null || sale >= regular) return [];
+  return [{
+    name: product.name,
+    href: `/product/${product.id}`,
+    image: product.images[0],
+    oldPrice: currency(regular),
+    price: currency(sale),
+    discount: `${Math.round((1 - sale / regular) * 100)}% OFF`,
+    accent: '#00abff',
+  }];
+});
 
 function FeatureCard({ accent, title, children }: { accent: 'violet' | 'cyan' | 'orange'; title: string; children: React.ReactNode }) {
   return (
@@ -84,7 +101,7 @@ export default function PenroseHome() {
       </section>
 
       {offers.length > 0 && <section className="penrose-section penrose-offers">
-        <h2>Ofertas</h2><OfferCarousel />
+        <h2>Ofertas</h2><OfferCarousel offers={offers} />
       </section>}
 
       <section className="penrose-section penrose-catalog-preview">

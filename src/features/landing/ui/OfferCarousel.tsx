@@ -5,13 +5,9 @@ import Link from 'next/link';
 import { useRef, useState } from 'react';
 import type { CSSProperties, PointerEvent, TransitionEvent } from 'react';
 
-export const offers = [
-  { name: 'Gaara', href: '/product/pnr-001', image: '/assets/catalog/pnr-001/01.webp', oldPrice: 'R$ 599,90', price: 'R$ 259,90', discount: '57% OFF', accent: '#d15dff' },
-  { name: 'Asa Noturna', href: '/product/pnr-003', image: '/assets/catalog/pnr-003/01.webp', oldPrice: 'R$ 549,90', price: 'R$ 259,90', discount: '53% OFF', accent: '#00ff73' },
-];
+export type Offer = { name: string; href: string; image: string; oldPrice: string; price: string; discount: string; accent: string };
 
-export default function OfferCarousel() {
-  if (offers.length === 0) return null;
+export default function OfferCarousel({ offers }: { offers: Offer[] }) {
   const [firstOffer, setFirstOffer] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
   const pointer = useRef({ x: 0, active: false, suppressClickUntil: 0 });
