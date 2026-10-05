@@ -87,6 +87,7 @@ export default function CouponField({ onApply }: Props) {
         disabled={loading}
       />
       <button
+        type="button"
         onClick={apply}
         className="btn-secondary"
         disabled={loading || !code.trim()}

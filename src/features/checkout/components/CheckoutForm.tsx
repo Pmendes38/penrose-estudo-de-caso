@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ShippingSelector from '@/features/shipping/ui/ShippingSelector';
 import type { CalculateShippingInput, ShippingQuote } from '@/features/shipping/schemas';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -47,22 +48,23 @@ export default function CheckoutForm() {
 
   const field=(name:keyof FormState,label:string,props:React.InputHTMLAttributes<HTMLInputElement>={})=><label><span>{label}</span><input id={name} name={name} value={data[name]} onChange={onChange} required={props.required!==false} {...props}/></label>;
   return <div className="penrose-page penrose-checkout-page">
-    <h1>CHECKOUT</h1>
     <form onSubmit={submit} className="penrose-checkout-layout" noValidate>
       <section className="penrose-checkout-form">
-        <fieldset><legend><span>01</span> Informações de Contato</legend><div className="checkout-grid two">{field('nome','Nome completo',{autoComplete:'name'})}{field('email','E-mail',{type:'email',autoComplete:'email'})}{field('telefone','Telefone',{autoComplete:'tel'})}{field('cpf','CPF',{inputMode:'numeric'})}</div></fieldset>
-        <fieldset><legend><span>02</span> Endereço de Entrega</legend><div className="checkout-grid three">{field('cep','CEP',{inputMode:'numeric',autoComplete:'postal-code'})}{field('endereco','Endereço',{autoComplete:'street-address'})}{field('numero','Número')}{field('complemento','Complemento',{required:false})}{field('bairro','Bairro')}{field('cidade','Cidade')}<label><span>Estado</span><select name="estado" value={data.estado} onChange={onChange} required><option value="">Selecione</option>{ESTADOS.map(uf=><option key={uf}>{uf}</option>)}</select></label></div></fieldset>
-        <fieldset><legend><span>03</span> Método de Entrega</legend><ShippingSelector input={shippingInput} onSelect={setShipping}/></fieldset>
-        <fieldset><legend><span>04</span> Cupom</legend><CouponField onApply={setCoupon}/>{coupon.code&&<p className="checkout-note">Cupom aplicado: <strong>{coupon.code}</strong></p>}</fieldset>
-        {error&&<div className="penrose-form-error">{error}</div>}
+        <h1><Link href="/cart" aria-label="Voltar ao carrinho">←</Link> CHECKOUT</h1>
+        <fieldset><legend>1. Informações de Contato</legend><div className="checkout-grid two">{field('nome','Nome completo',{autoComplete:'name'})}{field('email','E-mail',{type:'email',autoComplete:'email'})}{field('telefone','Telefone',{autoComplete:'tel'})}{field('cpf','CPF',{inputMode:'numeric'})}</div></fieldset>
+        <fieldset><legend>2. Endereço de Entrega</legend><div className="checkout-grid three">{field('cep','CEP',{inputMode:'numeric',autoComplete:'postal-code'})}{field('endereco','Endereço',{autoComplete:'street-address'})}{field('numero','Número')}{field('complemento','Complemento',{required:false})}{field('bairro','Bairro')}{field('cidade','Cidade')}<label><span>Estado</span><select name="estado" value={data.estado} onChange={onChange} required><option value="">Selecione</option>{ESTADOS.map(uf=><option key={uf}>{uf}</option>)}</select></label></div></fieldset>
+        <fieldset><legend>3. Método de Entrega</legend><ShippingSelector input={shippingInput} onSelect={setShipping}/></fieldset>
+        <fieldset><legend>4. Cupom de Desconto</legend><CouponField onApply={setCoupon}/>{coupon.code&&<p className="checkout-note">Cupom aplicado: <strong>{coupon.code}</strong></p>}</fieldset>
+        <fieldset className="checkout-payment-next"><legend>5. Método de Pagamento</legend><p>Escolha Pix, boleto ou cartão com segurança na próxima etapa.</p></fieldset>
+        {error&&<div className="penrose-form-error" role="alert">{error}</div>}
       </section>
       <aside className="penrose-checkout-summary">
         <h2>PEDIDOS</h2>
-        <div className="checkout-items">{items.map(item=><article key={item.id}>{item.image?<img src={item.image} alt={item.name??item.sku}/>:<span/>}<div><h3>{item.name??item.sku}</h3><small>Quantidade: {item.quantity}</small></div><strong>{money(item.total/100)}</strong></article>)}</div>
+        <div className="checkout-items">{items.map(item=><article key={item.id}>{item.image?<img src={item.image} alt={item.name??item.sku}/>:<span/>}<div><h3>{item.name??item.sku}</h3><small>Quantidade: {item.quantity}</small><strong>{money(item.total/100)}</strong></div></article>)}</div>
         <dl><div><dt>Subtotal</dt><dd>{money(subtotal)}</dd></div><div><dt>Frete</dt><dd>{money(shippingTotal)}</dd></div><div><dt>Descontos</dt><dd>− {money(cartDiscount+couponDiscount)}</dd></div><div className="total"><dt>TOTAL</dt><dd>{money(grandTotal)}</dd></div></dl>
         <div className="checkout-security">Compra segura · Dados protegidos</div>
         <button type="submit" disabled={submitting||isLoading}>{submitting?'PREPARANDO…':'CONTINUAR PARA PAGAMENTO'}</button>
-        <button type="button" className="checkout-back" onClick={()=>history.back()}>VOLTAR</button>
+        <Link href="/cart" className="checkout-back">VOLTAR AO CARRINHO</Link>
       </aside>
     </form>
   </div>;
