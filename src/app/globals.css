@@ -878,24 +878,26 @@ h3 {
 .penrose-public-header {
   position: sticky;
   top: 0;
+}
+.penrose-public-header:not(.penrose-home-header) {
   min-height: 112px;
   border-bottom: 2px solid #006cff;
   background: #080a0d;
   box-shadow: 0 5px 16px rgba(0, 102, 255, .45);
 }
-.penrose-public-header .penrose-nav a:hover,
-.penrose-public-header .penrose-nav a:focus-visible,
-.penrose-public-header .penrose-header-icon:hover,
-.penrose-public-header .penrose-header-icon:focus-visible { color: #60adff; }
+.penrose-public-header:not(.penrose-home-header) .penrose-nav a:hover,
+.penrose-public-header:not(.penrose-home-header) .penrose-nav a:focus-visible,
+.penrose-public-header:not(.penrose-home-header) .penrose-header-icon:hover,
+.penrose-public-header:not(.penrose-home-header) .penrose-header-icon:focus-visible { color: #60adff; }
 @media (max-width: 1000px) {
-  .penrose-public-header { grid-template-columns: 1fr auto; row-gap: 10px; padding-block: 12px; }
-  .penrose-public-header .penrose-nav { grid-row: 2; grid-column: 1 / -1; display: flex; justify-content: center; gap: clamp(20px, 5vw, 48px); font-size: .9rem; }
-  .penrose-public-header .penrose-nav a:not(:last-child)::after { right: calc(clamp(20px, 5vw, 48px) / -2); height: 20px; }
+  .penrose-public-header:not(.penrose-home-header) { grid-template-columns: 1fr auto; row-gap: 10px; padding-block: 12px; }
+  .penrose-public-header:not(.penrose-home-header) .penrose-nav { grid-row: 2; grid-column: 1 / -1; display: flex; justify-content: center; gap: clamp(20px, 5vw, 48px); font-size: .9rem; }
+  .penrose-public-header:not(.penrose-home-header) .penrose-nav a:not(:last-child)::after { right: calc(clamp(20px, 5vw, 48px) / -2); height: 20px; }
 }
 @media (max-width: 480px) {
-  .penrose-public-header { min-height: 92px; padding-inline: 12px; }
-  .penrose-public-header .penrose-nav { gap: 22px; font-size: .75rem; }
-  .penrose-public-header .penrose-nav a:not(:last-child)::after { right: -11px; height: 16px; }
+  .penrose-public-header:not(.penrose-home-header) { min-height: 92px; padding-inline: 12px; }
+  .penrose-public-header:not(.penrose-home-header) .penrose-nav { gap: 22px; font-size: .75rem; }
+  .penrose-public-header:not(.penrose-home-header) .penrose-nav a:not(:last-child)::after { right: -11px; height: 16px; }
 }
 .penrose-page { min-height: 72vh; padding: clamp(48px, 6vw, 96px) clamp(20px, 4.2vw, 80px); font-family: "Instrument Sans", Arial, sans-serif; }
 .penrose-page h1,.penrose-page h2,.penrose-page h3,.penrose-confirmed-page h1,.penrose-policy-page h1,.penrose-policy-page h2 { font-family: "Clash Display", Arial, sans-serif; letter-spacing: -.04em; }
