@@ -28,7 +28,7 @@ export default async function ProductPage({ params }: PageParams) {
   if (!source && !api) notFound();
 
   const product = source ?? api!;
-  const images = product.images?.length ? product.images : ['/assets/wide-logo.svg'];
+  const images = product.images ?? [];
   const price = source ? productPrice(source) : { cents: api!.priceCents, estimated: false };
   const oldPrice = source?.regularPriceCents && source.salePriceCents ? source.regularPriceCents : null;
   const canBuy = !source && api!.status === 'active' && api!.stock > 0;

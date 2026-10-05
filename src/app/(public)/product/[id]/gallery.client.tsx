@@ -10,8 +10,10 @@ type Props = {
 };
 
 export default function Gallery({ images, alt }: Props) {
-  const safe = images.length ? images : ['/assets/wide-logo.svg'];
+  const safe = images;
   const [active, setActive] = useState(0);
+
+  if (!safe.length) return <div className="penrose-gallery-empty" role="img" aria-label={`${alt}: foto em breve`}>Foto em breve</div>;
 
   return (
     <div className="penrose-gallery">

@@ -1001,6 +1001,8 @@ h3 {
 .penrose-store-card { border-width: 1px; background: #00102d; }
 .penrose-store-card-image { aspect-ratio: 1; }
 .penrose-store-card-image.is-placeholder img { object-fit: contain; padding: 22%; opacity: .45; }
+.penrose-store-card-image.is-placeholder,.penrose-gallery-empty { display: grid; place-items: center; color: #7591ac; background: #00112a; font-size: .8rem; }
+.penrose-gallery-empty { aspect-ratio: 1; border: 1px solid #195080; border-radius: 8px; }
 .penrose-store-card-copy { min-height: 128px; padding: 12px 13px; }
 .penrose-store-card-copy h3 { margin: 0; font-size: .9rem; line-height: 1.2; }
 .penrose-card-series { margin-top: 4px; color: #a5b7c8; font-size: .7rem; }

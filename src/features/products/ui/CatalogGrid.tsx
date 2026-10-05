@@ -14,7 +14,7 @@ export default function CatalogGrid({ products }: { products: CatalogProduct[] }
       const href = `/product/${product.id}`;
       return <article key={product.sku} className="penrose-store-card">
         <Link href={href} className={`penrose-store-card-image${product.images.length ? '' : ' is-placeholder'}`}>
-          <Image src={product.images[0] ?? '/assets/wide-logo.svg'} alt={product.images.length ? product.name : 'Foto em breve'} fill sizes="(min-width: 1200px) 22vw, (min-width: 640px) 45vw, 100vw" />
+          {product.images[0] ? <Image src={product.images[0]} alt={product.name} fill sizes="(min-width: 1200px) 22vw, (min-width: 640px) 45vw, 100vw" /> : <span>Foto em breve</span>}
         </Link>
         <div className="penrose-store-card-copy">
           <h3><Link href={href}>{product.name}</Link></h3>
