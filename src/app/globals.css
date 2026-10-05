@@ -746,12 +746,7 @@ h3 {
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 68%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 68%, transparent 100%);
 }
-.penrose-hero-media img.penrose-hero-image-aquaman { width: 50.87%; height: 216.89%; left: -3.45%; top: -41.18%; }
-.penrose-hero-media img.penrose-hero-image-gaara { width: 44.12%; height: 146.06%; left: -.83%; top: -22.95%; }
-.penrose-hero-media img.penrose-hero-image-superman { width: 57.97%; height: 191.9%; left: -4.38%; top: -7.26%; }
-.penrose-hero-media img.penrose-hero-image-alphonse { width: 65.41%; height: 216.55%; left: -9.25%; top: -19.62%; }
-.penrose-hero-media img.penrose-hero-image-batman { width: 56.74%; height: 187.83%; left: -7.2%; top: -3.07%; }
-.penrose-hero-media img.penrose-hero-image-luffy { width: 48.02%; height: 158.95%; left: -.26%; top: -16.23%; }
+.penrose-hero-media img[class^="penrose-hero-image-"] { width: min(50vw, 900px); height: 125%; left: 0; top: -12%; object-fit: cover; object-position: 50% 35%; }
 .penrose-hero-copy { right: clamp(24px, 3.8vw, 70px); width: min(53vw, 969px); }
 .penrose-hero-copy h1 { font-size: clamp(1rem, 3.34vw, 64px); line-height: .985; }
 .penrose-hero-copy p { max-width: 745px; font-family: "Clash Display", Arial, sans-serif; font-size: 15px; line-height: 25px; }
