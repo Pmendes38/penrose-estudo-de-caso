@@ -6,10 +6,10 @@ import { useRef } from 'react';
 import type { PointerEvent } from 'react';
 
 const collections = [
-  { title: 'Universo DC', href: '/catalog?category=Universo+DC', image: '/assets/penrose/collection-dc.png', accent: '#d15dff' },
-  { title: 'Universo Marvel', href: '/catalog?category=Marvel', image: '/assets/penrose/collection-marvel.png', accent: '#ff0946' },
-  { title: 'Dragon Ball', href: '/catalog?search=Goku', image: '/assets/penrose/collection-dragonball.png', accent: '#fbbc04' },
-  { title: 'Naruto', href: '/catalog?search=Naruto', image: '/assets/penrose/collection-naruto.png', accent: '#ff5e00' },
+  { title: 'Universo DC', href: '/catalog?category=Universo+DC', image: '/assets/catalog/pnr-092/01.webp', accent: '#d15dff' },
+  { title: 'Universo Marvel', href: '/catalog?category=Marvel', image: '/assets/catalog/pnr-105/01.webp', accent: '#ff0946' },
+  { title: 'Dragon Ball', href: '/catalog?search=Goku', image: '/assets/catalog/pnr-018/01.webp', accent: '#fbbc04' },
+  { title: 'Naruto', href: '/catalog?search=Naruto', image: '/assets/catalog/pnr-001/01.webp', accent: '#ff5e00' },
 ];
 
 type DragState = { startX: number; startScrollLeft: number; active: boolean; moved: boolean };
