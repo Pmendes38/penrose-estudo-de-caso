@@ -706,9 +706,8 @@ h3 {
 .penrose-top-shell::after {
   content: "";
   position: absolute;
-  z-index: 5;
-  inset: 0 0 auto;
-  height: min(1050px, 100%);
+  z-index: 30;
+  inset: 0;
   pointer-events: none;
   opacity: .35;
   mix-blend-mode: lighten;
