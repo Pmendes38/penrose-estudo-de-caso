@@ -614,6 +614,8 @@ h3 {
 .penrose-filter-row button:hover,
 .penrose-filter-row button:focus-visible { border-color: #00abff; box-shadow: 0 0 9px rgba(0, 171, 255, .45); }
 .penrose-filter-row .is-active { color: #fff; border-color: #006cff; background: #006cff; }
+.penrose-catalog-preview .penrose-filter-row { margin-bottom: 24px; }
+.penrose-catalog-see-all { margin-bottom: 32px; }
 .penrose-product-gallery { display: flex; width: 100%; gap: 32px; padding: 0 0 34px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-color: #fff #5d5d5d; scrollbar-width: auto; }
 .penrose-product-gallery::-webkit-scrollbar { height: 10px; }
 .penrose-product-gallery::-webkit-scrollbar-track { border-radius: 200px; background: #5d5d5d; }
