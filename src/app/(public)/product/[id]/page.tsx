@@ -24,14 +24,14 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 
 export default async function ProductPage({ params }: PageParams) {
   const source = findCatalogProduct(params.id);
-  const api = source ? null : await getProduct(params.id).catch(() => null);
+  const api = await getProduct(params.id).catch(() => null);
   if (!source && !api) notFound();
 
   const product = source ?? api!;
   const images = product.images ?? [];
   const price = source ? productPrice(source) : { cents: api!.priceCents, estimated: false };
   const oldPrice = source?.regularPriceCents && source.salePriceCents ? source.regularPriceCents : null;
-  const canBuy = !source && api!.status === 'active' && api!.stock > 0;
+  const canBuy = Boolean(api?.status === 'active' && (api.madeToOrder || api.stock > 0));
   const inquiry = `https://wa.me/5500000000000?text=${encodeURIComponent(`Olá! Gostaria de consultar ${product.name} (${source?.sku ?? api?.sku ?? product.id}).`)}`;
 
   return <div className="penrose-page penrose-product-page">
@@ -48,7 +48,7 @@ export default async function ProductPage({ params }: PageParams) {
         <h1>{product.name}</h1>
         <p className="penrose-product-subtitle">{source?.sourceCategory || product.category || 'Action figure'} by Penrøse</p>
         <div className="penrose-purchase-panel">
-          <p className="penrose-stock">{canBuy ? 'Em estoque' : 'Disponibilidade sob consulta'}</p>
+          <p className="penrose-stock">{api?.madeToOrder ? 'Produzido sob encomenda' : canBuy ? 'Em estoque' : 'Disponibilidade sob consulta'}</p>
           {oldPrice && <del>DE: {formatBRL(oldPrice / 100)}</del>}
           <strong className="penrose-product-price">{formatBRL(price.cents / 100)}</strong>
           {price.estimated && <p className="penrose-price-note">Valor estimado com base na planilha. Confirme o preço final antes de encomendar.</p>}

@@ -15,7 +15,7 @@ export default async function BuyAgainPage({ params }: { params: { id: string } 
   const items = (order.items ?? []).map((item, index) => {
     const product = findCatalogProduct(item.productId) ?? catalogProducts.find((entry) => entry.name.toLowerCase() === item.name.toLowerCase());
     const current = currentProducts.find((entry) => entry.id === item.productId || Boolean(product?.sku && entry.sku?.toUpperCase() === product.sku.toUpperCase()));
-    return { id: `${item.productId}-${index}`, name: item.name, sku: current?.sku ?? null, image: product?.images[0] ?? current?.images[0] ?? null, category: product?.sourceCategory ?? current?.category ?? null, size: item.size ?? null, quantity: item.quantity, priceCents: current?.priceCents ?? 0, previousPriceCents: item.unitPrice, stock: current?.stock ?? 0, available: Boolean(current?.sku && current.stock > 0 && current.priceCents > 0) };
+    return { id: `${item.productId}-${index}`, name: item.name, sku: current?.sku ?? null, image: product?.images[0] ?? current?.images[0] ?? null, category: product?.sourceCategory ?? current?.category ?? null, size: item.size ?? null, quantity: item.quantity, priceCents: current?.priceCents ?? 0, previousPriceCents: item.unitPrice, stock: current?.stock ?? 0, madeToOrder: current?.madeToOrder ?? false, available: Boolean(current?.sku && (current.madeToOrder || current.stock > 0) && current.priceCents > 0) };
   });
 
   return <section className="penrose-repeat-page"><header className="penrose-order-intro"><h1>COMPRAR NOVAMENTE</h1><p>Pedido #{order.orderNumber}. Confirme disponibilidade, tamanhos e quantidades.</p></header><BuyAgainForm items={items} /></section>;

@@ -10,6 +10,7 @@ export const ProductSchema = z.object({
   category: z.string().nullable().optional(),
   priceCents: z.number().nonnegative(),
   stock: z.number().int().nonnegative(),
+  madeToOrder: z.boolean().optional(),
   status: ProductStatusSchema,
   description: z.string().nullable().optional(),
   images: z.array(z.string()).default([]),
