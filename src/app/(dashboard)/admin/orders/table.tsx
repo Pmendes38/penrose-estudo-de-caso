@@ -14,8 +14,8 @@ function csvCell(value: string | number) {
   return `"${(/^[=+@-]/.test(text.trimStart()) ? "'" : '') + text.replaceAll('"', '""')}"`;
 }
 
-export default function OrdersTable({ orders }: { orders: Order[] }) {
-  const [query, setQuery] = useState('');
+export default function OrdersTable({ orders, initialQuery = '' }: { orders: Order[]; initialQuery?: string }) {
+  const [query, setQuery] = useState(initialQuery);
   const [status, setStatus] = useState('');
   const [period, setPeriod] = useState('30');
   const [page, setPage] = useState(1);
@@ -53,7 +53,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
   return <div className="space-y-5">
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">{cards.map(card => <div key={card.label} className={`h-32 rounded-lg border bg-[#02091b] p-5 shadow-[0_0_16px_rgba(0,102,255,.12)] ${card.color}`}><div className="flex items-center justify-between text-[13px] text-[#9ca3af]"><span>{card.label}</span>{icon(card.icon, 20)}</div><p className="mt-2 text-[30px] font-bold leading-none">{card.value}</p><p className={`mt-2 text-[11px] ${card.accent}`}>{card.detail}</p></div>)}</div>
     <div className="flex flex-wrap items-center gap-3 py-2">
-      <label className="flex h-10 min-w-[240px] flex-1 items-center gap-2 rounded-md border border-[#064181] bg-[#071127] px-3 xl:max-w-[420px]">{icon('search', 18)}<input aria-label="Buscar pedido ou ID do cliente" type="search" value={query} onChange={event => { setQuery(event.target.value); setPage(1); }} placeholder="Buscar pedido ou cliente..." className="w-full bg-transparent text-[13px] outline-none placeholder:text-[#6b7280]" /></label>
+      <label id="order-search" className="flex h-10 min-w-[240px] flex-1 items-center gap-2 rounded-md border border-[#064181] bg-[#071127] px-3 xl:max-w-[420px]">{icon('search', 18)}<input aria-label="Buscar pedido ou ID do cliente" type="search" value={query} onChange={event => { setQuery(event.target.value); setPage(1); }} placeholder="Buscar pedido ou cliente..." className="w-full bg-transparent text-[13px] outline-none placeholder:text-[#6b7280]" /></label>
       <label className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-[#071127] px-3 text-xs">{icon('orders-list-filter', 15)}<select aria-label="Filtrar por status" value={status} onChange={event => { setStatus(event.target.value); setPage(1); }} className="bg-transparent outline-none"><option className="bg-[#071127]" value="">Todos os status</option>{Object.entries(labels).map(([value, label]) => <option className="bg-[#071127]" key={value} value={value}>{label}</option>)}</select></label>
       <label className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-[#071127] px-3 text-xs">{icon('orders-calendar', 15)}<select aria-label="Filtrar por período" value={period} onChange={event => { setPeriod(event.target.value); setPage(1); }} className="bg-transparent outline-none"><option className="bg-[#071127]" value="30">Últimos 30 dias</option><option className="bg-[#071127]" value="7">Últimos 7 dias</option><option className="bg-[#071127]" value="90">Últimos 90 dias</option><option className="bg-[#071127]" value="all">Todo o período</option></select></label>
       <button onClick={exportCsv} className="ml-auto flex h-10 items-center gap-2 rounded-md border border-white/15 bg-[#071127] px-4 text-[13px] text-[#d1d5db] hover:border-[#06f]">{icon('download')}Exportar</button>

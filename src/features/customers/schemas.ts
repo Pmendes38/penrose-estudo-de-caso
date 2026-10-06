@@ -1,4 +1,3 @@
-// src/features/customers/schemas.ts
 import { z } from 'zod';
 
 export const CustomerSchema = z.object({
@@ -8,17 +7,11 @@ export const CustomerSchema = z.object({
   phone: z.string().optional().nullable(),
   totalOrders: z.number().int().nonnegative(),
   totalSpent: z.number().nonnegative(),
-  lastOrder: z.coerce.date(), // converte string ISO -> Date automaticamente
-  status: z.enum(['active', 'inactive']).default('active'),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
+  paidOrders: z.number().int().nonnegative(),
+  lastOrder: z.string().datetime().nullable(),
+  createdAt: z.string().datetime().nullable(),
 });
 
 export type Customer = z.infer<typeof CustomerSchema>;
 
-export const CustomersPageSchema = z.object({
-  items: z.array(CustomerSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().nonnegative(),
-  pageSize: z.number().int().positive(),
-});
+export const CustomersPageSchema = z.array(CustomerSchema);
