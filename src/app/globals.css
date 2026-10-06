@@ -1193,3 +1193,27 @@ h3 {
 .penrose-payment-terms a { color: #101114; text-decoration: underline; }
 .penrose-payment-error { margin-top: 12px; color: #aa2020; font-size: .8rem; }
 @media (max-width: 830px) { .penrose-payment-layout { grid-template-columns: 1fr; } .penrose-payment-summary { order: -1; } }
+
+.penrose-confirmed-page { min-height: 100svh; padding: 100px 24px 90px; display: grid; place-items: center; background: #03081a url('/assets/penrose/confirmation-noise.png') center / cover no-repeat; color: #fff; text-align: center; }
+.penrose-confirmed-page .confirmed-close { position: absolute; top: clamp(20px, 3vw, 58px); right: clamp(20px, 3vw, 58px); width: auto; height: auto; border: 0; border-radius: 0; }
+.penrose-confirmed-page .confirmed-close img { display: block; }
+.penrose-confirmed-page .confirmed-close::before,.penrose-confirmed-page .confirmed-close::after { content: ''; position: absolute; top: 50%; left: 50%; width: 24px; height: 2px; margin-left: -12px; margin-top: -1px; background: #fff; transform: rotate(45deg); }
+.penrose-confirmed-page .confirmed-close::after { transform: rotate(-45deg); }
+.confirmed-content { width: min(100%, 1500px); }
+.penrose-confirmed-page h1 { margin: 0 0 30px; font: 700 clamp(2rem, 3.35vw, 4rem)/1.08 "Clash Display", Arial, sans-serif; letter-spacing: -.04em; text-transform: none; }
+.confirmed-content > p { margin: 0 auto; max-width: 1430px; font: 400 clamp(1.1rem, 1.9vw, 2.25rem)/1.18 "Instrument Sans", Arial, sans-serif; }
+.confirmed-content > p strong { font-weight: 700; }
+.confirmed-content .confirmed-order { margin-top: 24px; color: #d7e1e9; font-size: clamp(.9rem, 1vw, 1.15rem); }
+.confirmed-order a { color: #fff; text-decoration: underline; }
+.penrose-confirmed-page .confirmed-newsletter { width: min(100%, 734px); margin: 40px auto 0; padding: 0; border: 0; }
+.confirmed-newsletter label { display: block; margin-bottom: 14px; font-size: clamp(.9rem, 1.04vw, 1.25rem); }
+.penrose-confirmed-page .confirmed-newsletter > div { display: flex; min-height: 64px; border-radius: 10px; overflow: hidden; }
+.penrose-confirmed-page .confirmed-newsletter input { flex: 1; min-width: 0; padding: 0 20px; border: 0; background: #001636; color: #fff; text-align: center; font-size: 1rem; }
+.penrose-confirmed-page .confirmed-newsletter input::placeholder { color: #fff; opacity: 1; }
+.penrose-confirmed-page .confirmed-newsletter button { flex: 0 0 192px; padding: 0 20px; border: 0; background: #06f; color: #fff; font-size: 1.5rem; opacity: 1; }
+.confirmed-newsletter small { display: block; margin-top: 7px; color: #c5d0dc; font-size: .75rem; }
+.penrose-confirmed-page .confirmed-social { display: flex; justify-content: center; align-items: center; gap: clamp(24px, 3vw, 42px); margin-top: 34px; }
+.penrose-confirmed-page .confirmed-social button { display: grid; place-items: center; padding: 0; border: 0; background: transparent; opacity: 1; }
+.penrose-confirmed-page .confirmed-social img { display: block; }
+.confirmed-back { display: inline-block; margin-top: 25px; padding: 12px 20px; border-radius: 8px; background: #06f; }
+@media (max-width: 700px) { .penrose-confirmed-page { padding: 110px 18px 70px; } .penrose-confirmed-page h1 { margin-bottom: 22px; } .confirmed-content > p br { display: none; } .penrose-confirmed-page .confirmed-newsletter > div { min-height: 50px; } .penrose-confirmed-page .confirmed-newsletter input { padding: 0 9px; font-size: .75rem; text-align: left; } .penrose-confirmed-page .confirmed-newsletter button { flex-basis: 95px; padding: 0 8px; font-size: .95rem; } .penrose-confirmed-page .confirmed-social { gap: 18px; } .penrose-confirmed-page .confirmed-social img { max-width: 28px; height: auto; } }

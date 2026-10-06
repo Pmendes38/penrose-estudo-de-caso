@@ -7,10 +7,6 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function ObrigadoPage({ searchParams }: { searchParams?: { order?: string } }) {
-  return (
-    <main>
-      <ThankYouClient />
-    </main>
-  );
+export default function ObrigadoPage() {
+  return <main><ThankYouClient /></main>;
 }
