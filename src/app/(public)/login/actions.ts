@@ -62,11 +62,11 @@ export async function loginAction(_: LoginState, form: FormData): Promise<LoginS
     refreshToken: data.tokens.refreshToken,
   });
 
-  const dest = isSafeRelativePath(nextRaw)
-    ? nextRaw
-    : data.role === 'admin'
+  const dest = data.role === 'admin'
     ? '/admin'
-    : isSafeRelativePath(data.redirect)
+    : isSafeRelativePath(nextRaw) && !nextRaw.startsWith('/admin')
+    ? nextRaw
+    : isSafeRelativePath(data.redirect) && !data.redirect.startsWith('/admin')
     ? data.redirect
     : '/catalog';
 

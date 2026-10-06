@@ -1,276 +1,58 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
+import { envServer } from '@/shared/lib/env.server';
+import { listOrdersAdmin } from '@/features/orders/api';
 
-export default function AdminDashboard() {
-  const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalOrders: 0,
-    totalClients: 0,
-    monthlyRevenue: 0
-  });
-  
-  const [isLoading, setIsLoading] = useState(true);
+export const dynamic = 'force-dynamic';
+const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Simular dados do dashboard
-        setTimeout(() => {
-          setStats({
-            totalProducts: 12,
-            totalOrders: 45,
-            totalClients: 28,
-            monthlyRevenue: 15750.00
-          });
-          setIsLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error);
-        setIsLoading(false);
-      }
-    };
+async function getProducts() {
+  const response = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/products?page=1&pageSize=3`);
+  if (!response.ok) throw new Error('Não foi possível consultar os produtos');
+  return response.json() as Promise<{ total: number; items: { id: string; name: string; createdAt?: string }[] }>;
+}
 
-    fetchStats();
-  }, []);
-
-  const quickActions = [
-    { name: 'Novo Produto', href: '/admin/products/new', icon: '➕', color: 'bg-green-600' },
-    { name: 'Ver Pedidos', href: '/admin/orders', icon: '📋', color: 'bg-blue-600' },
-    { name: 'Relatórios', href: '/admin/reports', icon: '📊', color: 'bg-purple-600' },
-    { name: 'Configurações', href: '/admin/settings', icon: '⚙️', color: 'bg-gray-600' },
-  ];
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-brand-gray-dark rounded-lg p-5">
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-700 rounded w-1/2"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+async function getOrders() {
+  const first = await listOrdersAdmin({ page: 1, pageSize: 100 });
+  const items = [...first.items];
+  // ponytail: percorre as páginas existentes; criar endpoint agregado quando o volume exigir.
+  for (let page = 2; page <= first.pages; page++) {
+    items.push(...(await listOrdersAdmin({ page, pageSize: 100 })).items);
   }
+  return items;
+}
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold leading-7 text-brand-gray-light sm:text-3xl sm:truncate">
-          Dashboard
-        </h2>
-        <p className="mt-1 text-sm text-brand-gray">
-          Visão geral do seu negócio
-        </p>
-      </div>
+export default async function AdminDashboard() {
+  const [productsResult, ordersResult] = await Promise.allSettled([getProducts(), getOrders()]);
+  const products = productsResult.status === 'fulfilled' ? productsResult.value : null;
+  const orders = ordersResult.status === 'fulfilled' ? ordersResult.value : null;
+  const now = new Date();
+  const monthlyOrders = orders?.filter(order => order.createdAt.getFullYear() === now.getFullYear() && order.createdAt.getMonth() === now.getMonth());
+  const revenue = monthlyOrders?.filter(order => ['paid', 'shipped', 'delivered'].includes(order.status)).reduce((sum, order) => sum + order.grandTotal, 0);
+  const customerCount = orders ? new Set(orders.map(order => order.customerId)).size : null;
+  const cards = [
+    { label: 'Total de Produtos', value: products?.total ?? '—', href: '/admin/products', link: 'Ver todos os produtos', icon: '□', color: 'text-[#b47aff]' },
+    { label: 'Pedidos do Mês', value: monthlyOrders?.length ?? '—', href: '/admin/orders', link: 'Ver todos os pedidos', icon: '▤', color: 'text-[#008dff]' },
+    { label: 'Clientes com Pedidos', value: customerCount ?? '—', href: '/admin/orders', link: 'Ver pedidos', icon: '♙', color: 'text-[#00e999]' },
+    { label: 'Receita Mensal', value: revenue === undefined ? '—' : money.format(revenue), href: '/admin/orders', link: 'Ver pedidos', icon: '$', color: 'text-[#ffbd66]' },
+  ];
+  const actions = [
+    { name: 'Novo Produto', description: 'Adicione uma nova peça', href: '/admin/products/new', icon: '+', color: 'from-[#7222c2] to-[#b05cec]' },
+    { name: 'Ver Pedidos', description: 'Acompanhe suas vendas', href: '/admin/orders', icon: '▤', color: 'from-[#064f9f] to-[#067df2]' },
+    { name: 'Pagamentos', description: 'Confira as transações', href: '/admin/payments', icon: '$', color: 'from-[#087362] to-[#06b59b]' },
+    { name: 'Cupons', description: 'Gerencie as promoções', href: '/admin/coupons', icon: '◇', color: 'from-[#5f4b20] to-[#b88835]' },
+  ];
+  const activity = [
+    ...(products?.items ?? []).filter(item => item.createdAt).map(item => ({ id: `product-${item.id}`, label: `Novo produto adicionado: ${item.name}`, date: new Date(item.createdAt!), href: '/admin/products', icon: '□' })),
+    ...(orders ?? []).slice(0, 5).map(order => ({ id: `order-${order.id}`, label: `Pedido #${order.orderNumber} recebido`, date: order.createdAt, href: `/admin/orders/${order.id}`, icon: '▤' })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-brand-gray-dark overflow-hidden rounded-lg border border-brand-gray-border">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 text-2xl">📦</div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-brand-gray truncate">
-                    Total de Produtos
-                  </dt>
-                  <dd className="text-lg font-medium text-brand-gray-light">
-                    {stats.totalProducts}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <div className="bg-brand-gray px-5 py-3">
-            <div className="text-sm">
-              <Link href="/admin/products" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
-                Ver todos produtos
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-brand-gray-dark overflow-hidden rounded-lg border border-brand-gray-border">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 text-2xl">🛒</div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-brand-gray truncate">
-                    Pedidos do Mês
-                  </dt>
-                  <dd className="text-lg font-medium text-brand-gray-light">
-                    {stats.totalOrders}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <div className="bg-brand-gray px-5 py-3">
-            <div className="text-sm">
-              <Link href="/admin/orders" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
-                Ver todos pedidos
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-brand-gray-dark overflow-hidden rounded-lg border border-brand-gray-border">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 text-2xl">👥</div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-brand-gray truncate">
-                    Total de Clientes
-                  </dt>
-                  <dd className="text-lg font-medium text-brand-gray-light">
-                    {stats.totalClients}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <div className="bg-brand-gray px-5 py-3">
-            <div className="text-sm">
-              <Link href="/admin/customers" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
-                Ver todos clientes
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-brand-gray-dark overflow-hidden rounded-lg border border-brand-gray-border">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 text-2xl">💰</div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-brand-gray truncate">
-                    Receita Mensal
-                  </dt>
-                  <dd className="text-lg font-medium text-brand-gray-light">
-                    R$ {stats.monthlyRevenue.toFixed(2).replace('.', ',')}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <div className="bg-brand-gray px-5 py-3">
-            <div className="text-sm">
-              <Link href="/admin/reports" className="font-medium text-brand-blue hover:text-blue-400 transition-colors">
-                Ver relatórios
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h3 className="text-lg leading-6 font-medium text-brand-gray-light mb-4">
-          Ações Rápidas
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {quickActions.map((action) => (
-            <Link
-              key={action.name}
-              href={action.href}
-              className="relative group bg-brand-gray-dark p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-brand-blue rounded-lg border border-brand-gray-border hover:bg-brand-gray transition-colors"
-            >
-              <div>
-                <span className={`rounded-lg inline-flex p-3 text-white text-2xl ${action.color}`}>
-                  {action.icon}
-                </span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-lg font-medium text-brand-gray-light">
-                  {action.name}
-                </h3>
-              </div>
-              <span className="pointer-events-none absolute top-6 right-6 text-brand-gray group-hover:text-brand-gray-light transition-colors" aria-hidden="true">
-                →
-              </span>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div>
-        <h3 className="text-lg leading-6 font-medium text-brand-gray-light mb-4">
-          Atividade Recente
-        </h3>
-        <div className="bg-brand-gray-dark border border-brand-gray-border rounded-lg">
-          <div className="p-6">
-            <div className="flow-root">
-              <ul className="divide-y divide-brand-gray-border">
-                <li className="py-3">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0 text-2xl">
-                      📦
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-brand-gray-light truncate">
-                        Novo produto adicionado: Venom Simbionte
-                      </p>
-                      <p className="text-sm text-brand-gray">
-                        2 horas atrás
-                      </p>
-                    </div>
-                  </div>
-                </li>
-                <li className="py-3">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0 text-2xl">
-                      🛒
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-brand-gray-light truncate">
-                        Novo pedido #1234 recebido
-                      </p>
-                      <p className="text-sm text-brand-gray">
-                        4 horas atrás
-                      </p>
-                    </div>
-                  </div>
-                </li>
-                <li className="py-3">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0 text-2xl">
-                      👤
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-brand-gray-light truncate">
-                        Novo cliente cadastrado
-                      </p>
-                      <p className="text-sm text-brand-gray">
-                        1 dia atrás
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="space-y-10 text-white">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">{cards.map(card => <div key={card.label} className="overflow-hidden rounded-xl border border-[#123866] bg-[#091932]">
+      <div className="flex min-h-36 items-start gap-5 p-6"><span className={`text-4xl ${card.color}`} aria-hidden="true">{card.icon}</span><div><p className="text-sm text-[#aab9d0]">{card.label}</p><p className="mt-2 text-3xl font-semibold">{card.value}</p></div></div>
+      <Link href={card.href} className="block border-t border-[#123866] bg-[#0b2141] px-6 py-3 text-sm text-[#62b7ff] hover:text-white">{card.link} →</Link>
+    </div>)}</div>
+    <section><h2 className="mb-5 text-2xl font-medium">Ações Rápidas</h2><div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">{actions.map(action => <Link key={action.name} href={action.href} className={`group rounded-xl border border-white/10 bg-gradient-to-br ${action.color} p-6 transition hover:brightness-125`}><span className="text-4xl" aria-hidden="true">{action.icon}</span><h3 className="mt-7 text-lg font-semibold">{action.name} <span className="float-right transition group-hover:translate-x-1">→</span></h3><p className="mt-1 text-sm text-white/80">{action.description}</p></Link>)}</div></section>
+    <section><h2 className="mb-5 text-2xl font-medium">Atividade Recente</h2><div className="rounded-xl border border-[#123866] bg-[#091932] px-6">{activity.length ? activity.map(item => <Link href={item.href} key={item.id} className="flex items-center gap-5 border-b border-[#123866] py-5 last:border-0 hover:text-[#62b7ff]"><span className="text-2xl text-[#008dff]" aria-hidden="true">{item.icon}</span><span className="flex-1">{item.label}</span><time className="text-sm text-[#aab9d0]" dateTime={item.date.toISOString()}>{item.date.toLocaleDateString('pt-BR')}</time></Link>) : <p className="py-6 text-[#aab9d0]">Nenhuma atividade disponível.</p>}</div></section>
+  </div>;
 }
