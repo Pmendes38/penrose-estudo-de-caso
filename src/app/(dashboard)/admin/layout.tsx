@@ -11,7 +11,7 @@ const nav = [
   { name: 'Dashboard', href: '/admin', icon: '▦' },
   { name: 'Produtos', href: '/admin/products', icon: '□' },
   { name: 'Pedidos', href: '/admin/orders', icon: '▤' },
-  { name: 'Clientes', href: '/admin/customers', icon: '♙' },
+  { name: 'Clientes', href: '', icon: '♙' },
   { name: 'Pagamentos', href: '/admin/payments', icon: '$' },
   { name: 'Cupons', href: '/admin/coupons', icon: '◇' },
   { name: 'Administradores', href: '/admin/admins', icon: '⚙' },
@@ -24,9 +24,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <aside className="border-b border-[#124785] bg-[#060d1f] lg:min-h-screen lg:w-[220px] lg:flex-none lg:border-b-0 lg:border-r">
       <div className="flex h-24 items-center px-6"><Link href="/" aria-label="Voltar à loja"><Logo className="h-auto w-40" /></Link></div>
       <nav aria-label="Administração" className="flex gap-1 overflow-x-auto px-3 pb-3 lg:block lg:space-y-2 lg:overflow-visible lg:px-0 lg:pb-0">
-        {nav.map(item => <Link key={item.href} href={item.href} className="flex shrink-0 items-center gap-4 rounded-lg px-5 py-3 text-sm text-[#b8c3d5] transition hover:bg-[#0b2852] hover:text-white lg:rounded-none lg:border-l-4 lg:border-transparent lg:py-4 lg:hover:border-[#008dff]">
+        {nav.map(item => item.href ? <Link key={item.name} href={item.href} className="flex shrink-0 items-center gap-4 rounded-lg px-5 py-3 text-sm text-[#b8c3d5] transition hover:bg-[#0b2852] hover:text-white lg:rounded-none lg:border-l-4 lg:border-transparent lg:py-4 lg:hover:border-[#008dff]">
           <span className="w-6 text-center text-xl text-[#008dff]" aria-hidden="true">{item.icon}</span>{item.name}
-        </Link>)}
+        </Link> : <span key={item.name} aria-disabled="true" title="Cadastro de clientes em preparação" className="flex shrink-0 cursor-not-allowed items-center gap-4 px-5 py-3 text-sm text-[#73839a] lg:py-4"><span className="w-6 text-center text-xl" aria-hidden="true">{item.icon}</span>{item.name}</span>)}
       </nav>
       <div className="hidden px-5 py-8 lg:block"><Link href="/" className="text-sm text-[#8da4c4] hover:text-white">← Voltar à loja</Link><form action={userLogoutAction} className="mt-5"><button type="submit" className="text-sm text-[#8da4c4] hover:text-white">Sair da conta</button></form></div>
     </aside>
