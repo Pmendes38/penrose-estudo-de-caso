@@ -34,7 +34,8 @@ export default function AdminChrome({ children }: { children: ReactNode }) {
     : pathname === '/admin/orders' ? '/admin/orders#order-search'
     : pathname === '/admin/customers' ? '/admin/customers#customer-search'
     : pathname === '/admin/coupons' ? '/admin/coupons#coupon-search'
-    : pathname === '/admin/reports' ? '/admin/reports#report-filters' : '/admin/products#product-search';
+    : pathname === '/admin/reports' ? '/admin/reports#report-filters'
+    : pathname === '/admin/settings' ? '/admin/settings#store' : '/admin/products#product-search';
 
   return <div className="min-h-screen bg-[#03081a] font-['Instrument_Sans'] text-white lg:flex">
     <aside className="flex-none border-b border-[#06f] bg-[#060d1f] lg:flex lg:min-h-screen lg:w-[220px] lg:flex-col lg:border-b-0 lg:border-r">
@@ -51,7 +52,7 @@ export default function AdminChrome({ children }: { children: ReactNode }) {
       {pathname === '/admin/reports' && <button type="button" onClick={() => document.getElementById('report-export')?.click()} className="flex h-10 items-center gap-2 rounded-md bg-[#06f] px-4 text-[13px] font-semibold hover:bg-[#2780ff]"><img src="/assets/admin/download.svg" alt="" width="16" height="16" />Exportar relatório</button>}
       {pathname === '/admin/orders' && <button type="button" disabled title="Criação manual de pedido ainda não disponível" className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-[#071127] px-4 text-[13px] text-[#9ca3af] opacity-70"><img src="/assets/admin/plus.svg" alt="" width="16" height="16" />Criar pedido</button>}
       {pathname === '/admin/customers' && <button type="button" disabled title="Cadastro administrativo de cliente ainda não disponível" className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-[#071127] px-4 text-[13px] text-[#9ca3af] opacity-70"><img src="/assets/admin/customers-user-plus.svg" alt="" width="16" height="16" />Novo cliente</button>}
-      {pathname === '/admin/settings' && <button type="button" disabled title="Esta página ainda não salva configurações" className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-[#071127] px-4 text-[13px] text-[#9ca3af] opacity-70">Salvar alterações</button>}
+      {pathname === '/admin/settings' && <button type="button" disabled title="Edição das preferências indisponível" className="flex h-10 cursor-not-allowed items-center gap-2 rounded-md border border-[#06f] bg-[#06f] px-4 text-[13px] font-semibold text-white opacity-70"><img src="/assets/admin/settings-save.svg" alt="" aria-hidden="true" />Salvar alterações</button>}
       <Link href={searchTarget} aria-label="Buscar nesta seção" className="flex h-12 w-12 items-center justify-center rounded-md hover:bg-white/10"><img src="/assets/admin/search.svg" alt="" width="18" height="18" /></Link><Link href="/" aria-label="Abrir loja" className="flex h-12 w-12 items-center justify-center rounded-md text-[#06f] hover:bg-white/10"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M6 8h12l1 13H5L6 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg></Link><img src="/assets/admin/profile.png" alt="Perfil do administrador" width="52" height="52" className="rounded-full" />
     </div></header><main className="p-6 lg:p-8">{children}</main></div>
   </div>;
