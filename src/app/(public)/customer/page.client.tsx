@@ -31,7 +31,7 @@ export default function CustomerClient({me,ordersPage}:{me:Me|null;ordersPage:Pa
           <header><div><small>PEDIDO</small><strong>#{order.code??order.orderNumber??order.id}</strong></div><div><small>REALIZADO EM</small><strong>{formatDate(String(order.createdAt))}</strong></div><div><small>TOTAL</small><strong>{formatBRL(total(order)/100)}</strong></div></header>
           <div className="order-products">{(order.items??[]).map((it:any,i:number)=><div key={i}>{it.image?<Image src={it.image} alt={it.name??'Item'} width={86} height={86}/>:<span/>}<div><h3>{it.name??'Item colecionável'}</h3><p>Quantidade: {it.quantity??1}{it.size?` · Tamanho: ${it.size}`:''}</p><strong>{formatBRL(itemTotal(it)/100)}</strong></div></div>)}</div>
           <div className="order-track">{['Realizado','Em produção','Enviado','Entregue'].map((label,i)=><div className={i<=idx?'is-done':''} key={label}><span>{i<idx?'✓':i+1}</span><small>{label}</small></div>)}</div>
-          <footer><button>REPETIR PEDIDO</button><Link href={`/orders/${order.id}`}>VER DETALHES</Link>{idx<2&&<button className="cancel">CANCELAR PEDIDO</button>}</footer>
+          <footer><button>REPETIR PEDIDO</button><Link href={`/orders/${order.id}`}>VER DETALHES</Link>{idx<2&&<Link className="cancel" href={`/orders/${order.id}/cancel`}>CANCELAR PEDIDO</Link>}</footer>
         </article>})}
         {!ordersPage.items.length&&<div className="penrose-empty-state"><h2>Você ainda não fez nenhum pedido.</h2><Link href="/catalog">EXPLORAR CATÁLOGO</Link></div>}
       </section></div>

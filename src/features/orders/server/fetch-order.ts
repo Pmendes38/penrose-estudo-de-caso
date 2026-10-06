@@ -7,7 +7,7 @@ import { OrderSchema, type Order } from '../schemas';
 const BASE = `${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders`;
 
 export async function fetchOrderMine(id: string): Promise<Order> {
-  const res = await fetchWithAuth(`${BASE}/me/${id}`, { cache: 'no-store' });
+  const res = await fetchWithAuth(`${BASE}/me/order/${encodeURIComponent(id)}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
   return OrderSchema.parse(await res.json());
 }

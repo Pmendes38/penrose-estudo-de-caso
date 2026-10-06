@@ -13,7 +13,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
 
   let order: Order;
   try {
-    order = await fetchOrderMine(encodeURIComponent(params.id));
+    order = await fetchOrderMine(params.id);
   } catch {
     return <section className="penrose-order-details penrose-order-unavailable"><h1>Pedido indisponível</h1><p>Não foi possível carregar este pedido. Confira o número e tente novamente.</p><Link href="/customer#pedidos">VOLTAR AOS PEDIDOS</Link></section>;
   }
@@ -52,5 +52,6 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
       <div><h2>Transportadora</h2><p>{order.status === 'shipped' || order.status === 'delivered' ? 'Consulte o código de rastreio no atendimento.' : 'Informações disponíveis após o envio.'}</p></div>
     </div>
     <div className="penrose-order-actions"><Link href="/shipping/track">ACOMPANHAR ENTREGA</Link><a href="mailto:contato@example.com">PRECISO DE AJUDA</a></div>
+    {['pending', 'processing', 'paid'].includes(order.status) && <p className="penrose-order-cancel-link"><Link href={`/orders/${encodeURIComponent(order.id)}/cancel`}>Solicitar cancelamento</Link></p>}
   </section>;
 }
