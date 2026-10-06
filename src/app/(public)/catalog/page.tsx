@@ -12,8 +12,7 @@ export default function CatalogPage({ searchParams = {} }: { searchParams?: Sear
   const discount = Number(searchParams.discount) || 0;
   const filtered = catalogProducts.filter((product) => {
     const price = productPrice(product).cents / 100;
-    const percent = product.regularPriceCents && product.salePriceCents
-      ? Math.round((1 - product.salePriceCents / product.regularPriceCents) * 100) : 0;
+    const percent = 25; // A opção de 30 cm está em promoção para todas as peças.
     return (!categories.length || categories.includes(product.category)) &&
       (!search || `${product.name} ${product.description} ${product.sourceCategory ?? ''} ${product.sku}`.toLocaleLowerCase('pt-BR').includes(search)) &&
       price >= min && price <= max && percent >= discount;

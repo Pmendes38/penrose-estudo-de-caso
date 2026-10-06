@@ -1060,6 +1060,7 @@ h3 {
 .penrose-purchase-panel .penrose-stock { margin: 0; }
 .penrose-purchase-panel del { color: #8fa3b6; font-size: .8rem; }
 .penrose-purchase-panel .penrose-product-price { margin: 0; font-size: clamp(1.7rem, 2.5vw, 2.6rem); }
+.penrose-selected-price p{margin:0 0 4px}.penrose-selected-price p b{margin-left:8px;color:#00f078}.penrose-selected-price>small{display:block;margin-top:5px}.penrose-repeat-copy select{margin-left:6px;padding:4px 8px;border:1px solid #1768ba;border-radius:4px;background:#061a34;color:#fff}
 .penrose-price-note,.penrose-purchase-panel small { color: #aebfd0; font-size: .75rem; line-height: 1.5; }
 .penrose-variant-list { display: grid; gap: 7px; margin-block: 8px; color: #c6d3df; font-size: .77rem; }
 .penrose-variant-list > span:first-child { color: #80a1be; font-weight: 700; }

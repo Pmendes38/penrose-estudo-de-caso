@@ -47,15 +47,13 @@ const catalogFilters = ['Todos', 'Anime', 'Filme', 'Games', 'Universo DC', 'Univ
 
 const currency = (cents: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 const offers: Offer[] = catalogProducts.flatMap((product) => {
-  const { regularPriceCents: regular, salePriceCents: sale } = product;
-  if (regular === null || sale === null || sale >= regular) return [];
   return [{
-    name: product.name,
+    name: `${product.name} · 30 cm`,
     href: `/product/${product.id}`,
     image: product.images[0],
-    oldPrice: currency(regular),
-    price: currency(sale),
-    discount: `${Math.round((1 - sale / regular) * 100)}% OFF`,
+    oldPrice: currency(240000),
+    price: currency(180000),
+    discount: '25% OFF',
     accent: '#00abff',
   }];
 });

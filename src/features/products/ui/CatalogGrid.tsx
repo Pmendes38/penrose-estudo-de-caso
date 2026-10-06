@@ -20,8 +20,7 @@ export default function CatalogGrid({ products }: { products: CatalogProduct[] }
           <h3><Link href={href}>{product.name}</Link></h3>
           <p className="penrose-card-series">{product.sourceCategory || product.category}</p>
           <div className="penrose-card-bottom">
-            {product.regularPriceCents && product.salePriceCents && <del>DE: {formatBRL(product.regularPriceCents / 100)}</del>}
-            <span>{price.estimated ? 'Valor estimado' : product.variants.length && !product.salePriceCents ? 'A partir de' : 'POR'}: {formatBRL(price.cents / 100)}</span>
+            <span>A partir de: {formatBRL(price.cents / 100)}</span>
           </div>
           <Link href={href} className="penrose-card-details" aria-label={`Ver detalhes de ${product.name}`}>Detalhes ↗</Link>
         </div>

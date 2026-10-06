@@ -3,8 +3,9 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/features/cart/hooks/useCart';
+import { formatBRL } from '@/shared/lib/format';
 
-type Size = { name?: string; label?: string; price: number; inStock?: boolean };
+type Size = { name?: string; label?: string; price: number; regularPrice?: number; inStock?: boolean };
 
 type Product = {
   id: string;
@@ -20,7 +21,7 @@ export default function AddToCartClient({ product }: { product: Product }) {
   const { add } = useCart();
 
   const initial = useMemo(
-    () => product.sizes?.find((s) => s.inStock) ?? product.sizes?.[0],
+    () => product.sizes?.find((s) => s.name === '30cm' && s.inStock) ?? product.sizes?.find((s) => s.inStock) ?? product.sizes?.[0],
     [product.sizes]
   );
   const [selected, setSelected] = useState<Size | undefined>(initial);
@@ -32,7 +33,7 @@ export default function AddToCartClient({ product }: { product: Product }) {
   const sku = product.sku ?? product.id;
 
   async function handleAdd() {
-    if (!selected) return;
+    if (!selected) return false;
 
     setIsAdding(true);
     try {
@@ -41,20 +42,26 @@ export default function AddToCartClient({ product }: { product: Product }) {
         quantity: 1,
         variant: variantKey ? { size: String(variantKey) } : undefined,
       });
+      return true;
     } catch (e: any) {
       alert(e?.message || 'Falha ao adicionar ao carrinho');
+      return false;
     } finally {
       setIsAdding(false);
     }
   }
 
   async function handleBuyNow() {
-    await handleAdd();
-    router.push('/cart');
+    if (await handleAdd()) router.push('/cart');
   }
 
   return (
     <div className="penrose-buy-box">
+      {selected && <div className="penrose-selected-price">
+        {selected.regularPrice && selected.regularPrice > selected.price && <p><del>DE: {formatBRL(selected.regularPrice)}</del> <b>25% OFF</b></p>}
+        <strong className="penrose-product-price">{formatBRL(selected.price)}</strong>
+        <small>{selected.name} · valor da peça, sem frete</small>
+      </div>}
       {Array.isArray(product.sizes) && product.sizes.length > 0 && (
         <div className="penrose-size-grid">
           {product.sizes.map((s) => {

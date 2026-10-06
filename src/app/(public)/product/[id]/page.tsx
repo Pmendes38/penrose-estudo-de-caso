@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getProduct } from '@/features/products/api';
-import { findCatalogProduct, productPrice } from '@/features/products/catalog';
-import { formatBRL } from '@/shared/lib/format';
+import { findCatalogProduct } from '@/features/products/catalog';
+import { sizePrices } from '@/features/products/size-prices';
 import Gallery from './gallery.client';
 import AddToCartClient from './add-to-cart.client';
 
@@ -29,8 +29,6 @@ export default async function ProductPage({ params }: PageParams) {
 
   const product = source ?? api!;
   const images = product.images ?? [];
-  const price = source ? productPrice(source) : { cents: api!.priceCents, estimated: false };
-  const oldPrice = source?.regularPriceCents && source.salePriceCents ? source.regularPriceCents : null;
   const canBuy = Boolean(api?.status === 'active' && (api.madeToOrder || api.stock > 0));
   const inquiry = `https://wa.me/5500000000000?text=${encodeURIComponent(`Olá! Gostaria de consultar ${product.name} (${source?.sku ?? api?.sku ?? product.id}).`)}`;
 
@@ -49,13 +47,9 @@ export default async function ProductPage({ params }: PageParams) {
         <p className="penrose-product-subtitle">{source?.sourceCategory || product.category || 'Action figure'} by Penrøse</p>
         <div className="penrose-purchase-panel">
           <p className="penrose-stock">{api?.madeToOrder ? 'Produzido sob encomenda' : canBuy ? 'Em estoque' : 'Disponibilidade sob consulta'}</p>
-          {oldPrice && <del>DE: {formatBRL(oldPrice / 100)}</del>}
-          <strong className="penrose-product-price">{formatBRL(price.cents / 100)}</strong>
-          {price.estimated && <p className="penrose-price-note">Valor estimado com base na planilha. Confirme o preço final antes de encomendar.</p>}
-          {source?.variants.length ? <div className="penrose-variant-list"><span>Tamanhos informados na planilha</span>{source.variants.map((variant) => <span key={variant.sku}>{variant.name}: {variant.priceCents ? formatBRL(variant.priceCents / 100) : 'sob consulta'}</span>)}</div> : null}
-          {canBuy ? <AddToCartClient product={{ id: api!.id, sku: api!.sku ?? undefined, name: api!.name, images: api!.images, mainImage: api!.images[0], sizes: [{ name: 'Único', price: api!.priceCents / 100, inStock: true }] }} />
+          {canBuy ? <AddToCartClient product={{ id: api!.id, sku: api!.sku ?? undefined, name: api!.name, images: api!.images, mainImage: api!.images[0], sizes: api!.madeToOrder ? sizePrices.map((size) => ({ name: size.name, price: size.priceCents / 100, regularPrice: size.regularPriceCents / 100, inStock: true })) : [{ name: 'Único', price: api!.priceCents / 100, inStock: true }] }} />
             : <a className="penrose-inquiry-button" href={inquiry} target="_blank" rel="noopener noreferrer">Consultar disponibilidade</a>}
-          <small>Preços e disponibilidade sujeitos à confirmação pela Penrøse.</small>
+          <small>Valores médios por tamanho. Produção e frete sujeitos à confirmação pela Penrøse.</small>
         </div>
         <section className="penrose-product-about"><h2>Sobre o produto</h2><p>{product.description || 'Detalhes deste produto sob consulta.'}</p></section>
         <details className="penrose-product-accordion"><summary>Detalhes</summary><p>Referência: {source?.sku ?? api?.sku ?? product.id}</p></details>
