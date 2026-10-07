@@ -46,9 +46,35 @@ export default function StorefrontFooter() {
           ))}
         </div>
       </div>
-      <nav className="penrose-footer-column" aria-label="Institucional"><h3>Institucional</h3><Link href="/about">Quem Somos</Link><Link href="/privacy">Política de Privacidade</Link><Link href="/about#studio">O Estúdio</Link></nav>
-      <nav className="penrose-footer-column" aria-label="Mais informações"><h3>Mais Informações</h3><Link href="/shipping">Política de Entrega</Link><Link href="/returns">Trocas e Devoluções</Link><Link href="/coupons">Política de Promoções</Link></nav>
-      <nav className="penrose-footer-column" aria-label="Suporte ao cliente"><h3>Suporte ao Cliente</h3><a href="mailto:contato@example.com">Fale Conosco</a><Link href="/customer#perfil">Minha Conta</Link><Link href="/customer#pedidos">Meus Pedidos</Link></nav>
+      <nav className="penrose-footer-column" aria-label="Institucional">
+        <h3>Institucional</h3>
+        <Link href="/">Página Inicial</Link>
+        <Link href="/about">Quem Somos</Link>
+        <Link href="/about#studio">O Estúdio</Link>
+        <Link href="/privacy">Política de Privacidade</Link>
+        <Link href="/terms">Termos de Uso</Link>
+        <Link href="/shipping">Política de Entrega</Link>
+        <Link href="/returns">Trocas e Devoluções</Link>
+      </nav>
+      <nav className="penrose-footer-column" aria-label="Compras">
+        <h3>Compras</h3>
+        <Link href="/catalog">Catálogo e Produtos</Link>
+        <Link href="/cart">Carrinho</Link>
+        <Link href="/checkout">Finalizar Compra</Link>
+        <Link href="/payment">Opções de Pagamento</Link>
+        <Link href="/coupons">Política de Promoções</Link>
+        <Link href="/shipping/services">Modalidades de Entrega</Link>
+      </nav>
+      <nav className="penrose-footer-column" aria-label="Suporte ao cliente">
+        <h3>Suporte ao Cliente</h3>
+        <a href="mailto:contato@example.com">Fale Conosco</a>
+        <Link href="/login">Entrar</Link>
+        <Link href="/register">Criar Conta</Link>
+        <Link href="/customer#perfil">Minha Conta</Link>
+        <Link href="/customer#pedidos">Meus Pedidos</Link>
+        <Link href="/shipping/track">Rastrear Pedido</Link>
+        <Link href="/thank-you">Confirmação de Pedido</Link>
+      </nav>
       <small>© 2025 Projeto Penrose — Todos os direitos reservados.</small>
     </footer>
   );
