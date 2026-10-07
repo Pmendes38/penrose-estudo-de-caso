@@ -22,7 +22,7 @@ export default async function AppHeader({ home = false }: { home?: boolean }) {
       <Link href="/" aria-label="Página inicial"><Logo className="h-7 w-auto md:h-9" /></Link>
       {!home && (
         <nav className="penrose-nav" aria-label="Navegação principal">
-          <Link href="/catalog">Catálogo</Link><Link href="/customer">Pedidos</Link><Link href="/#sobre">Sobre Nós</Link>
+          <Link href="/catalog">Catálogo</Link><Link href="/customer">Pedidos</Link><Link href="/about">Sobre Nós</Link>
         </nav>
       )}
       <div className="penrose-header-actions">

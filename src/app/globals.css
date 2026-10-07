@@ -997,11 +997,48 @@ h3 {
 /* Policy pages */
 .penrose-policy-page{min-height:80vh;padding:clamp(60px,8vw,125px) clamp(22px,11vw,190px);color:#fff;background:radial-gradient(circle at 15% 5%,rgba(0,100,150,.34),transparent 35%),linear-gradient(rgba(0,24,52,.88),rgba(2,7,23,.98)),url('/assets/penrose/noise.png') center/cover}.penrose-policy-page>header{max-width:900px;margin-bottom:70px}.penrose-policy-page>header span{color:#00a8ff;font-size:.68rem;letter-spacing:.22em}.penrose-policy-page h1{margin:14px 0 22px;color:#f3b39d;font-size:clamp(3rem,7vw,7rem);line-height:.88;text-transform:uppercase}.penrose-policy-page>header p{max-width:680px;color:#b6c4d2;line-height:1.7}.policy-copy{max-width:1050px;color:#c6d0db;font-size:.9rem;line-height:1.8}.policy-copy>p{margin-bottom:42px}.policy-copy section{padding:32px 0;border-top:1px solid #214563}.policy-copy h2{margin-bottom:15px;color:#fff;font-size:clamp(1.3rem,2.3vw,2.1rem)}.policy-copy h3{margin:20px 0 7px;color:#00a8ff;font-size:.85rem;letter-spacing:.04em}.policy-copy p+ p{margin-top:10px}.policy-copy ul{margin-top:12px;padding-left:20px;list-style:disc}.policy-copy a{color:#00bfff;text-decoration:underline}
 .penrose-returns-page{padding-top:clamp(80px,18vw,300px);padding-bottom:clamp(100px,16vw,260px);background:radial-gradient(circle at 15% 6%,rgba(0,102,255,.24),transparent 33%),linear-gradient(rgba(0,18,48,.78),rgba(2,7,23,.98)),url('/assets/penrose/noise.png') center/cover}.penrose-returns-page>header{max-width:1180px;margin:0 auto 76px}.penrose-returns-page>header span{color:#06f}.penrose-returns-page h1{max-width:1100px;color:#fff;font-family:"Instrument Sans",Arial,sans-serif;font-size:clamp(2.8rem,5vw,4.5rem);line-height:1.1;letter-spacing:-.04em;text-transform:none}.penrose-returns-page>header p{max-width:900px;color:#d4dce5;font-size:clamp(1.1rem,2vw,1.5rem)}.penrose-returns-page .policy-copy{max-width:1180px;margin:auto;color:#e2e7ed;font-size:clamp(1rem,1.45vw,1.28rem);line-height:1.7}.penrose-returns-page .policy-copy>p{margin-bottom:72px}.penrose-returns-page .policy-copy section{padding:48px 0;border-top:1px solid #174b75}.penrose-returns-page .policy-copy h2{margin-bottom:24px;font-family:"Instrument Sans",Arial,sans-serif;font-size:clamp(1.9rem,3vw,3.2rem)}.penrose-returns-page .policy-copy h3{margin-top:34px;font-size:1rem}.penrose-returns-page .policy-copy a{color:#4ec4ff}
-.penrose-about-page{min-height:1100px;padding:clamp(70px,9vw,140px) clamp(24px,8vw,150px) 120px;color:#fff;background:radial-gradient(circle at 18% 10%,rgba(0,146,220,.36),transparent 34%),linear-gradient(180deg,rgba(0,18,44,.76),#03081a 46%,#020617),url('/assets/penrose/noise.png') center/cover}
-.penrose-about-hero{max-width:1050px;margin:0 auto 90px;text-align:center}.penrose-about-hero>span,.penrose-about-studio span{color:#16a9ff;font-size:.72rem;letter-spacing:.25em}.penrose-about-hero h1{margin:20px 0 25px;font-size:clamp(2.4rem,6vw,6rem);line-height:.92;text-transform:uppercase}.penrose-about-hero h1 em{color:#f5ae98;font-style:normal}.penrose-about-hero p{max-width:760px;margin:auto;color:#b9c9d9;line-height:1.7}
-.penrose-about-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;max-width:1300px;margin:0 auto 130px}.penrose-about-values article{min-height:190px;padding:28px;border:1px solid #087cdf;border-radius:5px;background:rgba(0,31,68,.75);box-shadow:0 0 28px rgba(0,130,255,.13)}.penrose-about-values article:nth-child(1){border-color:#a44aff;background:rgba(62,25,85,.5)}.penrose-about-values article:nth-child(3){border-color:#ff6a20;background:rgba(83,28,24,.5)}.penrose-about-values strong{color:#08a8ff;font-size:.72rem;letter-spacing:.2em}.penrose-about-values h2{margin:22px 0 10px;font-size:1.45rem}.penrose-about-values p{color:#c0cfdb;font-size:.82rem;line-height:1.55}
-.penrose-about-studio{display:grid;grid-template-columns:1.1fr 1fr;gap:80px;max-width:1180px;margin:auto;padding-top:65px;border-top:1px solid #11679a}.penrose-about-studio h2{margin-top:18px;font-size:clamp(2rem,4vw,4rem);line-height:1}.penrose-about-studio p{margin-bottom:18px;color:#bbc9d8;line-height:1.7}.penrose-about-studio a{color:#2cb7ff;text-decoration:underline}
-@media(max-width:720px){.penrose-about-page{padding:58px 20px 80px}.penrose-about-hero{margin-bottom:58px}.penrose-about-values,.penrose-about-studio{grid-template-columns:1fr;gap:16px}.penrose-about-values{margin-bottom:70px}.penrose-about-studio{gap:28px}}
+.penrose-about-page {
+  position: relative;
+  padding-top: clamp(80px, 9.2vw, 176px);
+  color: #fff;
+  background: #03081a;
+}
+.penrose-about-page::before { content: ""; position: absolute; inset: 0 0 auto; height: 56.25vw; background: linear-gradient(180deg, transparent 70%, #03081a), url('/assets/penrose/about-background.png') center top / cover; pointer-events: none; }
+.penrose-about-page > * { position: relative; }
+.penrose-about-hero { width: min(78%, 1485px); margin: 0 auto clamp(100px, 11vw, 210px); text-align: center; }
+.penrose-about-page h1, .penrose-about-founders h2, .penrose-about-founder h3 {
+  font-family: "Clash Display", Arial, sans-serif;
+  font-size: clamp(32px, 3.34vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.penrose-about-hero p { margin-top: 24px; font-size: clamp(20px, 2.5vw, 48px); font-weight: 500; line-height: 1.48; text-wrap: pretty; }
+.penrose-about-founders { width: min(88%, 1690px); margin-inline: auto; }
+.penrose-about-founders > h2 { margin-bottom: clamp(60px, 6.2vw, 120px); text-align: center; }
+.penrose-about-founder { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.1fr); gap: clamp(30px, 2.6vw, 50px); align-items: start; }
+.penrose-about-portrait { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; object-position: center top; border-radius: 10px; }
+.portrait-pedro { border: 5px solid #0066ff; box-shadow: 0 4px 70px rgba(0, 102, 255, .55); }
+.penrose-about-role { margin-top: 8px; font-family: "Clash Display", Arial, sans-serif; font-size: clamp(20px, 2.08vw, 40px); font-weight: 300; line-height: 1.3; }
+.penrose-about-bio { margin-top: 28px; font-size: clamp(20px, 2.5vw, 48px); line-height: 1.33; text-align: justify; }
+.founder-ravel { grid-template-columns: minmax(0, 1.1fr) minmax(0, .85fr); margin-top: clamp(80px, 9vw, 173px); }
+.founder-ravel > img { grid-column: 2; grid-row: 1; }
+.founder-ravel > div { grid-column: 1; grid-row: 1; text-align: right; }
+.penrose-about-studio { position: relative; width: min(82%, 1573px); margin: clamp(120px, 12vw, 230px) auto clamp(120px, 13vw, 250px); padding-top: clamp(80px, 9vw, 173px); text-align: center; scroll-margin-top: 140px; }
+.penrose-about-divider { position: absolute; top: 0; left: 12.5%; width: 75%; height: auto; }
+.penrose-about-studio h2 { font-family: "Clash Display", Arial, sans-serif; font-size: clamp(44px, 5vw, 96px); font-weight: 700; line-height: 1.1; text-transform: uppercase; text-wrap: balance; }
+.penrose-about-studio p { margin-top: 30px; font-size: clamp(24px, 3.34vw, 64px); line-height: 1.12; text-wrap: pretty; }
+.penrose-about-page .penrose-why { background: none; }
+@media (max-width: 760px) {
+  .penrose-about-hero, .penrose-about-founders, .penrose-about-studio { width: calc(100% - 40px); }
+  .penrose-about-founder, .founder-ravel { grid-template-columns: 1fr; gap: 30px; }
+  .founder-ravel > img, .founder-ravel > div { grid-column: auto; grid-row: auto; }
+  .founder-ravel > div { text-align: left; }
+  .penrose-about-portrait { max-width: 500px; margin-inline: auto; }
+  .penrose-about-bio { text-align: left; }
+  .penrose-about-studio p { line-height: 1.4; }
+}
 
 @media(max-width:1100px){
   .penrose-catalog-grid{grid-template-columns:repeat(3,1fr)}.penrose-product-layout{grid-template-columns:1fr 1fr;gap:38px}.penrose-cart-layout,.penrose-checkout-layout{grid-template-columns:1fr 360px}.checkout-grid.three{grid-template-columns:1fr 1fr}.checkout-grid label:nth-child(2){grid-column:auto}
