@@ -1,0 +1,16 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+const code = ts.transpileModule(fs.readFileSync('src/features/orders/schemas.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+const context = { exports: {}, require };
+vm.runInNewContext(code, context);
+const input = { id: 'demo', orderNumber: 1, customerId: 'customer', status: 'paid', createdAt: new Date(), updatedAt: new Date(), subtotal: 180000, shippingTotal: 1000, discountTotal: 10000, grandTotal: 171000, items: [{ productId: 'piece', name: 'Piece', quantity: 1, unitPrice: 180000 }] };
+const admin = context.exports.AdminOrderSchema.parse(input);
+assert.equal(admin.subtotal, 1800);
+assert.equal(admin.grandTotal, 1710);
+assert.equal(admin.shippingTotal, 10);
+assert.equal(admin.discountTotal, 100);
+assert.equal(admin.items[0].unitPrice, 1800);
+assert.equal(context.exports.OrderSchema.parse(input).grandTotal, 171000);
+console.log('ERP uses BRL; commerce and customer schemas retain cents');

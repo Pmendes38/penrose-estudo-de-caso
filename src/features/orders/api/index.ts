@@ -1,7 +1,7 @@
 import { envServer } from '@/shared/lib/env.server';
 import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
 import {
-  PagedOrdersSchema, OrderSchema, type PagedOrders, type Order,
+  PagedOrdersSchema, OrderSchema, AdminOrderSchema, type PagedOrders, type Order,
   CreateOrderPayload, UpdateOrderStatusPayload,
 } from '../schemas';
 
@@ -11,13 +11,14 @@ export async function listOrdersAdmin(params?: { page?: number; pageSize?: numbe
   if (params?.pageSize) qs.set('pageSize', String(params.pageSize));
   const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin?${qs}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
-  return PagedOrdersSchema.parse(await res.json());
+  const page = PagedOrdersSchema.parse(await res.json());
+  return { ...page, items: page.items.map(order => AdminOrderSchema.parse(order)) };
 }
 
 export async function getOrderAdmin(id: string): Promise<Order> {
   const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(await res.text());
-  return OrderSchema.parse(await res.json());
+  return AdminOrderSchema.parse(await res.json());
 }
 
 export async function updateOrderStatusAdmin(id: string, payload: UpdateOrderStatusPayload) {
@@ -30,7 +31,7 @@ export async function updateOrderStatusAdmin(id: string, payload: UpdateOrderSta
   if (!res.ok) throw new Error(await res.text());
   // backend responde { message, order }
   const json = await res.json();
-  return { message: String(json?.message ?? 'OK'), order: OrderSchema.parse(json.order) };
+  return { message: String(json?.message ?? 'OK'), order: AdminOrderSchema.parse(json.order) };
 }
 
 export async function cancelOrderAdmin(id: string) {

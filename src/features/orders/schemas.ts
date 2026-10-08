@@ -43,6 +43,16 @@ export const OrderSchema = z.object({
 });
 export type Order = z.infer<typeof OrderSchema>;
 
+// ERP views use BRL; the commerce API and customer views retain integer cents.
+export const AdminOrderSchema = OrderSchema.transform(order => ({
+  ...order,
+  subtotal: order.subtotal / 100,
+  shippingTotal: order.shippingTotal / 100,
+  discountTotal: order.discountTotal / 100,
+  grandTotal: order.grandTotal / 100,
+  items: order.items?.map(item => ({ ...item, unitPrice: item.unitPrice / 100 })),
+}));
+
 export const PagedOrdersSchema = z.object({
   items: z.array(OrderSchema),
   total: z.number(),
