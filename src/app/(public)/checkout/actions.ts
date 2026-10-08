@@ -40,7 +40,12 @@ export async function setCheckoutSessionAction(input: unknown) {
     await quoteShipping({ address: { ...customerData, postalCode: cepDigits } }, opts);
 
     await selectShipping(
-      { serviceCode: selectedShipping.id, address: { postalCode: cepDigits } },
+      { serviceCode: selectedShipping.id, address: {
+        postalCode: cepDigits,
+        endereco: customerData.endereco, numero: customerData.numero,
+        complemento: customerData.complemento, bairro: customerData.bairro,
+        cidade: customerData.cidade, estado: customerData.estado,
+      } },
       { cookie: cookies().toString() },
     );
   } catch (e: any) {

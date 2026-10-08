@@ -76,6 +76,11 @@ export async function getPayment(id: string): Promise<Payment> {
   return parseOrThrow(res, PaymentSchema);
 }
 
+export async function approveDemoPayment(id: string): Promise<Payment> {
+  const res = await fetchWithAuth(`${BASE}/${encodeURIComponent(id)}/demo/approve`, { method: 'PUT', cache: 'no-store' });
+  return parseOrThrow(res, PaymentSchema);
+}
+
 export type ListPaymentsAdminOpts = {
   page?: number;
   pageSize?: number;

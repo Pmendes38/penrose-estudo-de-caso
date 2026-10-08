@@ -1,6 +1,9 @@
 // src/app/(dashboard)/admin/orders/[id]/page.tsx
 import { getOrderAdmin } from '@/features/orders/api';
 import StatusForm from './ui/StatusForm';
+import Link from 'next/link';
+import ProductionForm from '../../production/ProductionForm';
+import { productionLabels } from '@/features/orders/schemas';
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const order = await getOrderAdmin(params.id);
@@ -11,6 +14,13 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         <h1 className="text-xl font-semibold">Pedido #{order.orderNumber}</h1>
         <span className="capitalize px-2 py-1 rounded border border-brand-gray-border">{order.status}</span>
       </header>
+      <div className="flex gap-4"><Link className="text-brand-blue underline" href={`/admin/payments?orderId=${order.id}`}>Ver pagamento</Link><Link className="text-brand-blue underline" href="/admin/production">Kanban de produção</Link></div>
+
+      <section className="space-y-3 rounded border border-brand-gray-border p-4">
+        <h2 className="font-semibold">O.S. #{order.orderNumber} · Produção sob encomenda</h2>
+        {order.status === 'paid' ? <ProductionForm id={order.id} current={order.productionStage} /> : <p className="text-sm text-brand-gray">Produção disponível somente com pagamento aprovado.</p>}
+        {!!order.productionHistory?.length && <ul className="space-y-1 text-sm text-brand-gray">{order.productionHistory.map((entry, i) => <li key={i}>{productionLabels[entry.stage]} · {entry.at.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</li>)}</ul>}
+      </section>
 
       <section className="grid md:grid-cols-2 gap-6">
         {order.cancellationRequest && <div className="border border-amber-400/40 rounded p-4 md:col-span-2"><h2 className="font-semibold">Solicitação de cancelamento</h2><p>{order.cancellationRequest.reason}</p><p className="text-sm">Recebida em {order.cancellationRequest.requestedAt.toLocaleString('pt-BR')}. Não altera o pagamento automaticamente.</p></div>}

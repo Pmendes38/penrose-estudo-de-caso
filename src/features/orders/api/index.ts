@@ -3,7 +3,24 @@ import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
 import {
   PagedOrdersSchema, OrderSchema, AdminOrderSchema, type PagedOrders, type Order,
   CreateOrderPayload, UpdateOrderStatusPayload,
+  ProductionStage,
 } from '../schemas';
+
+export async function listProductionAdmin(): Promise<Order[]> {
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/production`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(await res.text());
+  const orders = await res.json();
+  if (!Array.isArray(orders)) throw new Error('Lista de produção inválida');
+  return orders.map(order => AdminOrderSchema.parse(order));
+}
+
+export async function updateProductionAdmin(id: string, stage: ProductionStage): Promise<Order> {
+  const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/admin/${encodeURIComponent(id)}/production`, {
+    method: 'PUT', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return AdminOrderSchema.parse(await res.json());
+}
 
 export async function listOrdersAdmin(params?: { page?: number; pageSize?: number }): Promise<PagedOrders> {
   const qs = new URLSearchParams();

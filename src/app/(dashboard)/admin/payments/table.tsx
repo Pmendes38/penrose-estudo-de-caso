@@ -4,10 +4,15 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition, useState } from 'react';
 import type { PaginatedPayments } from '@/features/payments/schemas';
-import { cancelPaymentAction, refundPaymentAction } from './actions';
+import { cancelPaymentAction, refundPaymentAction, approveDemoPaymentAction } from './actions';
 import { useFormState, useFormStatus } from 'react-dom';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+function ApproveButton() {
+  const { pending } = useFormStatus();
+  return <button disabled={pending} className="rounded bg-green-800 px-3 py-1 text-white disabled:opacity-50">{pending ? 'Aprovando…' : 'Aprovar (simulado)'}</button>;
+}
 
 function CancelButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
@@ -42,6 +47,7 @@ export default function PaymentsTable({ data }: { data: PaginatedPayments }) {
 
   const [cancelState, cancelAction] = useFormState(cancelPaymentAction, { ok: false } as any);
   const [refundState, refundAction] = useFormState(refundPaymentAction, { ok: false } as any);
+  const [approveState, approveAction] = useFormState(approveDemoPaymentAction, { ok: false } as any);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const goPage = (page: number) => {
@@ -52,8 +58,8 @@ export default function PaymentsTable({ data }: { data: PaginatedPayments }) {
 
   return (
     <div className="space-y-3">
-      {(cancelState.error || refundState.error) && (
-        <div className="text-red-400">{cancelState.error || refundState.error}</div>
+      {(cancelState.error || refundState.error || approveState.error) && (
+        <div role="alert" className="text-red-400">{cancelState.error || refundState.error || approveState.error}</div>
       )}
 
       <div className="overflow-auto border border-brand-gray-border rounded-lg">
@@ -96,6 +102,7 @@ export default function PaymentsTable({ data }: { data: PaginatedPayments }) {
                   <td className="p-3">{created}</td>
                   <td className="p-3">
                     <div className="flex flex-wrap gap-2">
+                      {p.provider === 'DEMO' && p.status === 'PENDING' && <form action={approveAction} onSubmit={() => setSelectedId(p.id)}><input type="hidden" name="id" value={p.id} /><ApproveButton /></form>}
                       {/* Cancelar */}
                       <form action={cancelAction} onSubmit={() => setSelectedId(p.id)}>
                         <input type="hidden" name="id" value={p.id} />
@@ -118,7 +125,7 @@ export default function PaymentsTable({ data }: { data: PaginatedPayments }) {
                       </Link>
                     </div>
 
-                    {selectedId === p.id && (cancelState.ok || refundState.ok) && (
+                    {selectedId === p.id && (cancelState.ok || refundState.ok || approveState.ok) && (
                       <span className="ml-2 text-brand-gray text-xs">Atualizado.</span>
                     )}
                   </td>

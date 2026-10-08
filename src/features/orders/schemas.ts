@@ -11,6 +11,12 @@ export const OrderStatus = z.enum([
 ]);
 export type OrderStatus = z.infer<typeof OrderStatus>;
 
+export const ProductionStage = z.enum(['todo', 'printing', 'finishing', 'ready']);
+export type ProductionStage = z.infer<typeof ProductionStage>;
+export const productionLabels: Record<ProductionStage, string> = {
+  todo: 'A fazer', printing: 'Impressão 3D', finishing: 'Acabamento', ready: 'Pronto para envio',
+};
+
 export const OrderItemSchema = z.object({
   productId: z.string(),
   name: z.string(),
@@ -37,6 +43,10 @@ export const OrderSchema = z.object({
   couponCode: z.string().optional(),
   notes: z.string().optional(),
   cancellationRequest: z.object({ reason: z.string(), requestedAt: z.coerce.date() }).optional(),
+  productionStage: ProductionStage.optional(),
+  productionHistory: z.array(z.object({ stage: ProductionStage, at: z.coerce.date(), changedBy: z.string() })).optional(),
+  shipping: z.object({ label: z.string().optional(), days: z.number().optional(), provider: z.string().optional() }).optional(),
+  shippingAddress: z.object({ postalCode: z.string().optional(), endereco: z.string().optional(), numero: z.string().optional(), complemento: z.string().optional(), bairro: z.string().optional(), cidade: z.string().optional(), estado: z.string().optional() }).optional(),
 
   // Em algumas rotas o backend não inclui os itens.
   // .catch([]) garante array vazio se vier undefined/null.

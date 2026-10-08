@@ -3,7 +3,7 @@ import { requireCustomerOrRedirect } from '@/features/auth/server/guards';
 import { fetchOrderMine } from '@/features/orders/server/fetch-order';
 import { findCatalogProduct, catalogProducts } from '@/features/products/catalog';
 import { formatBRL, formatDate } from '@/shared/lib/format';
-import type { Order } from '@/features/orders/schemas';
+import { productionLabels, type Order } from '@/features/orders/schemas';
 
 const steps = ['Realizado', 'Em produção', 'Enviado', 'Entregue'];
 const progress: Record<string, number> = { pending: 0, processing: 1, paid: 1, shipped: 2, delivered: 3 };
@@ -22,6 +22,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
   const canceled = order.status === 'canceled' || order.status === 'refunded';
   const subtotal = order.subtotal;
   const discount = order.discountTotal;
+  const address = order.shippingAddress;
 
   return <section className="penrose-order-details">
     <header className="penrose-order-intro"><h1>PEDIDO #{order.orderNumber}</h1><p>Realizado em {formatDate(order.createdAt)}</p></header>
@@ -30,6 +31,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
       <div className="penrose-order-steps">{steps.map((step, index) => <span key={step} className={index <= currentStep && !canceled ? 'active' : ''}><img src={`/assets/penrose/order-step-${index < 2 ? 'complete' : index === 2 ? 'shipped' : 'delivered'}.svg`} alt="" width="10" height="10" />{step}</span>)}</div>
       <div className="penrose-order-progress"><span style={{ width: canceled ? '0%' : `${(currentStep + 1) * 25}%` }} /></div>
       <p>{canceled ? (order.status === 'refunded' ? 'Pedido reembolsado.' : 'Pedido cancelado.') : `Status atual: ${steps[currentStep].toLowerCase()}. Atualizado em ${formatDate(order.updatedAt)}.`}</p>
+      {order.productionStage && !canceled && <p>Produção: {productionLabels[order.productionStage]}. {order.productionStage === 'ready' && 'Aguardando envio; ainda não foi despachado.'}</p>}
     </div>
 
     <div className="penrose-order-main">
@@ -47,9 +49,9 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
     </div>
 
     <div className="penrose-order-extra">
-      <div><h2>Endereço de entrega</h2><p>Endereço não disponível neste pedido.</p></div>
-      <div><h2>Pagamento</h2><p>Detalhes do pagamento não disponíveis.</p></div>
-      <div><h2>Transportadora</h2><p>{order.status === 'shipped' || order.status === 'delivered' ? 'Consulte o código de rastreio no atendimento.' : 'Informações disponíveis após o envio.'}</p></div>
+      <div><h2>Endereço de entrega</h2>{address?.postalCode ? <><p>{[address.endereco, address.numero, address.complemento].filter(Boolean).join(', ')}</p><p>{[address.bairro, address.cidade, address.estado].filter(Boolean).join(' · ')}</p><p>CEP: {address.postalCode}</p></> : <p>Endereço não disponível neste pedido.</p>}</div>
+      <div><h2>Pagamento</h2><p>{['pending', 'processing'].includes(order.status) ? 'Aguardando aprovação.' : order.status === 'refunded' ? 'Reembolsado.' : order.status === 'canceled' ? 'Cancelado.' : 'Aprovado.'}</p></div>
+      <div><h2>Entrega</h2>{order.shipping ? <><p>{order.shipping.label}</p>{order.shipping.days !== undefined && <p>Prazo de transporte: {order.shipping.days} dias úteis após a produção.</p>}{order.shipping.provider === 'DEMO' && <p>Demonstração: frete simulado, sem cobrança ou envio real.</p>}</> : <p>Informações disponíveis após o envio.</p>}</div>
     </div>
     <div className="penrose-order-actions"><Link href="/shipping/track">ACOMPANHAR ENTREGA</Link><a href="mailto:contato@example.com">PRECISO DE AJUDA</a></div>
     {['pending', 'processing', 'paid'].includes(order.status) && <p className="penrose-order-cancel-link"><Link href={`/orders/${encodeURIComponent(order.id)}/cancel`}>Solicitar cancelamento</Link></p>}
