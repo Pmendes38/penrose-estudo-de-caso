@@ -5,7 +5,7 @@ import PenroseHero from './PenroseHero';
 import CollectionCarousel from './CollectionCarousel';
 import OfferCarousel from './OfferCarousel';
 import type { Offer } from './OfferCarousel';
-import { catalogProducts } from '@/features/products/catalog';
+import { getStorefrontProducts } from '@/features/products/catalog.server';
 import StorefrontFooter from '@/shared/ui/StorefrontFooter';
 import LandingCatalogPreview from './LandingCatalogPreview';
 
@@ -45,17 +45,6 @@ const products = [
 const catalogFilters = ['Todos', 'Anime', 'Filme', 'Games', 'Universo DC', 'Universo Marvel'] as const;
 
 const currency = (cents: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
-const offers: Offer[] = catalogProducts.flatMap((product) => {
-  return [{
-    name: `${product.name} · 30 cm`,
-    href: `/product/${product.id}`,
-    image: product.images[0],
-    oldPrice: currency(240000),
-    price: currency(180000),
-    discount: '25% OFF',
-    accent: '#00abff',
-  }];
-});
 
 function FeatureCard({ accent, title, children }: { accent: 'violet' | 'cyan' | 'orange'; title: string; children: React.ReactNode }) {
   return (
@@ -76,7 +65,12 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function PenroseHome() {
+export default async function PenroseHome() {
+  const catalogProducts = await getStorefrontProducts();
+  const offers: Offer[] = catalogProducts.filter(product => product.madeToOrder && product.images[0]).map(product => ({
+    name: `${product.name} · 30 cm`, href: `/product/${product.id}`, image: product.images[0],
+    oldPrice: currency(240000), price: currency(180000), discount: '25% OFF', accent: '#00abff',
+  }));
   return (
     <main className="penrose-site">
       <div className="penrose-top-shell">
@@ -94,7 +88,7 @@ export default function PenroseHome() {
         <div className="penrose-collections-actions">
           <Link href="/catalog" className="penrose-collections-more">Ver mais coleções</Link>
         </div>
-        <CollectionCarousel />
+        <CollectionCarousel products={catalogProducts} />
       </section>
 
       {offers.length > 0 && <section className="penrose-section penrose-offers">
@@ -103,7 +97,7 @@ export default function PenroseHome() {
 
       <section className="penrose-section penrose-catalog-preview">
         <h2>Catálogo Completo</h2>
-        <LandingCatalogPreview filters={catalogFilters} />
+        <LandingCatalogPreview filters={catalogFilters} products={catalogProducts} />
       </section>
 
       <section className="penrose-why">

@@ -11,6 +11,7 @@ export default function PaymentAwait({ paymentId }: Props) {
   const [info, setInfo] = useState<{
     status?: string; billingType?: 'PIX'|'BOLETO'|'CREDIT_CARD';
     boletoUrl?: string; identificatorField?: string; pixPayload?: string; orderId?: string;
+    provider?: string;
   }>({});
   const abortRef = useRef<AbortController | null>(null);
 
@@ -37,6 +38,7 @@ export default function PaymentAwait({ paymentId }: Props) {
           signal: abortRef.current.signal,
         });
         const p = await res.json();
+        if (!res.ok) throw new Error(p.message || 'Não foi possível consultar o pagamento');
 
         setInfo({
           status: p.status,
@@ -45,6 +47,7 @@ export default function PaymentAwait({ paymentId }: Props) {
           identificatorField: p.identificatorField,
           pixPayload: p.pixPayload,
           orderId: p.orderId,
+          provider: p.provider,
         });
 
         if (p.status === 'CONFIRMED') {
@@ -70,13 +73,24 @@ export default function PaymentAwait({ paymentId }: Props) {
   const isPix = info.billingType === 'PIX';
   const isBoleto = info.billingType === 'BOLETO';
   const isTerminal = info.status ? TERMINALS.has(info.status) : false;
+  async function simulate(outcome: 'approve' | 'decline') {
+    setError('');
+    try {
+      const res = await fetch(`/api/v1/payments/${encodeURIComponent(paymentId)}/demo/${outcome}`, { method: 'PUT' });
+      const payment = await res.json();
+      if (!res.ok) throw new Error(payment.message || 'Falha na simulação');
+      if (payment.status === 'CONFIRMED') window.location.href = `/thank-you?order=${encodeURIComponent(payment.orderId)}`;
+      else setInfo(payment);
+    } catch (error: any) { setError(error.message); }
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <h2 className="text-xl font-semibold">Finalize seu pagamento</h2>
       <p className="text-brand-gray">Status: {info.status ?? 'carregando...'}</p>
 
-      {isPix && (
+      {info.provider === 'DEMO' && <div role="status"><h3>Pagamento de demonstração</h3><p>Nenhuma cobrança será feita. Não use seu aplicativo bancário nem informe dados de cartão.</p>{!isTerminal && <div className="flex gap-4"><button type="button" onClick={() => simulate('approve')} className="px-4 py-2 bg-brand-blue rounded">Simular aprovação</button><button type="button" onClick={() => simulate('decline')} className="px-4 py-2 border rounded">Simular recusa</button></div>}</div>}
+      {isPix && info.provider !== 'DEMO' && (
         <div className="space-y-3">
           <p>Copie o código PIX abaixo e pague no seu app bancário:</p>
           <textarea
@@ -95,7 +109,7 @@ export default function PaymentAwait({ paymentId }: Props) {
         </div>
       )}
 
-      {isBoleto && (
+      {isBoleto && info.provider !== 'DEMO' && (
         <div className="space-y-3">
           {info.boletoUrl && (
             <a href={info.boletoUrl} target="_blank" rel="noreferrer" className="px-4 py-2 bg-brand-blue rounded inline-block text-white">
@@ -111,7 +125,7 @@ export default function PaymentAwait({ paymentId }: Props) {
         </div>
       )}
 
-      {error && <p className="text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-red-400">{error}</p>}
 
       {!isTerminal && (
         <p className="text-sm text-brand-gray">Esta página atualiza automaticamente a cada poucos segundos.</p>

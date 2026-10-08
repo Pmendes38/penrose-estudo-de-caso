@@ -1,4 +1,5 @@
 import { envServer } from '@/shared/lib/env.server';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 import {
   CalculateShippingInput,
   CalculateShippingInputSchema,

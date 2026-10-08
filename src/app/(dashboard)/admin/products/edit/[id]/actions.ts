@@ -1,4 +1,5 @@
 'use server';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';

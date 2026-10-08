@@ -7,6 +7,7 @@ export type CheckoutSession = {
   customerData?: Record<string, any> | null;
   selectedShipping?: Record<string, any> | null;
   couponCode?: string | null;
+  draftId?: string | null;
 };
 
 const COOKIE_KEY = 'checkout_session';
@@ -24,6 +25,7 @@ export async function getCheckoutSession(): Promise<CheckoutSession> {
         customerData: parsed.customerData ?? null,
         selectedShipping: parsed.selectedShipping ?? null,
         couponCode: typeof parsed.couponCode === 'string' ? parsed.couponCode : null,
+        draftId: typeof parsed.draftId === 'string' ? parsed.draftId : null,
       };
       return safe;
     }

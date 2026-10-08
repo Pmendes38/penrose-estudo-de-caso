@@ -8,7 +8,9 @@ export async function apiFetch(input: string, init: ApiInit = {}): Promise<Respo
 
   try {
     const url = input.startsWith('http') ? input : `${envClient.NEXT_PUBLIC_API_BASE_URL}${input}`;
-    const res = await fetch(url, {
+    const request = typeof window === 'undefined' ? (await import('@/shared/lib/backend-fetch')).backendFetch : fetch;
+    const target = typeof window !== 'undefined' && url.startsWith(envClient.NEXT_PUBLIC_API_BASE_URL) ? url.slice(envClient.NEXT_PUBLIC_API_BASE_URL.length) : url;
+    const res = await request(target, {
       ...init,
       cache: init?.cache ?? 'no-store', 
       credentials: init.credentials ?? 'include',

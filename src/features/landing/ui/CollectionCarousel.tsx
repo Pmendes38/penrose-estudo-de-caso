@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
 import type { PointerEvent } from 'react';
+import type { CatalogProduct } from '@/features/products/catalog';
 
 const collections = [
   { title: 'Universo DC', href: '/catalog?category=Universo+DC', image: '/assets/catalog/pnr-092/01.webp', accent: '#d15dff' },
@@ -14,7 +15,14 @@ const collections = [
 
 type DragState = { startX: number; startScrollLeft: number; active: boolean; moved: boolean };
 
-export default function CollectionCarousel() {
+export default function CollectionCarousel({ products }: { products: CatalogProduct[] }) {
+  const activeCollections = collections.flatMap(collection => {
+    const query = new URLSearchParams(collection.href.split('?')[1]);
+    const category = query.get('category');
+    const search = query.get('search')?.toLowerCase();
+    const product = products.find(product => product.images[0] && (category ? product.category === category : `${product.name} ${product.tags.join(' ')} ${product.description ?? ''}`.toLowerCase().includes(search ?? '')));
+    return product ? [{ ...collection, image: product.images[0] }] : [];
+  });
   const galleryRef = useRef<HTMLDivElement>(null);
   const drag = useRef<DragState>({ startX: 0, startScrollLeft: 0, active: false, moved: false });
 
@@ -65,7 +73,7 @@ export default function CollectionCarousel() {
         }
       }}
     >
-      {collections.map((collection) => (
+      {activeCollections.map((collection) => (
         <Link href={collection.href} key={collection.title} className="penrose-collection-card" style={{ '--card-accent': collection.accent } as React.CSSProperties} draggable={false}>
           <Image src={collection.image} alt={collection.title} fill sizes="(max-width: 768px) 78vw, 420px" draggable={false} />
           <span>{collection.title}</span>

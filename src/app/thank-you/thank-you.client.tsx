@@ -1,13 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import ClearCartOnMount from '@/features/cart/clear-on-mount';
 
 const socialIcons = ['facebook', 'instagram', 'tiktok', 'youtube', 'whatsapp'] as const;
 
-export default function ThankYouClient() {
-  const orderId = useSearchParams().get('order')?.trim();
+export default function ThankYouClient({ orderId }: { orderId?: string }) {
 
   return <section className="penrose-confirmed-page">
     {orderId && <ClearCartOnMount />}

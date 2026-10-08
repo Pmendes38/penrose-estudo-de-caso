@@ -1,11 +1,13 @@
 import data from './catalog-data.json';
 import { sizePrices } from './size-prices';
+import type { Product } from './schemas';
 
-export type CatalogProduct = (typeof data)[number];
-export const catalogProducts: CatalogProduct[] = data;
+export type CatalogProduct = Product & { sourceCategory?: string };
+// Historical order images only. Storefront reads come from catalog.server.ts.
+export const catalogProducts = data;
 
-export function productPrice(_product: CatalogProduct) {
-  return { cents: sizePrices[0].priceCents, estimated: false };
+export function productPrice(product: CatalogProduct) {
+  return { cents: product.madeToOrder ? sizePrices[0].priceCents : product.priceCents, estimated: false };
 }
 
 export function findCatalogProduct(id: string) {

@@ -1,11 +1,7 @@
 import Link from 'next/link';
-import { catalogProducts } from '@/features/products/catalog';
+import type { CatalogProduct } from '@/features/products/catalog';
 
-const suggestions = ['pnr-092', 'pnr-030', 'pnr-001']
-  .map((id) => catalogProducts.find((product) => product.id === id))
-  .filter((product): product is (typeof catalogProducts)[number] => Boolean(product?.images[0]));
-
-export default function EmptyStoreState({ kind }: { kind: 'cart' | 'checkout' }) {
+export default function EmptyStoreState({ kind, suggestions = [] }: { kind: 'cart' | 'checkout'; suggestions?: CatalogProduct[] }) {
   const isCart = kind === 'cart';
   return <section className="penrose-store-empty" aria-labelledby="empty-title">
     <div className="penrose-store-empty-icon" aria-hidden="true"><svg width="42" height="42" viewBox="0 0 42 42" fill="none"><rect x="8" y="13" width="26" height="23" rx="3" stroke="#071327" strokeWidth="2.5"/><path d="M14 14V9a7 7 0 0 1 14 0v5" stroke="#071327" strokeWidth="2.5"/><path d="M17 23a4 4 0 0 0 8 0" stroke="#071327" strokeWidth="2.5"/></svg></div>

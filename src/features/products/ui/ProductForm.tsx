@@ -315,6 +315,10 @@ export default function ProductForm({
 
         {/* Tags */}
         <div>
+          <label htmlFor="images" className="block text-sm text-brand-gray mb-1">URLs das imagens (a primeira é a capa)</label>
+          <textarea id="images" name="images" defaultValue={initial.imagesText} rows={3} className="w-full bg-brand-gray-dark border border-brand-gray-border text-brand-gray-light py-2 px-3 rounded" />
+        </div>
+        <div>
           <label htmlFor="tags" className="block text-sm text-brand-gray mb-1">Tags (separadas por vírgula)</label>
           <input
             id="tags"

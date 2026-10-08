@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getProduct } from '@/features/products/api';
-import { findCatalogProduct } from '@/features/products/catalog';
 import { sizePrices } from '@/features/products/size-prices';
 import Gallery from './gallery.client';
 import AddToCartClient from './add-to-cart.client';
@@ -11,26 +10,24 @@ type PageParams = { params: { id: string } };
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.penrose.example';
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
-  const source = findCatalogProduct(params.id);
-  const product = source ?? await getProduct(params.id).catch(() => null);
+  const product = await getProduct(params.id).catch(() => null);
   if (!product) return { title: 'Produto não encontrado | Penrøse' };
   return {
     title: `${product.name} | Penrøse`,
     description: product.description || `Conheça ${product.name} no catálogo Penrøse.`,
-    alternates: { canonical: `${SITE_URL}/product/${source?.id ?? product.slug}` },
+    alternates: { canonical: `${SITE_URL}/product/${product.id}` },
     openGraph: { images: product.images[0] ? [product.images[0]] : [] },
   };
 }
 
 export default async function ProductPage({ params }: PageParams) {
-  const source = findCatalogProduct(params.id);
   const api = await getProduct(params.id).catch(() => null);
-  if (!source && !api) notFound();
+  if (!api) notFound();
 
-  const product = source ?? api!;
+  const product = api;
   const images = product.images ?? [];
   const canBuy = Boolean(api?.status === 'active' && (api.madeToOrder || api.stock > 0));
-  const inquiry = `https://wa.me/5500000000000?text=${encodeURIComponent(`Olá! Gostaria de consultar ${product.name} (${source?.sku ?? api?.sku ?? product.id}).`)}`;
+  const inquiry = `https://wa.me/5500000000000?text=${encodeURIComponent(`Olá! Gostaria de consultar ${product.name} (${api.sku ?? product.id}).`)}`;
 
   return <div className="penrose-page penrose-product-page">
     <nav className="penrose-breadcrumb" aria-label="Caminho"><Link href="/">Home</Link><span>/</span><Link href="/catalog">Coleção</Link><span>/</span><strong>{product.name}</strong></nav>
@@ -39,12 +36,12 @@ export default async function ProductPage({ params }: PageParams) {
         <Gallery images={images} alt={product.name} />
         <dl className="penrose-product-specs">
           <div><dt>Categoria</dt><dd>{product.category || 'Colecionável'}</dd></div>
-          <div><dt>Referência</dt><dd>{source?.sku ?? api?.sku ?? product.id}</dd></div>
+          <div><dt>Referência</dt><dd>{api.sku ?? product.id}</dd></div>
         </dl>
       </div>
       <section className="penrose-product-info">
         <h1>{product.name}</h1>
-        <p className="penrose-product-subtitle">{source?.sourceCategory || product.category || 'Action figure'} by Penrøse</p>
+        <p className="penrose-product-subtitle">{product.tags[0] || product.category || 'Action figure'} by Penrøse</p>
         <div className="penrose-purchase-panel">
           <p className="penrose-stock">{api?.madeToOrder ? 'Produzido sob encomenda' : canBuy ? 'Em estoque' : 'Disponibilidade sob consulta'}</p>
           {canBuy ? <AddToCartClient product={{ id: api!.id, sku: api!.sku ?? undefined, name: api!.name, images: api!.images, mainImage: api!.images[0], sizes: api!.madeToOrder ? sizePrices.map((size) => ({ name: size.name, price: size.priceCents / 100, regularPrice: size.regularPriceCents / 100, inStock: true })) : [{ name: 'Único', price: api!.priceCents / 100, inStock: true }] }} />
@@ -52,7 +49,7 @@ export default async function ProductPage({ params }: PageParams) {
           <small>Valores médios por tamanho. Produção e frete sujeitos à confirmação pela Penrøse.</small>
         </div>
         <section className="penrose-product-about"><h2>Sobre o produto</h2><p>{product.description || 'Detalhes deste produto sob consulta.'}</p></section>
-        <details className="penrose-product-accordion"><summary>Detalhes</summary><p>Referência: {source?.sku ?? api?.sku ?? product.id}</p></details>
+        <details className="penrose-product-accordion"><summary>Detalhes</summary><p>Referência: {api.sku ?? product.id}</p></details>
         <details className="penrose-product-accordion"><summary>Fotos do produto</summary><p>{images.length} {images.length === 1 ? 'imagem disponível' : 'imagens disponíveis'} na galeria.</p></details>
       </section>
     </div>

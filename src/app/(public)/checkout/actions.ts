@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { quoteShipping, selectShipping } from '@/features/cart/api';
+import { quoteShipping, selectShipping, applyCoupon, removeCoupon, getCart } from '@/features/cart/api';
 import { prepareCheckoutDraft, buildIdempotencyKey } from '@/features/checkout/api';
 
 const CheckoutSession = z.object({
@@ -33,7 +33,11 @@ export async function setCheckoutSessionAction(input: unknown) {
   }
 
   try {
-    await quoteShipping({ address: { postalCode: cepDigits } }, { cookie: cookies().toString() });
+    const opts = { cookie: cookies().toString() };
+    const cart = await getCart(opts);
+    for (const code of cart.coupons ?? []) if (code !== couponCode?.trim().toUpperCase()) await removeCoupon(code, opts);
+    if (couponCode) await applyCoupon(couponCode, opts);
+    await quoteShipping({ address: { ...customerData, postalCode: cepDigits } }, opts);
 
     await selectShipping(
       { serviceCode: selectedShipping.id, address: { postalCode: cepDigits } },
@@ -56,7 +60,7 @@ export async function setCheckoutSessionAction(input: unknown) {
   cookies().set(
     'checkout_session',
     JSON.stringify({ customerData, couponCode, draftId }),
-    { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 60 * 60 * 2 },
+    { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 2 },
   );
 
   return { ok: true, draftId };

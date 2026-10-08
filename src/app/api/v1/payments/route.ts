@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
 import { envServer } from '@/shared/lib/env.server';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,7 @@ export async function POST(req: Request) {
   const res = await fetchWithAuth(`${envServer.NEXT_PUBLIC_API_BASE_URL}/api/v1/payments`, {
     method: 'POST',
     cache: 'no-store',
-    headers: { 'Content-Type':'application/json' },
+    headers: { 'Content-Type':'application/json', cookie: cookies().toString() },
     body,
   });
   const text = await res.text();

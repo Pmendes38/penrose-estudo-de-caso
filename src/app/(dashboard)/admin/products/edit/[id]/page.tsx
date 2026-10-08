@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import ProductForm from '@/features/products/ui/ProductForm';
 import { updateProductAction } from '../../_actions';
-import { api } from '@/shared/lib/http';
+import { getAdminProduct } from '@/features/products/api';
 
 type ProductDTO = {
   id: string;
@@ -22,7 +22,8 @@ type ProductDTO = {
 
 async function getProduct(id: string): Promise<ProductDTO | null> {
   try {
-    return await api<ProductDTO>(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/products/${id}`);
+    const product = await getAdminProduct(id);
+    return { ...product, category: product.category ?? '', description: product.description ?? '', price: product.priceCents / 100 };
   } catch {
     return null;
   }

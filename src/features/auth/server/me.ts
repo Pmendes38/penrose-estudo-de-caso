@@ -1,4 +1,5 @@
 import 'server-only';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 import { envServer } from '@/shared/lib/env.server';
 import { getAccessToken } from './cookies';
 import {

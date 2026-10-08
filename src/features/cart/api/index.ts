@@ -143,7 +143,9 @@ async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<{ data: 
 
   let res: Response;
   try {
-    res = await fetch(path, init);
+    res = typeof window === 'undefined'
+      ? await (await import('@/shared/lib/backend-fetch')).backendFetch(path, init)
+      : await fetch(path.startsWith(BASE) ? path.slice(BASE.length) : path, init);
   } catch (err: any) {
     throw new ApiError(0, err?.message || 'network_error', 'network_error', err);
   }

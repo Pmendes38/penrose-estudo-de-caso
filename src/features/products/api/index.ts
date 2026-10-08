@@ -1,4 +1,5 @@
 import 'server-only';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 import { envServer } from '@/shared/lib/env.server';
 import { fetchWithAuth } from '@/features/auth/server/fetch-with-auth';
 import {
@@ -80,6 +81,12 @@ export async function listAdminProducts(query?: {
 }
 
 export { listAdminProducts as listProducts };
+
+export async function getAdminProduct(id: string): Promise<Product> {
+  const res = await fetchWithAuth(`${ADMIN_BASE}/${encodeURIComponent(id)}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(await res.text());
+  return ProductSchema.parse(await res.json());
+}
 
 export async function createProduct(input: CreateProductDto): Promise<Product> {
   const body = JSON.stringify(CreateProductDtoSchema.parse(input));

@@ -1,5 +1,6 @@
 // src/app/api/v1/payments/tokenize/route.ts
 import { NextResponse } from 'next/server';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 import { envServer } from '@/shared/lib/env.server';
 export const dynamic = 'force-dynamic';
 

@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { createPayment } from '@/features/payments/api';
 import { CreatePaymentSchema, BillingType } from '@/features/payments/schemas';
 import { getMe } from '@/features/auth/server/me';
+import { getCheckoutSession } from './session';
 
 function hashString(input: string) {
   let h = 5381;
@@ -71,6 +72,7 @@ export async function createPaymentAction(_: unknown, form: FormData) {
     );
 
   const payloadParse = CreatePaymentSchema.safeParse({
+    draftId: (await getCheckoutSession()).draftId ?? undefined,
     cartItems,
     totalAmount: Math.max(0, parsed.data.totalAmount),
     billingType: parsed.data.billingType,
@@ -84,11 +86,6 @@ export async function createPaymentAction(_: unknown, form: FormData) {
 
   try {
     const payment = await createPayment(payloadParse.data);
-
-    if (payment.billingType === 'CREDIT_CARD' && payment.status === 'CONFIRMED') {
-      revalidatePath('/thank-you');
-      redirect(`/thank-you?order=${payment.orderId}`);
-    }
 
     return { ok: true, paymentId: payment.id };
   } catch (e: any) {

@@ -11,7 +11,7 @@ export const PaymentSchema = z.object({
   billingType: BillingType,
   status: PaymentStatus,
   amount: z.number(),
-  provider: z.literal('ASAAS').optional(),
+  provider: z.enum(['ASAAS', 'DEMO']).optional(),
   providerPaymentId: z.string().optional(),
   boletoUrl: z.string().optional(),
   identificatorField: z.string().optional(),
@@ -39,6 +39,7 @@ export const CartItemSchema = z.object({
 });
 
 export const CreatePaymentSchema = z.object({
+  draftId: z.string().optional(),
   cartItems: z.array(CartItemSchema).min(1, 'Carrinho vazio'),
   totalAmount: z.number().min(0),
   billingType: BillingType,

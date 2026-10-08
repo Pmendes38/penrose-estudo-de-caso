@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import CatalogGrid from '@/features/products/ui/CatalogGrid';
-import { catalogProducts, productPrice } from '@/features/products/catalog';
+import { productPrice } from '@/features/products/catalog';
+import { getStorefrontProducts } from '@/features/products/catalog.server';
 
 type SearchParams = { search?: string; category?: string | string[]; minPrice?: string; maxPrice?: string; discount?: string; page?: string };
 
-export default function CatalogPage({ searchParams = {} }: { searchParams?: SearchParams }) {
+export default async function CatalogPage({ searchParams = {} }: { searchParams?: SearchParams }) {
+  const catalogProducts = await getStorefrontProducts();
   const categories = [searchParams.category].flat().filter((value): value is string => Boolean(value));
   const search = (searchParams.search ?? '').trim().toLocaleLowerCase('pt-BR');
   const min = Number(searchParams.minPrice) || 0;
@@ -12,8 +14,8 @@ export default function CatalogPage({ searchParams = {} }: { searchParams?: Sear
   const discount = Number(searchParams.discount) || 0;
   const filtered = catalogProducts.filter((product) => {
     const price = productPrice(product).cents / 100;
-    const percent = 25; // A opção de 30 cm está em promoção para todas as peças.
-    return (!categories.length || categories.includes(product.category)) &&
+    const percent = product.madeToOrder ? 25 : 0;
+    return (!categories.length || categories.includes(product.category ?? '')) &&
       (!search || `${product.name} ${product.description} ${product.sourceCategory ?? ''} ${product.sku}`.toLocaleLowerCase('pt-BR').includes(search)) &&
       price >= min && price <= max && percent >= discount;
   });

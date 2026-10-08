@@ -1,4 +1,5 @@
 'use server';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 
 export async function publicRegisterAction(formData: {
   name: string; email: string; phone?: string; password: string;

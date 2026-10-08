@@ -7,6 +7,7 @@ import {
   type Payment,
 } from '../schemas';
 import crypto from 'crypto';
+import { cookies } from 'next/headers';
 
 const API_BASE = (envServer.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/+$/, '');
 const BASE = `${API_BASE}/api/v1/payments`;
@@ -59,6 +60,7 @@ export async function createPayment(input: CreatePaymentPayload): Promise<Paymen
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Idempotency-Key': idempotencyKey,
+      cookie: cookies().toString(),
     },
     body: JSON.stringify(payload),
   });

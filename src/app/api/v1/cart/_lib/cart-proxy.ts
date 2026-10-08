@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 
 const BACKEND_BASE = process.env.CART_API_BASE_URL?.replace(/\/$/, '') ?? process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ?? '';
 const BACKEND_CART = `${BACKEND_BASE}/api/v1/cart`;

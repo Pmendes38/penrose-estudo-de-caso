@@ -16,7 +16,8 @@ const uniq = <T,>(arr: T[] = []) => Array.from(new Set(arr));
 const toCents = (raw: unknown) => {
   const s = String(raw ?? '').trim();
   if (!s) return NaN;
-  const normalized = s.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
+  const cleaned = s.replace(/[^\d,.-]/g, '');
+  const normalized = cleaned.includes(',') ? cleaned.replace(/\./g, '').replace(',', '.') : cleaned;
   const n = Number(normalized);
   return Number.isFinite(n) ? Math.round(n * 100) : NaN;
 };

@@ -1,0 +1,14 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+const code = ts.transpileModule(fs.readFileSync('src/shared/lib/backend-fetch.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+const context = { exports: {}, Headers, URL, process: { env: { BACKEND_PREVIEW_ACCESS_SECRET: 'test-only', NEXT_PUBLIC_API_BASE_URL: 'https://demo.example' } }, fetch: (url, init) => ({ url, init }) };
+vm.runInNewContext(code, context);
+const own = context.exports.backendFetch('https://demo.example/api');
+assert.equal(own.init.headers.get('x-vercel-protection-bypass'), 'test-only');
+assert.equal(own.init.redirect, 'manual');
+assert.equal(context.exports.backendFetch('https://other.example/api').init.headers.get('x-vercel-protection-bypass'), null);
+context.window = {};
+assert.equal(context.exports.backendFetch('https://demo.example/api').init.headers, undefined);
+console.log('Backend connection security checks passed');

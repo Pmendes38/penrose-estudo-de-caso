@@ -1,4 +1,6 @@
 import ThankYouClient from './thank-you.client';
+import { fetchOrderMine } from '@/features/orders/server/fetch-order';
+import { requireCustomerOrRedirect } from '@/features/auth/server/guards';
 
 export const metadata = {
   title: 'Obrigado pela compra | Penrøse',
@@ -7,6 +9,9 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default function ObrigadoPage() {
-  return <main><ThankYouClient /></main>;
+export default async function ObrigadoPage({ searchParams }: { searchParams: { order?: string } }) {
+  requireCustomerOrRedirect();
+  const order = searchParams.order ? await fetchOrderMine(searchParams.order).catch(() => null) : null;
+  const confirmed = order && ['paid', 'shipped', 'delivered'].includes(order.status);
+  return <main><ThankYouClient orderId={confirmed ? order.id : undefined} /></main>;
 }

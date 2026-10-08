@@ -1,4 +1,5 @@
 import 'server-only';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 import { cookies } from 'next/headers';
 import { getAccessToken, setAuthCookies } from './cookies';
 

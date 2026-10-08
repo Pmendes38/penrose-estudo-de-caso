@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 import { envServer } from '@/shared/lib/env.server';
 import {
   PrepareCheckoutResponseSchema,

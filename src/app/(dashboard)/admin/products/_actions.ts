@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { createProduct, updateProduct } from '@/features/products/api';
+import { createProduct, updateProduct, uploadProductImages } from '@/features/products/api';
 import {
   CreateProductFormSchema,
   UpdateProductFormSchema,
@@ -29,12 +29,14 @@ export async function createProductAction(formData: FormData) {
     throw new Error(issue?.message ?? 'Dados inválidos');
   }
 
-  await createProduct(parsed.data);
+  const product = await createProduct(parsed.data);
+  const files = formData.getAll('files').filter((file): file is File => file instanceof File && file.size > 0);
+  await uploadProductImages(product.id, files);
   revalidatePath('/admin/products');
   redirect('/admin/products');
 }
 
-export async function updateProductAction(id: string, _prev: unknown, formData: FormData) {
+export async function updateProductAction(id: string, formData: FormData) {
   const parsed = UpdateProductFormSchema.safeParse(readFormData(formData));
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
@@ -42,6 +44,8 @@ export async function updateProductAction(id: string, _prev: unknown, formData: 
   }
 
   await updateProduct(id, parsed.data);
+  const files = formData.getAll('files').filter((file): file is File => file instanceof File && file.size > 0);
+  await uploadProductImages(id, files);
   revalidatePath('/admin/products');
   redirect('/admin/products');
 }

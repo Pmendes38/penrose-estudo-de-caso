@@ -1,5 +1,6 @@
 // src/app/api/v1/shipping/_lib/shipping-proxy.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { backendFetch as fetch } from '@/shared/lib/backend-fetch';
 import { envServer } from '@/shared/lib/env.server';
 
 const BASE = envServer.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, '');
