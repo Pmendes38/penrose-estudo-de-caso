@@ -1,7 +1,6 @@
 import 'server-only';
-import { api } from '@/shared/lib/http';
+import { listPaymentsAdmin } from '../api';
 import {
-  PaginatedPaymentsSchema,
   type PaginatedPayments,
   PaymentStatus,
   BillingType,
@@ -21,15 +20,5 @@ export async function fetchAdminPayments(
 ): Promise<PaginatedPayments> {
   const { page = 1, pageSize = 20, filters = {} } = opts;
 
-  const search = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
-    ...(filters.status ? { status: filters.status } : {}),
-    ...(filters.billingType ? { billingType: filters.billingType } : {}),
-    ...(filters.orderId ? { orderId: filters.orderId } : {}),
-    ...(filters.providerPaymentId ? { providerPaymentId: filters.providerPaymentId } : {}),
-  });
-
-  const data = await api(`/api/v1/payments/admin?${search.toString()}`);
-  return PaginatedPaymentsSchema.parse(data);
+  return listPaymentsAdmin({ page, pageSize, ...filters });
 }

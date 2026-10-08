@@ -6,7 +6,8 @@ export const CustomerSchema = z.object({
   email: z.string().email(),
   phone: z.string().optional().nullable(),
   totalOrders: z.number().int().nonnegative(),
-  totalSpent: z.number().nonnegative(),
+  // The API aggregates order totals in cents; ERP tables and exports use BRL.
+  totalSpent: z.number().nonnegative().transform(cents => cents / 100),
   paidOrders: z.number().int().nonnegative(),
   lastOrder: z.string().datetime().nullable(),
   createdAt: z.string().datetime().nullable(),
