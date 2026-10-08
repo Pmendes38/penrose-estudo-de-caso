@@ -7,3 +7,7 @@ export function formatDate(value: string | Date) {
   const d = typeof value === 'string' ? new Date(value) : value;
   return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(d);
 }
+
+export function formatCents(value: number = 0) {
+  return formatBRL(value / 100);
+}

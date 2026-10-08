@@ -1,7 +1,7 @@
 // src/features/orders/components/OrderSummary.tsx
 import { fetchOrderMine } from '@/features/orders/server/fetch-order';
 import type { Order } from '@/features/orders/schemas';
-import { formatBRL } from '@/shared/lib/format';
+import { formatCents } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/cn'; // util opcional (clsx/twMerge); remova se não tiver
 
 export function OrderSummarySkeleton() {
@@ -90,7 +90,7 @@ export default async function OrderSummary({ orderId }: { orderId: string }) {
                 <span className="text-brand-gray"> × {it.quantity}</span>
               </div>
               <div className="text-brand-gray-light">
-                {formatBRL(it.unitPrice * it.quantity)}
+                {formatCents(it.unitPrice * it.quantity)}
               </div>
             </div>
           ))}
@@ -100,12 +100,12 @@ export default async function OrderSummary({ orderId }: { orderId: string }) {
       <hr className="border-brand-gray-border my-3" />
 
       <div className="space-y-1 text-sm">
-        <Row label="Subtotal" value={formatBRL(order.subtotal)} />
-        <Row label="Frete" value={formatBRL(order.shippingTotal)} />
-        {order.discountTotal ? <Row label="Descontos" value={`- ${formatBRL(order.discountTotal)}`} /> : null}
+        <Row label="Subtotal" value={formatCents(order.subtotal)} />
+        <Row label="Frete" value={formatCents(order.shippingTotal)} />
+        {order.discountTotal ? <Row label="Descontos" value={`- ${formatCents(order.discountTotal)}`} /> : null}
         <div className="flex items-center justify-between text-white font-semibold pt-1">
           <span>Total</span>
-          <span>{formatBRL(order.grandTotal)}</span>
+          <span>{formatCents(order.grandTotal)}</span>
         </div>
       </div>
 

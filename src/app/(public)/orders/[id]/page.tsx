@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { requireCustomerOrRedirect } from '@/features/auth/server/guards';
 import { fetchOrderMine } from '@/features/orders/server/fetch-order';
 import { findCatalogProduct, catalogProducts } from '@/features/products/catalog';
-import { formatBRL, formatDate } from '@/shared/lib/format';
+import { formatCents, formatDate } from '@/shared/lib/format';
 import { productionLabels, type Order } from '@/features/orders/schemas';
 
 const steps = ['Realizado', 'Em produção', 'Enviado', 'Entregue'];
@@ -40,12 +40,12 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
         return <article key={`${item.productId}-${index}`} className="penrose-order-item">
           {product?.images[0] ? <img src={product.images[0]} alt={item.name} width="116" height="116" /> : <div className="penrose-order-image-empty" aria-hidden="true" />}
           <div><h2>{item.name}</h2>{product && <p>{product.sourceCategory}</p>}<small>QUANTIDADE: <b>{item.quantity}</b>{item.size && <> · TAMANHO: <b>{item.size}</b></>}</small></div>
-          <strong>{formatBRL(item.unitPrice * item.quantity)}</strong>
+          <strong>{formatCents(item.unitPrice * item.quantity)}</strong>
         </article>;
       })}
         {!order.items?.length && <p className="penrose-order-no-items">Os itens deste pedido não estão disponíveis no momento.</p>}
       </div>
-      <aside className="penrose-order-totals" aria-label="Resumo do pedido"><div><span>Subtotal</span><strong>{formatBRL(subtotal)}</strong></div><div><span>Desconto</span><strong className="discount">− {formatBRL(discount)}</strong></div><div><span>Entrega</span><strong>{order.shippingTotal === 0 ? 'GRÁTIS' : formatBRL(order.shippingTotal)}</strong></div><div className="grand"><span>TOTAL</span><strong>{formatBRL(order.grandTotal)}</strong></div></aside>
+      <aside className="penrose-order-totals" aria-label="Resumo do pedido"><div><span>Subtotal</span><strong>{formatCents(subtotal)}</strong></div><div><span>Desconto</span><strong className="discount">− {formatCents(discount)}</strong></div><div><span>Entrega</span><strong>{order.shippingTotal === 0 ? 'GRÁTIS' : formatCents(order.shippingTotal)}</strong></div><div className="grand"><span>TOTAL</span><strong>{formatCents(order.grandTotal)}</strong></div></aside>
     </div>
 
     <div className="penrose-order-extra">

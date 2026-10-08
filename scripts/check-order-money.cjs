@@ -13,4 +13,13 @@ assert.equal(admin.shippingTotal, 10);
 assert.equal(admin.discountTotal, 100);
 assert.equal(admin.items[0].unitPrice, 1800);
 assert.equal(context.exports.OrderSchema.parse(input).grandTotal, 171000);
-console.log('ERP uses BRL; commerce and customer schemas retain cents');
+const formats = { exports: {} };
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/shared/lib/format.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, formats);
+assert.equal(formats.exports.formatCents(306000).replace(/\s/g, ' '), 'R$ 3.060,00');
+assert.equal(formats.exports.formatCents(180000).replace(/\s/g, ' '), 'R$ 1.800,00');
+for (const file of ['src/app/(public)/orders/[id]/page.tsx', 'src/features/orders/components/OrderSummary.tsx']) {
+  const source = fs.readFileSync(file, 'utf8');
+  assert(source.includes('formatCents('));
+  assert(!source.includes('formatBRL('));
+}
+console.log('ERP uses BRL; customer order views format authoritative cents once');
