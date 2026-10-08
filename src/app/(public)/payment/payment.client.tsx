@@ -21,16 +21,16 @@ function hashString(input: string) {
   return (h >>> 0).toString(36);
 }
 
-function SubmitBtn() {
+function SubmitBtn({ demo }: { demo: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" className="penrose-payment-submit" disabled={pending}>
-      {pending ? 'GERANDO PAGAMENTO…' : 'FINALIZAR COMPRA'}
+      {pending ? 'PREPARANDO PEDIDO…' : demo ? 'CRIAR PEDIDO DE DEMONSTRAÇÃO' : 'FINALIZAR COMPRA'}
     </button>
   );
 }
 
-export default function PaymentClient({ session }: { session?: CheckoutSession }) {
+export default function PaymentClient({ session, demo = false }: { session?: CheckoutSession; demo?: boolean }) {
   const { cart, isLoading, error: cartError } = useCart();
 
   const [method, setMethod] = useState<'PIX'|'BOLETO'|'CREDIT_CARD'>('PIX');
@@ -161,7 +161,7 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
 
   return (
     <div className="penrose-payment-page">
-      <header><h1>MAIS OPÇÕES DE PAGAMENTO</h1><p>Escolha a forma que combina com sua coleção.</p></header>
+      <header><h1>MAIS OPÇÕES DE PAGAMENTO</h1><p>{demo ? 'Ambiente de demonstração: pedido fictício, sem cobrança nem envio real. Não informe dados reais.' : 'Escolha a forma que combina com sua coleção.'}</p></header>
       <form action={formAction} className="penrose-payment-layout">
         <section className="penrose-payment-methods" aria-label="Formas de pagamento">
           {([
@@ -171,14 +171,14 @@ export default function PaymentClient({ session }: { session?: CheckoutSession }
           ] as const).map((option) => <label key={option.value} className={`penrose-payment-method${method === option.value ? ' is-selected' : ''}`}>
             <input type="radio" name="paymentMethod" value={option.value} checked={method === option.value} onChange={() => setMethod(option.value)} />
             <img src={`/assets/penrose/payment-method-${option.icon}.svg`} alt="" width="28" height="28" />
-            <span><strong>{option.label}</strong><small>{option.detail}</small></span>
+            <span><strong>{option.label}</strong><small>{demo ? 'Pagamento simulado, sem cobrança' : option.detail}</small></span>
           </label>)}
           <div className="penrose-payment-method is-unavailable" aria-disabled="true"><span className="penrose-payment-radio" /><img src="/assets/penrose/payment-method-transfer.svg" alt="" width="28" height="28" /><span><strong>Transferência</strong><small>Indisponível no momento</small></span></div>
           <div className="penrose-payment-cards"><h2>Bandeiras de cartão</h2><div>{(['mastercard', 'visa', 'amex', 'elo'] as const).map((name) => <img key={name} src={`/assets/penrose/payment-${name}.svg`} alt={name} />)}</div></div>
         </section>
         <aside className="penrose-payment-summary"><h2 className="sr-only">Resumo do pedido</h2>
           <dl><div><dt>Subtotal</dt><dd>{money(cart.itemsSubtotal)}</dd></div><div><dt>Desconto</dt><dd className="discount">− {money(cart.discountTotal)}</dd></div><div><dt>Entrega</dt><dd>{cart.shippingTotal === 0 ? 'GRÁTIS' : money(cart.shippingTotal)}</dd></div><div className="total"><dt>TOTAL</dt><dd>{money(totalCents)}</dd></div></dl>
-          <SubmitBtn />
+          <SubmitBtn demo={demo} />
           <label className="penrose-payment-terms"><input type="checkbox" required /> Aceito os <Link href="/terms">termos de uso do site</Link></label>
           {state.error && <p role="alert" className="penrose-payment-error">{state.error}</p>}
         </aside>

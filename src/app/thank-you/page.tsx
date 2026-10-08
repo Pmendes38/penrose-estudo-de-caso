@@ -13,5 +13,5 @@ export default async function ObrigadoPage({ searchParams }: { searchParams: { o
   requireCustomerOrRedirect();
   const order = searchParams.order ? await fetchOrderMine(searchParams.order).catch(() => null) : null;
   const confirmed = order && ['paid', 'shipped', 'delivered'].includes(order.status);
-  return <main><ThankYouClient orderId={confirmed ? order.id : undefined} /></main>;
+  return <main><ThankYouClient orderId={confirmed ? order.id : undefined} demo={process.env.COMMERCE_MODE === 'demo'} /></main>;
 }

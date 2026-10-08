@@ -6,5 +6,5 @@ export const revalidate = 0;
 
 export default async function PaymentPage() {
   const session = await getCheckoutSession().catch(() => ({}));
-  return <PaymentClient session={session} />;
+  return <PaymentClient session={session} demo={process.env.COMMERCE_MODE === 'demo'} />;
 }
