@@ -36,6 +36,7 @@ export const OrderSchema = z.object({
 
   couponCode: z.string().optional(),
   notes: z.string().optional(),
+  cancellationRequest: z.object({ reason: z.string(), requestedAt: z.coerce.date() }).optional(),
 
   // Em algumas rotas o backend não inclui os itens.
   // .catch([]) garante array vazio se vier undefined/null.

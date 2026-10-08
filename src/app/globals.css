@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+.penrose-cancel-actions button{flex:1;min-height:48px;padding:8px 12px;border-radius:8px;background:#ff0946;color:#fff;font-size:14px;font-weight:700;text-align:center}.penrose-cancel-actions button:disabled{opacity:.6;cursor:wait}
+
 @font-face {
   font-family: "Clash Display";
   src: url('/fonts/ClashDisplay-Extralight.otf') format('opentype');

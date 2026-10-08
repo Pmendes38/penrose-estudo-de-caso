@@ -13,6 +13,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       </header>
 
       <section className="grid md:grid-cols-2 gap-6">
+        {order.cancellationRequest && <div className="border border-amber-400/40 rounded p-4 md:col-span-2"><h2 className="font-semibold">Solicitação de cancelamento</h2><p>{order.cancellationRequest.reason}</p><p className="text-sm">Recebida em {order.cancellationRequest.requestedAt.toLocaleString('pt-BR')}. Não altera o pagamento automaticamente.</p></div>}
         <div className="border border-brand-gray-border rounded p-4">
           <h2 className="font-semibold mb-2">Itens</h2>
           <ul className="space-y-2">

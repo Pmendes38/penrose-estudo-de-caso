@@ -36,12 +36,11 @@ export default function PaymentClient({ session, demo = false }: { session?: Che
   const [method, setMethod] = useState<'PIX'|'BOLETO'|'CREDIT_CARD'>('PIX');
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
   const [sessionShipping, setSessionShipping] = useState<any | null>(null);
-  const [couponCode, setCouponCode] = useState<string | undefined>();
+  const couponCode = cart?.coupons?.[0];
 
   useEffect(() => {
     if (session?.customerData) setCheckoutData(session.customerData as any);
     if (session?.selectedShipping) setSessionShipping(session.selectedShipping);
-    if (session?.couponCode) setCouponCode(session.couponCode || undefined);
 
     try {
       if (!session?.customerData) {
@@ -52,12 +51,8 @@ export default function PaymentClient({ session, demo = false }: { session?: Che
         const rawShip = localStorage.getItem('selectedShipping');
         if (rawShip) setSessionShipping(JSON.parse(rawShip));
       }
-      if (!session?.couponCode) {
-        const rawCoupon = localStorage.getItem('couponData');
-        if (rawCoupon) setCouponCode(JSON.parse(rawCoupon)?.code || undefined);
-      }
     } catch {/* ignore */}
-  }, [session?.customerData, session?.selectedShipping, session?.couponCode]);
+  }, [session?.customerData, session?.selectedShipping]);
 
   const cartItemsJson = useMemo(() => {
     const items = (cart?.items ?? []).map((i) => {
